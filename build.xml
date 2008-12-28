@@ -1,0 +1,39 @@
+<?xml version="1.0"?>
+
+<project name="bindgen" default="jar" basedir=".">
+
+	<target name="clean">
+		<delete dir="bin"/>
+	</target>
+
+	<target name="compile">
+		<mkdir dir="bin/main"/>
+		<javac srcdir="src/main" destdir="bin/main" debug="true" nowarn="yes" source="1.6" target="1.6" encoding="utf8"/>
+	</target>
+
+	<target name="compile-example">
+		<delete dir="bin/example"/>
+		<mkdir dir="bin/example"/>
+		<javac srcdir="src/example" destdir="bin/example" debug="true" nowarn="yes" source="1.6" target="1.6" encoding="utf8">
+			<classpath>
+				<pathelement path="bin/bindgen.jar"/>
+			</classpath>
+			<compilerarg line="-processor org.exigencecorp.bindgen.Bindgen"/>
+		</javac>
+	</target>
+
+	<target name="jar" depends="compile">
+		<jar destfile="bin/bindgen.jar">
+			<fileset dir="bin/main" includes="**/*.class"/>
+			<fileset dir="src/main" includes="**/*" excludes="**/*.class"/>
+		</jar>
+		<zip destfile="bin/bindgen.zip">
+			<fileset dir="src/main" includes="**/*.java"/>
+		</zip>
+		<mkdir dir="${user.home}/.bd"/>
+		<copy todir="${user.home}/.bd" file="bin/bindgen.jar"/>
+		<copy todir="${user.home}/.bd" file="bin/bindgen.zip"/>
+	</target>
+
+</project>
+
