@@ -4,7 +4,20 @@ import org.exigencecorp.bindgen.Binding;
 
 public class EmployeeBinding implements Binding<Employee> {
 
-    public EmployerBinding employer = new EmployerBinding(null) {
+    private EmployerBinding employer = null;
+
+    public EmployerBinding employer() {
+        if (this.employer == null) {
+            this.employer = new MyEmployerBinding();
+        }
+        return this.employer;
+    }
+
+    public class MyEmployerBinding extends EmployerBinding {
+        public MyEmployerBinding() {
+            super(null);
+        }
+
         @Override
         public String getName() {
             return "employer";
@@ -13,6 +26,11 @@ public class EmployeeBinding implements Binding<Employee> {
         @Override
         public Employer get() {
             return EmployeeBinding.this.get().employer;
+        }
+
+        @Override
+        public void set(Employer employer) {
+            EmployeeBinding.this.get().employer = employer;
         }
     };
 

@@ -39,13 +39,30 @@ public class EmployeeTest extends TestCase {
         EmployeeBinding eb = new EmployeeBinding(ee);
         Assert.assertEquals("bob", textBox(eb.name).toString());
         Assert.assertEquals("accounting", textBox(eb.department).toString());
-        Assert.assertEquals("at&t", textBox(eb.employer.name).toString());
+        Assert.assertEquals("at&t", textBox(eb.employer().name).toString());
 
-        Assert.assertEquals("employer", textBox(eb.employer).getName());
+        Assert.assertEquals("employer", textBox(eb.employer()).getName());
 
-        textBox(eb.employer.name).set("fromTheBrowser");
-        textBox(eb.employer.name).set("fromTheBrowser");
+        textBox(eb.employer().name).set("fromTheBrowser");
+        textBox(eb.employer().name).set("fromTheBrowser");
         Assert.assertEquals("fromTheBrowser", er.name);
+    }
+
+    public void testSetEmployer() {
+        Employer er1 = new Employer();
+        er1.name = "at&t";
+
+        Employer er2 = new Employer();
+        er2.name = "exigence";
+
+        Employee ee = new Employee();
+        ee.employer = er1;
+
+        EmployeeBinding eb = new EmployeeBinding(ee);
+        Assert.assertEquals("at&t", textBox(eb.employer().name).toString());
+
+        eb.employer().set(er2);
+        Assert.assertEquals("exigence", textBox(eb.employer().name).toString());
     }
 
     public void testDelayedEmployee() {
