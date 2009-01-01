@@ -1,4 +1,4 @@
-package org.exigencecorp.bindgen;
+package org.exigencecorp.bindgen.processor;
 
 import java.io.IOException;
 import java.io.Writer;
@@ -14,25 +14,16 @@ import javax.lang.model.element.Element;
 import javax.lang.model.element.PackageElement;
 import javax.lang.model.element.TypeElement;
 import javax.tools.JavaFileObject;
-import javax.tools.StandardLocation;
 import javax.tools.Diagnostic.Kind;
 
 @SupportedAnnotationTypes( { "org.exigencecorp.bindgen.Bindable" })
 @SupportedSourceVersion(SourceVersion.RELEASE_6)
-public class Bindgen extends AbstractProcessor {
+public class BindgenAnnotationProcessor extends AbstractProcessor {
 
     private boolean hasWritten = false;
 
+    @Override
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
-        System.out.println("HERE");
-
-        try {
-            this.processingEnv.getFiler().getResource(StandardLocation.CLASS_OUTPUT, "", "Blah");
-            System.out.println("Getting Blah: worked");
-        } catch (Exception e) {
-            System.out.println("Getting Blah: " + e.getMessage());
-        }
-
         if (this.hasWritten) {
             return true;
         }
@@ -40,11 +31,13 @@ public class Bindgen extends AbstractProcessor {
         try {
             JavaFileObject blah = this.processingEnv.getFiler().createSourceFile("org.exigencecorp.bindgen.example.Blah");
             Writer w = blah.openWriter();
-            w.append("public class Blah {}");
+            w.append("package org.exigencecorp.bindgen.example;\n");
+            w.append("public class Blah {\n");
+            w.append("public String blah = \"blah\";\n");
+            w.append("}\n");
             w.flush();
             w.close();
 
-            System.out.println("WROTE BLAH");
             this.hasWritten = true;
 
             for (Object e : roundEnv.getRootElements()) {

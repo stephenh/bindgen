@@ -15,10 +15,11 @@
 		<delete dir="bin/example"/>
 		<mkdir dir="bin/example"/>
 		<javac srcdir="src/example" destdir="bin/example" debug="true" nowarn="yes" source="1.6" target="1.6" encoding="utf8">
+			<compilerarg value="-XprintRounds"/>
 			<classpath>
 				<pathelement path="bin/bindgen.jar"/>
 			</classpath>
-			<compilerarg line="-processor org.exigencecorp.bindgen.Bindgen"/>
+			<compilerarg line="-processor org.exigencecorp.bindgen.processor.BindgenAnnotationProcessor"/>
 		</javac>
 	</target>
 
