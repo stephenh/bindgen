@@ -8,6 +8,5 @@ public class Employee {
     public Employer employer;
     public String name;
     public String department;
-    public Blah blah;
 
 }
