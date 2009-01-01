@@ -19,7 +19,6 @@
 			<classpath>
 				<pathelement path="bin/bindgen.jar"/>
 			</classpath>
-			<compilerarg line="-processor org.exigencecorp.bindgen.processor.BindgenAnnotationProcessor"/>
 		</javac>
 	</target>
 
