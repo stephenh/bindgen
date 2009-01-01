@@ -2,6 +2,7 @@
 <classpath>
 	<classpathentry kind="src" path="src/main"/>
 	<classpathentry kind="src" path="src/example"/>
+	<classpathentry kind="src" path="src/codegen"/>
 	<classpathentry kind="src" path="tests/unit"/>
 	<classpathentry kind="src" path="tests/example"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
