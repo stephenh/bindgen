@@ -9,10 +9,5 @@
 	<classpathentry kind="lib" path="lib/main/exigence-utilites.jar" sourcepath="lib/exigence-utilites.zip"/>
 	<classpathentry kind="lib" path="lib/main/junit-3.8.2.jar" sourcepath="lib/junit-3.8.2.zip"/>
 	<classpathentry kind="lib" path="lib/main/log4j-1.2.15.jar" sourcepath="lib/log4j-1.2.15.zip"/>
-	<classpathentry kind="src" path="src/codegen">
-		<attributes>
-			<attribute name="optional" value="true"/>
-		</attributes>
-	</classpathentry>
 	<classpathentry kind="output" path="bin/eclipse"/>
 </classpath>
