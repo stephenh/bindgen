@@ -1,10 +1,13 @@
 package org.exigencecorp.bindgen.example;
 
-// @Bindable
+import org.exigencecorp.bindgen.Bindable;
+
+@Bindable
 public class Employee {
 
     public Employer employer;
     public String name;
     public String department;
+    public Blah blah;
 
 }
