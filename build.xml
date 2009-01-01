@@ -8,7 +8,12 @@
 
 	<target name="compile">
 		<mkdir dir="bin/main"/>
-		<javac srcdir="src/main" destdir="bin/main" debug="true" nowarn="yes" source="1.6" target="1.6" encoding="utf8"/>
+		<javac srcdir="src/main" destdir="bin/main" debug="true" nowarn="yes" source="1.6" target="1.6" encoding="utf8">
+			<classpath>
+				<pathelement path="lib/main/commons-lang-2.3.jar"/>
+				<pathelement path="lib/main/exigence-utilites.jar"/>
+			</classpath>
+		</javac>
 	</target>
 
 	<target name="compile-example">
@@ -26,6 +31,8 @@
 		<jar destfile="bin/bindgen.jar">
 			<fileset dir="bin/main" includes="**/*.class"/>
 			<fileset dir="src/main" includes="**/*" excludes="**/*.class"/>
+			<zipfileset src="lib/main/commons-lang-2.3.jar"/>
+			<zipfileset src="lib/main/exigence-utilites.jar"/>
 		</jar>
 		<zip destfile="bin/bindgen.zip">
 			<fileset dir="src/main" includes="**/*.java"/>
