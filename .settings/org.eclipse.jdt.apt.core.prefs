@@ -1,5 +1,5 @@
-#Sat Dec 27 21:39:44 CST 2008
+#Thu Jan 01 08:50:11 CST 2009
 eclipse.preferences.version=1
-org.eclipse.jdt.apt.aptEnabled=true
+org.eclipse.jdt.apt.aptEnabled=false
 org.eclipse.jdt.apt.genSrcDir=src/codegen
 org.eclipse.jdt.apt.reconcileEnabled=true
