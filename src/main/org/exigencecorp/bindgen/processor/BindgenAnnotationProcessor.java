@@ -60,7 +60,7 @@ public class BindgenAnnotationProcessor extends AbstractProcessor {
         }
 
         String bindingClassName = element.getSimpleName().toString() + "Binding";
-        String bindingClassFullName = element.getQualifiedName().toString() + "Binding";
+        String bindingClassFullName = this.massageJavaPackageNames(element.getQualifiedName().toString() + "Binding");
 
         GClass gb = new GClass(bindingClassFullName);
         gb.implementsInterface(Binding.class.getName() + "<{}>", element.getSimpleName());
@@ -78,14 +78,27 @@ public class BindgenAnnotationProcessor extends AbstractProcessor {
         GMethod type = gb.getMethod("getType").returnType("Class<{}>", element.getSimpleName().toString());
         type.body.line("return {}.class;", element.getSimpleName().toString());
 
-        for (Element enclosed : element.getEnclosedElements()) {
-            if (enclosed.getKind() == ElementKind.FIELD && enclosed.getModifiers().contains(Modifier.PUBLIC)) {
+        for (Element enclosed : this.processingEnv.getElementUtils().getAllMembers(element)) {
+            if (enclosed.getKind() == ElementKind.FIELD
+                && enclosed.getModifiers().contains(Modifier.PUBLIC)
+                && !enclosed.getModifiers().contains(Modifier.STATIC)) {
                 String fieldName = enclosed.getSimpleName().toString();
                 String fieldType = enclosed.asType().toString();
+                String fieldBindingType = this.massageJavaPackageNames(fieldType + "Binding"); // e.g. java.lang.StringBinding, app.EmployeeBinding
 
-                gb.getField(fieldName).type(fieldType + "Binding"); // e.g. java.lang.StringBinder, app.EmployeeBinding
+                TypeElement fieldTypeElement = this.processingEnv.getElementUtils().getTypeElement(fieldType);
+                if (fieldTypeElement == null) {
+                    this.processingEnv.getMessager().printMessage(
+                        Kind.ERROR,
+                        "No type element found for " + fieldType + " in " + bindingClassFullName + "." + fieldName);
+                    continue;
+                }
+
+                this.generateBinding(fieldTypeElement);
+
+                gb.getField(fieldName).type(fieldBindingType);
                 GClass fieldClass = gb.getInnerClass("My{}Binding", StringUtils.capitalize(fieldName)).notStatic();
-                fieldClass.baseClassName(fieldType + "Binding");
+                fieldClass.baseClassName(fieldBindingType);
 
                 GMethod fieldClassName = fieldClass.getMethod("getName").returnType(String.class);
                 fieldClassName.body.line("return \"{}\";", fieldName);
@@ -96,7 +109,7 @@ public class BindgenAnnotationProcessor extends AbstractProcessor {
                 GMethod fieldClassSet = fieldClass.getMethod("set").argument(fieldType, fieldName);
                 fieldClassSet.body.line("{}.this.get().{} = {};", bindingClassName, fieldName, fieldName);
 
-                GMethod fieldGet = gb.getMethod(fieldName).returnType(fieldType + "Binding");
+                GMethod fieldGet = gb.getMethod(fieldName).returnType(fieldBindingType);
                 fieldGet.body.line("if (this.{} == null) {", fieldName);
                 fieldGet.body.line("    this.{} = new My{}Binding();", fieldName, StringUtils.capitalize(fieldName));
                 fieldGet.body.line("}");
@@ -115,4 +128,12 @@ public class BindgenAnnotationProcessor extends AbstractProcessor {
 
         this.written.add(element);
     }
+
+    private String massageJavaPackageNames(String originalBindingName) {
+        if (originalBindingName.startsWith("java")) {
+            return "bindgen." + originalBindingName;
+        }
+        return originalBindingName;
+    }
+
 }
