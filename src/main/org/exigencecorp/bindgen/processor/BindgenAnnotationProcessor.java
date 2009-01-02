@@ -83,8 +83,8 @@ public class BindgenAnnotationProcessor extends AbstractProcessor {
                 String fieldName = enclosed.getSimpleName().toString();
                 String fieldType = enclosed.asType().toString();
 
-                gb.getField(fieldName).type(fieldType + "Binding");
-                GClass fieldClass = gb.getNonStaticInnerClass("My{}Binding", StringUtils.capitalize(fieldName));
+                gb.getField(fieldName).type(fieldType + "Binding"); // e.g. java.lang.StringBinder, app.EmployeeBinding
+                GClass fieldClass = gb.getInnerClass("My{}Binding", StringUtils.capitalize(fieldName)).notStatic();
                 fieldClass.baseClassName(fieldType + "Binding");
 
                 GMethod fieldClassName = fieldClass.getMethod("getName").returnType(String.class);
