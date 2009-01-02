@@ -7,7 +7,7 @@ public class EmployeeBinding implements Binding<Employee> {
 
     private Employee value;
     private StringBinding department;
-    private EmployerBinding er;
+    private EmployerBinding employer;
     private StringBinding name;
 
     public void set(Employee value) {
@@ -33,11 +33,11 @@ public class EmployeeBinding implements Binding<Employee> {
         return this.department;
     }
 
-    public EmployerBinding er() {
-        if (this.er == null) {
-            this.er = new MyErBinding();
+    public EmployerBinding employer() {
+        if (this.employer == null) {
+            this.employer = new MyEmployerBinding();
         }
-        return this.er;
+        return this.employer;
     }
 
     public StringBinding name() {
@@ -59,15 +59,15 @@ public class EmployeeBinding implements Binding<Employee> {
         }
     }
 
-    public class MyErBinding extends EmployerBinding {
+    public class MyEmployerBinding extends EmployerBinding {
         public String getName() {
-            return "er";
+            return "employer";
         }
         public Employer get() {
-            return EmployeeBinding.this.get().er;
+            return EmployeeBinding.this.get().employer;
         }
-        public void set(Employer er) {
-            EmployeeBinding.this.get().er = er;
+        public void set(Employer employer) {
+            EmployeeBinding.this.get().employer = employer;
         }
     }
 

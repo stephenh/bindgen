@@ -5,7 +5,7 @@ import org.exigencecorp.bindgen.Bindable;
 @Bindable
 public class Employee {
 
-    public Employer er;
+    public Employer employer;
     public String name;
     public String department;
 
