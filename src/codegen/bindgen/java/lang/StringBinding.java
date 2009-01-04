@@ -6,6 +6,13 @@ public class StringBinding implements Binding<String> {
 
     private String value;
 
+    public StringBinding() {
+    }
+
+    public StringBinding(String value) {
+        this.set(value);
+    }
+
     public void set(String value) {
         this.value = value;
     }

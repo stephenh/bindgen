@@ -1,6 +1,7 @@
 package org.exigencecorp.bindgen.processor;
 
 import javax.annotation.processing.ProcessingEnvironment;
+import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.ArrayType;
@@ -62,11 +63,15 @@ public class GenerateMethodProperty {
         fieldClassGet.body.line("return {}.this.get().get{}();", this.bindingClass.getSimpleClassName(), StringUtils.capitalize(propertyName));
 
         GMethod fieldClassSet = fieldClass.getMethod("set").argument(propertyType, propertyName);
-        fieldClassSet.body.line(
-            "{}.this.get().set{}({});",
-            this.bindingClass.getSimpleClassName(),
-            StringUtils.capitalize(propertyName),
-            propertyName);
+        if (this.hasSetter()) {
+            fieldClassSet.body.line(
+                "{}.this.get().set{}({});",
+                this.bindingClass.getSimpleClassName(),
+                StringUtils.capitalize(propertyName),
+                propertyName);
+        } else {
+            fieldClassSet.body.line("throw new RuntimeException(this.getName() + \" is read only\");");
+        }
 
         GMethod fieldGet = this.bindingClass.getMethod(propertyName).returnType(propertyBindingType);
         fieldGet.body.line("if (this.{} == null) {", propertyName);
@@ -77,6 +82,17 @@ public class GenerateMethodProperty {
 
     private ProcessingEnvironment getProcessingEnv() {
         return this.generator.getProcessingEnv();
+    }
+
+    private boolean hasSetter() {
+        String methodName = this.enclosed.getSimpleName().toString();
+        String setterName = "set" + StringUtils.removeStart(methodName, "get");
+        for (Element other : this.enclosed.getEnclosingElement().getEnclosedElements()) {
+            if (other.getSimpleName().toString().equals(setterName)) {
+                return true;
+            }
+        }
+        return false;
     }
 
 }

@@ -29,6 +29,7 @@ public class GenerateBindingClass {
 
     public void generate() {
         this.initializeBindingClass();
+        this.addConstructors();
         this.addValueGetAndSet();
         this.addNameAndType();
         this.generateProperties();
@@ -38,6 +39,11 @@ public class GenerateBindingClass {
     private void initializeBindingClass() {
         this.bindingClass = new GClass(Massage.packageName(this.element.getQualifiedName().toString() + "Binding"));
         this.bindingClass.implementsInterface(Binding.class.getName() + "<{}>", this.element.getQualifiedName());
+    }
+
+    private void addConstructors() {
+        this.bindingClass.getConstructor();
+        this.bindingClass.getConstructor(this.element.getSimpleName() + " value").body.line("this.set(value);");
     }
 
     private void addValueGetAndSet() {

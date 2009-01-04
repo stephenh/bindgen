@@ -8,6 +8,13 @@ public class EmployerBinding implements Binding<Employer> {
     private Employer value;
     private StringBinding name;
 
+    public EmployerBinding() {
+    }
+
+    public EmployerBinding(Employer value) {
+        this.set(value);
+    }
+
     public void set(Employer value) {
         this.value = value;
     }

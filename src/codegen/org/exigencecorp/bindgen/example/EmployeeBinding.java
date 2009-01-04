@@ -10,6 +10,13 @@ public class EmployeeBinding implements Binding<Employee> {
     private EmployerBinding employer;
     private StringBinding name;
 
+    public EmployeeBinding() {
+    }
+
+    public EmployeeBinding(Employee value) {
+        this.set(value);
+    }
+
     public void set(Employee value) {
         this.value = value;
     }
