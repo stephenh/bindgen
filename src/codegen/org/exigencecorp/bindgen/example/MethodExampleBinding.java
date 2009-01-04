@@ -3,24 +3,24 @@ package org.exigencecorp.bindgen.example;
 import bindgen.java.lang.StringBinding;
 import org.exigencecorp.bindgen.Binding;
 
-public class MethodBindingExampleBinding implements Binding<MethodBindingExample> {
+public class MethodExampleBinding implements Binding<MethodExample> {
 
-    private MethodBindingExample value;
+    private MethodExample value;
     private StringBinding name;
     private StringBinding id;
 
-    public MethodBindingExampleBinding() {
+    public MethodExampleBinding() {
     }
 
-    public MethodBindingExampleBinding(MethodBindingExample value) {
+    public MethodExampleBinding(MethodExample value) {
         this.set(value);
     }
 
-    public void set(MethodBindingExample value) {
+    public void set(MethodExample value) {
         this.value = value;
     }
 
-    public MethodBindingExample get() {
+    public MethodExample get() {
         return this.value;
     }
 
@@ -28,8 +28,8 @@ public class MethodBindingExampleBinding implements Binding<MethodBindingExample
         return "";
     }
 
-    public Class<MethodBindingExample> getType() {
-        return MethodBindingExample.class;
+    public Class<MethodExample> getType() {
+        return MethodExample.class;
     }
 
     public StringBinding name() {
@@ -51,10 +51,10 @@ public class MethodBindingExampleBinding implements Binding<MethodBindingExample
             return "name";
         }
         public String get() {
-            return MethodBindingExampleBinding.this.get().getName();
+            return MethodExampleBinding.this.get().getName();
         }
         public void set(String name) {
-            MethodBindingExampleBinding.this.get().setName(name);
+            MethodExampleBinding.this.get().setName(name);
         }
     }
 
@@ -63,7 +63,7 @@ public class MethodBindingExampleBinding implements Binding<MethodBindingExample
             return "id";
         }
         public String get() {
-            return MethodBindingExampleBinding.this.get().getId();
+            return MethodExampleBinding.this.get().getId();
         }
         public void set(String id) {
             throw new RuntimeException(this.getName() + " is read only");

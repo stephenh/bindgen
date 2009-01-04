@@ -3,14 +3,14 @@ package org.exigencecorp.bindgen.example;
 import org.exigencecorp.bindgen.Bindable;
 
 @Bindable
-public class MethodBindingExample {
+public class MethodExample {
 
     // a read-only property
     private String id;
     // a read/write property
     private String name;
 
-    public MethodBindingExample(String id, String name) {
+    public MethodExample(String id, String name) {
         this.id = id;
         this.name = name;
     }

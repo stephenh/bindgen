@@ -3,11 +3,11 @@ package org.exigencecorp.bindgen.example;
 import junit.framework.Assert;
 import junit.framework.TestCase;
 
-public class MethodBindingExampleTest extends TestCase {
+public class MethodExampleTest extends TestCase {
 
     public void testReadWrite() {
-        MethodBindingExample e = new MethodBindingExample("1", "name");
-        MethodBindingExampleBinding b = new MethodBindingExampleBinding(e);
+        MethodExample e = new MethodExample("1", "name");
+        MethodExampleBinding b = new MethodExampleBinding(e);
 
         Assert.assertEquals("name", b.name().get());
 
@@ -16,8 +16,8 @@ public class MethodBindingExampleTest extends TestCase {
     }
 
     public void testReadOnly() {
-        MethodBindingExample e = new MethodBindingExample("1", "name");
-        MethodBindingExampleBinding b = new MethodBindingExampleBinding(e);
+        MethodExample e = new MethodExample("1", "name");
+        MethodExampleBinding b = new MethodExampleBinding(e);
 
         Assert.assertEquals("1", b.id().get());
 
