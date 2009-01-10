@@ -1,0 +1,36 @@
+
+Intro
+=====
+
+A data binding framework that generates type-safe binding classes.
+
+Or, OGNL with no strings:
+
+    public void testEmployerThroughEmployee() {
+        Employer er = new Employer();
+        er.name = "at&t";
+
+        Employee ee = new Employee();
+        ee.name = "bob";
+        ee.department = "accounting";
+        ee.employer = er;
+
+        EmployeeBinding eb = new EmployeeBinding(ee);
+        Assert.assertEquals("bob", textBox(eb.name()).toString());
+        Assert.assertEquals("accounting", textBox(eb.department()).toString());
+        Assert.assertEquals("at&t", textBox(eb.employer().name()).toString());
+
+        Assert.assertEquals("employer", textBox(eb.employer()).getName());
+
+        textBox(eb.employer().name()).set("fromTheBrowser");
+        textBox(eb.employer().name()).set("fromTheBrowser");
+        Assert.assertEquals("fromTheBrowser", er.name);
+    }
+
+The point being that `eb.employer().name()` does not directly access the `name`, but instead returns a `StringBinding` that the web framework can bind values into/out of as it serves the request.
+
+Annotation
+==========
+
+Bindgen is implemented as JDK6 annotation processor--when configured in your IDE (e.g. with project-specific settings in Eclipse), and as soon as you add a `@Bindable` annotation to a class `Foo`, and hit save, the IDE immediately invokes Bindgen behind the scenes and `FooBinding` is created.
+
