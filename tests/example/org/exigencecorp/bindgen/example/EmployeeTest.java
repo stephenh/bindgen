@@ -11,6 +11,7 @@ public class EmployeeTest extends TestCase {
         Employee e = new Employee();
         e.name = "bob";
         e.department = "accounting";
+
         EmployeeBinding eb = new EmployeeBinding(e);
         Assert.assertEquals("bob", textBox(eb.name()).toString());
         Assert.assertEquals("accounting", textBox(eb.department()).toString());
@@ -22,6 +23,7 @@ public class EmployeeTest extends TestCase {
     public void testEmployer() {
         Employer e = new Employer();
         e.name = "at&t";
+
         EmployerBinding eb = new EmployerBinding(e);
         Assert.assertEquals("at&t", textBox(eb.name()).toString());
         Assert.assertEquals("name", textBox(eb.name()).getName());
@@ -66,11 +68,8 @@ public class EmployeeTest extends TestCase {
     }
 
     public void testDelayedEmployee() {
-        Employee e1 = new Employee();
-        e1.name = "bob";
-
-        Employee e2 = new Employee();
-        e2.name = "fred";
+        Employee e1 = new Employee("bob");
+        Employee e2 = new Employee("fred");
 
         EmployeeBinding eb = new EmployeeBinding();
         TextBox<String> tb = textBox(eb.name());

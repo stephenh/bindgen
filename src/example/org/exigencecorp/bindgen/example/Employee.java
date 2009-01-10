@@ -9,4 +9,11 @@ public class Employee {
     public String name;
     public String department;
 
+    public Employee() {
+    }
+
+    public Employee(String name) {
+        this.name = name;
+    }
+
 }
