@@ -5,7 +5,6 @@ import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.ArrayType;
-import javax.lang.model.type.ExecutableType;
 import javax.lang.model.type.TypeMirror;
 
 import org.apache.commons.lang.StringUtils;
@@ -26,11 +25,6 @@ public class GenerateMethodProperty {
 
     public void generate() {
         String methodName = this.enclosed.getSimpleName().toString();
-        if (!methodName.startsWith("get")
-            || ((ExecutableType) this.enclosed.asType()).getParameterTypes().size() != 0
-            || methodName.equals("getClass")) {
-            return;
-        }
         String propertyName = StringUtils.uncapitalize(StringUtils.removeStart(methodName, "get"));
         TypeMirror returnType = this.enclosed.getReturnType();
 

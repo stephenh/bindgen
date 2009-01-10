@@ -9,6 +9,8 @@ import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
+import javax.lang.model.type.ExecutableType;
+import javax.lang.model.type.TypeKind;
 import javax.tools.JavaFileObject;
 import javax.tools.Diagnostic.Kind;
 
@@ -69,11 +71,28 @@ public class GenerateBindingClass {
             if (enclosed.getModifiers().contains(Modifier.PUBLIC) && !enclosed.getModifiers().contains(Modifier.STATIC)) {
                 if (enclosed.getKind() == ElementKind.FIELD) {
                     new GenerateFieldProperty(this.generator, this.bindingClass, enclosed).generate();
-                } else if (enclosed.getKind() == ElementKind.METHOD) {
+                } else if (enclosed.getKind() == ElementKind.METHOD && this.isMethodProperty(enclosed)) {
                     new GenerateMethodProperty(this.generator, this.bindingClass, (ExecutableElement) enclosed).generate();
+                } else if (enclosed.getKind() == ElementKind.METHOD && this.isMethodCallable(enclosed)) {
+                    new GenerateMethodCallable(this.generator, this.bindingClass, (ExecutableElement) enclosed).generate();
                 }
             }
         }
+    }
+
+    private boolean isMethodProperty(Element enclosed) {
+        String methodName = enclosed.getSimpleName().toString();
+        return methodName.startsWith("get") && ((ExecutableType) enclosed.asType()).getParameterTypes().size() == 0 && !methodName.equals("getClass");
+    }
+
+    private boolean isMethodCallable(Element enclosed) {
+        String methodName = enclosed.getSimpleName().toString();
+        ExecutableType e = (ExecutableType) enclosed.asType();
+        return e.getParameterTypes().size() == 0
+            && e.getReturnType().getKind() == TypeKind.VOID
+            && !methodName.equals("wait")
+            && !methodName.equals("notify")
+            && !methodName.equals("notifyAll");
     }
 
     private void saveCode() {
