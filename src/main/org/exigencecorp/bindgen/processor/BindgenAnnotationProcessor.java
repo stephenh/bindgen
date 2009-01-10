@@ -13,6 +13,8 @@ import javax.lang.model.element.PackageElement;
 import javax.lang.model.element.TypeElement;
 import javax.tools.Diagnostic.Kind;
 
+import org.exigencecorp.bindgen.Bindable;
+
 @SupportedAnnotationTypes( { "org.exigencecorp.bindgen.Bindable" })
 @SupportedSourceVersion(SourceVersion.RELEASE_6)
 public class BindgenAnnotationProcessor extends AbstractProcessor {
@@ -27,17 +29,15 @@ public class BindgenAnnotationProcessor extends AbstractProcessor {
 
     @Override
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
-        for (TypeElement annotation : annotations) {
-            for (Element element : roundEnv.getElementsAnnotatedWith(annotation)) {
-                if (element instanceof PackageElement) {
-                    for (Element nested : ((PackageElement) element).getEnclosedElements()) {
-                        this.generator.generate((TypeElement) nested);
-                    }
-                } else if (element instanceof TypeElement) {
-                    this.generator.generate((TypeElement) element);
-                } else {
-                    this.processingEnv.getMessager().printMessage(Kind.WARNING, "Unhandled element " + element);
+        for (Element element : roundEnv.getElementsAnnotatedWith(Bindable.class)) {
+            if (element instanceof PackageElement) {
+                for (Element nested : ((PackageElement) element).getEnclosedElements()) {
+                    this.generator.generate((TypeElement) nested);
                 }
+            } else if (element instanceof TypeElement) {
+                this.generator.generate((TypeElement) element);
+            } else {
+                this.processingEnv.getMessager().printMessage(Kind.WARNING, "Unhandled element " + element);
             }
         }
         return true;
