@@ -9,4 +9,12 @@ public class Massage {
         return originalBindingName;
     }
 
+    public static String stripGenerics(String originalName) {
+        int firstBracket = originalName.indexOf("<");
+        if (firstBracket != -1) {
+            return originalName.substring(0, firstBracket);
+        }
+        return originalName;
+    }
+
 }

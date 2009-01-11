@@ -26,7 +26,7 @@ public class RunnableExampleBinding implements Binding<RunnableExample> {
         return "";
     }
 
-    public Class<RunnableExample> getType() {
+    public Class<?> getType() {
         return RunnableExample.class;
     }
 

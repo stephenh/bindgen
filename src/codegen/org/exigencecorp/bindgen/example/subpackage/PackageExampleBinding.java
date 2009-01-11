@@ -27,7 +27,7 @@ public class PackageExampleBinding implements Binding<PackageExample> {
         return "";
     }
 
-    public Class<PackageExample> getType() {
+    public Class<?> getType() {
         return PackageExample.class;
     }
 

@@ -28,7 +28,7 @@ public class MethodExampleBinding implements Binding<MethodExample> {
         return "";
     }
 
-    public Class<MethodExample> getType() {
+    public Class<?> getType() {
         return MethodExample.class;
     }
 

@@ -27,7 +27,7 @@ public class EmployerBinding implements Binding<Employer> {
         return "";
     }
 
-    public Class<Employer> getType() {
+    public Class<?> getType() {
         return Employer.class;
     }
 

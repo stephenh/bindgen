@@ -6,6 +6,7 @@ import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.ArrayType;
 import javax.lang.model.type.TypeMirror;
+import javax.tools.Diagnostic.Kind;
 
 import org.apache.commons.lang.StringUtils;
 import org.exigencecorp.gen.GClass;
@@ -27,24 +28,32 @@ public class GenerateMethodProperty {
         String methodName = this.enclosed.getSimpleName().toString();
         String propertyName = StringUtils.uncapitalize(StringUtils.removeStart(methodName, "get"));
         TypeMirror returnType = this.enclosed.getReturnType();
-
         // Skip arrays for now
         if (returnType instanceof ArrayType) {
             return;
         }
 
-        String propertyType = this.getProcessingEnv().getTypeUtils().erasure(returnType).toString();
-        String propertyBindingType = Massage.packageName(propertyType + "Binding"); // e.g. java.lang.StringBinding, app.EmployeeBinding
+        String propertyType = returnType.toString();
+        String propertyGeneric = "";
+        int firstBracket = propertyType.indexOf("<");
+        if (firstBracket != -1) {
+            propertyGeneric = propertyType.substring(firstBracket);
+            propertyType = propertyType.substring(0, firstBracket);
+        }
+        String propertyBindingType = Massage.packageName(propertyType + "Binding" + propertyGeneric); // e.g. java.lang.StringBinding, app.EmployeeBinding, java.util.ListBinding<String>
 
         TypeElement propertyTypeElement = this.getProcessingEnv().getElementUtils().getTypeElement(propertyType);
         if (propertyTypeElement == null) {
-            // this.processingEnv.getMessager().printMessage(
-            //     Kind.ERROR,
-            //     "No type element found for " + propertyType + " in " + enclosed.getEnclosingElement().getSimpleName() + "." + propertyName);
-            // return;
+            this.getProcessingEnv().getMessager().printMessage(
+                Kind.ERROR,
+                "No type element found for " + propertyType + " in " + this.enclosed.getEnclosingElement().getSimpleName() + "." + propertyName);
+            return;
         } else {
             this.generator.generate(propertyTypeElement);
         }
+
+        // Go back go having List<String>
+        propertyType = propertyType + propertyGeneric;
 
         this.bindingClass.getField(propertyName).type(propertyBindingType);
         GClass fieldClass = this.bindingClass.getInnerClass("My{}Binding", StringUtils.capitalize(propertyName)).notStatic();
@@ -54,15 +63,14 @@ public class GenerateMethodProperty {
         fieldClassName.body.line("return \"{}\";", propertyName);
 
         GMethod fieldClassGet = fieldClass.getMethod("get").returnType(propertyType);
-        fieldClassGet.body.line("return {}.this.get().get{}();", this.bindingClass.getSimpleClassName(), StringUtils.capitalize(propertyName));
+        fieldClassGet.body.line("return {}.this.get().get{}();",//
+            this.bindingClass.getSimpleClassNameWithoutGeneric(),
+            StringUtils.capitalize(propertyName));
 
         GMethod fieldClassSet = fieldClass.getMethod("set").argument(propertyType, propertyName);
         if (this.hasSetter()) {
-            fieldClassSet.body.line(
-                "{}.this.get().set{}({});",
-                this.bindingClass.getSimpleClassName(),
-                StringUtils.capitalize(propertyName),
-                propertyName);
+            fieldClassSet.body.line("{}.this.get().set{}({});", this.bindingClass.getSimpleClassNameWithoutGeneric(), StringUtils
+                .capitalize(propertyName), propertyName);
         } else {
             fieldClassSet.body.line("throw new RuntimeException(this.getName() + \" is read only\");");
         }

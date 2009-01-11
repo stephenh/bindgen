@@ -4,7 +4,7 @@ public interface Binding<T> {
 
     String getName();
 
-    Class<T> getType();
+    Class<?> getType();
 
     T get();
 

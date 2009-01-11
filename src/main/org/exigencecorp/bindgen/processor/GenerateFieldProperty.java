@@ -44,10 +44,10 @@ public class GenerateFieldProperty {
         fieldClassName.body.line("return \"{}\";", fieldName);
 
         GMethod fieldClassGet = fieldClass.getMethod("get").returnType(fieldType);
-        fieldClassGet.body.line("return {}.this.get().{};", this.bindingClass.getSimpleClassName(), fieldName);
+        fieldClassGet.body.line("return {}.this.get().{};", this.bindingClass.getSimpleClassNameWithoutGeneric(), fieldName);
 
         GMethod fieldClassSet = fieldClass.getMethod("set").argument(fieldType, fieldName);
-        fieldClassSet.body.line("{}.this.get().{} = {};", this.bindingClass.getSimpleClassName(), fieldName, fieldName);
+        fieldClassSet.body.line("{}.this.get().{} = {};", this.bindingClass.getSimpleClassNameWithoutGeneric(), fieldName, fieldName);
 
         GMethod fieldGet = this.bindingClass.getMethod(fieldName).returnType(fieldBindingType);
         fieldGet.body.line("if (this.{} == null) {", fieldName);

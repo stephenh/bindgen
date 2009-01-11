@@ -14,6 +14,7 @@ import javax.lang.model.type.TypeKind;
 import javax.tools.JavaFileObject;
 import javax.tools.Diagnostic.Kind;
 
+import org.apache.commons.lang.StringUtils;
 import org.exigencecorp.bindgen.Binding;
 import org.exigencecorp.gen.GClass;
 import org.exigencecorp.gen.GMethod;
@@ -39,22 +40,22 @@ public class GenerateBindingClass {
     }
 
     private void initializeBindingClass() {
-        this.bindingClass = new GClass(Massage.packageName(this.element.getQualifiedName().toString() + "Binding"));
-        this.bindingClass.implementsInterface(Binding.class.getName() + "<{}>", this.element.getQualifiedName());
+        this.bindingClass = new GClass(Massage.packageName(this.element.getQualifiedName() + "Binding" + this.getTypeParametersOrEmpty()));
+        this.bindingClass.implementsInterface(Binding.class.getName() + "<{}>", this.getNameWithTypeParameters());
     }
 
     private void addConstructors() {
         this.bindingClass.getConstructor();
-        this.bindingClass.getConstructor(this.element.getSimpleName() + " value").body.line("this.set(value);");
+        this.bindingClass.getConstructor(this.getNameWithTypeParameters() + " value").body.line("this.set(value);");
     }
 
     private void addValueGetAndSet() {
-        this.bindingClass.getField("value").type(this.element.getSimpleName().toString());
+        this.bindingClass.getField("value").type(this.getNameWithTypeParameters());
 
-        GMethod set = this.bindingClass.getMethod("set").argument(this.element.getSimpleName().toString(), "value");
+        GMethod set = this.bindingClass.getMethod("set").argument(this.getNameWithTypeParameters(), "value");
         set.body.line("this.value = value;");
 
-        GMethod get = this.bindingClass.getMethod("get").returnType(this.element.getSimpleName().toString());
+        GMethod get = this.bindingClass.getMethod("get").returnType(this.getNameWithTypeParameters());
         get.body.line("return this.value;");
     }
 
@@ -62,8 +63,8 @@ public class GenerateBindingClass {
         GMethod name = this.bindingClass.getMethod("getName").returnType(String.class);
         name.body.line("return \"\";");
 
-        GMethod type = this.bindingClass.getMethod("getType").returnType("Class<{}>", this.element.getSimpleName().toString());
-        type.body.line("return {}.class;", this.element.getSimpleName().toString());
+        GMethod type = this.bindingClass.getMethod("getType").returnType("Class<?>", this.element.getSimpleName());
+        type.body.line("return {}.class;", this.element.getSimpleName());
     }
 
     private void generateProperties() {
@@ -97,7 +98,9 @@ public class GenerateBindingClass {
 
     private void saveCode() {
         try {
-            JavaFileObject jfo = this.getProcessingEnv().getFiler().createSourceFile(this.bindingClass.getFullClassName(), this.element);
+            JavaFileObject jfo = this.getProcessingEnv().getFiler().createSourceFile(
+                Massage.stripGenerics(this.bindingClass.getFullClassName()),
+                this.element);
             Writer w = jfo.openWriter();
             w.write(this.bindingClass.toCode());
             w.close();
@@ -108,6 +111,18 @@ public class GenerateBindingClass {
 
     private ProcessingEnvironment getProcessingEnv() {
         return this.generator.getProcessingEnv();
+    }
+
+    private String getNameWithTypeParameters() {
+        return this.element.getQualifiedName() + this.getTypeParametersOrEmpty();
+    }
+
+    private String getTypeParametersOrEmpty() {
+        String typeParameters = "";
+        if (this.element.getTypeParameters().size() != 0) {
+            typeParameters = "<" + StringUtils.join(this.element.getTypeParameters(), ", ") + ">";
+        }
+        return typeParameters;
     }
 
 }

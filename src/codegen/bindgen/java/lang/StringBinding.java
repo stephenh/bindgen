@@ -25,7 +25,7 @@ public class StringBinding implements Binding<String> {
         return "";
     }
 
-    public Class<String> getType() {
+    public Class<?> getType() {
         return String.class;
     }
 

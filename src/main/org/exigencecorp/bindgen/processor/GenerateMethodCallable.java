@@ -27,7 +27,7 @@ public class GenerateMethodCallable {
         fieldClass.implementsInterface(Runnable.class);
 
         GMethod fieldClassRun = fieldClass.getMethod("run");
-        fieldClassRun.body.line("{}.this.get().{}();", this.bindingClass.getSimpleClassName(), methodName);
+        fieldClassRun.body.line("{}.this.get().{}();", this.bindingClass.getSimpleClassNameWithoutGeneric(), methodName);
 
         GMethod fieldGet = this.bindingClass.getMethod(methodName).returnType(Runnable.class);
         fieldGet.body.line("if (this.{} == null) {", methodName);

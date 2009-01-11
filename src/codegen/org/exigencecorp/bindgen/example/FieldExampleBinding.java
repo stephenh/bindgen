@@ -27,7 +27,7 @@ public class FieldExampleBinding implements Binding<FieldExample> {
         return "";
     }
 
-    public Class<FieldExample> getType() {
+    public Class<?> getType() {
         return FieldExample.class;
     }
 

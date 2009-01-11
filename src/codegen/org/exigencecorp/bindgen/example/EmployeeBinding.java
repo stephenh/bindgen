@@ -29,7 +29,7 @@ public class EmployeeBinding implements Binding<Employee> {
         return "";
     }
 
-    public Class<Employee> getType() {
+    public Class<?> getType() {
         return Employee.class;
     }
 
