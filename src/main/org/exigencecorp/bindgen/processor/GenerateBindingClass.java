@@ -40,7 +40,8 @@ public class GenerateBindingClass {
     }
 
     private void initializeBindingClass() {
-        this.bindingClass = new GClass(Massage.packageName(this.element.getQualifiedName() + "Binding" + this.getTypeParametersOrEmpty()));
+        String className = Massage.packageName(this.element.getQualifiedName() + "Binding") + this.getTypeParametersOrEmpty();
+        this.bindingClass = new GClass(className);
         this.bindingClass.implementsInterface(Binding.class.getName() + "<{}>", this.getNameWithTypeParameters());
     }
 

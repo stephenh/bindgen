@@ -2,11 +2,13 @@ package org.exigencecorp.bindgen.processor;
 
 public class Massage {
 
-    public static String packageName(String originalBindingName) {
-        if (originalBindingName.startsWith("java")) {
-            return "bindgen." + originalBindingName;
+    public static String packageName(String bindingName) {
+        // Watch for package.Foo.Inner -> package.Inner
+        bindingName = bindingName.replaceAll("\\.([A-Z]\\w+)\\.", ".");
+        if (bindingName.startsWith("java")) {
+            return "bindgen." + bindingName;
         }
-        return originalBindingName;
+        return bindingName;
     }
 
     public static String stripGenerics(String originalName) {
