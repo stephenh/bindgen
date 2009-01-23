@@ -91,7 +91,8 @@ public class GenerateMethodProperty {
         String setterName = "set" + StringUtils.removeStart(methodName, "get");
         for (Element other : this.enclosed.getEnclosingElement().getEnclosedElements()) {
             if (other.getSimpleName().toString().equals(setterName)) {
-                return true;
+                ExecutableElement e = (ExecutableElement) other;
+                return e.getThrownTypes().size() == 0; // only true if no throws
             }
         }
         return false;

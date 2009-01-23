@@ -84,7 +84,8 @@ public class GenerateBindingClass {
 
     private boolean isMethodProperty(Element enclosed) {
         String methodName = enclosed.getSimpleName().toString();
-        return methodName.startsWith("get") && ((ExecutableType) enclosed.asType()).getParameterTypes().size() == 0 && !methodName.equals("getClass");
+        ExecutableType e = (ExecutableType) enclosed.asType();
+        return methodName.startsWith("get") && e.getThrownTypes().size() == 0 && e.getParameterTypes().size() == 0 && !methodName.equals("getClass");
     }
 
     private boolean isMethodCallable(Element enclosed) {
@@ -92,6 +93,7 @@ public class GenerateBindingClass {
         ExecutableType e = (ExecutableType) enclosed.asType();
         return e.getParameterTypes().size() == 0
             && e.getReturnType().getKind() == TypeKind.VOID
+            && e.getThrownTypes().size() == 0
             && !methodName.equals("wait")
             && !methodName.equals("notify")
             && !methodName.equals("notifyAll");
