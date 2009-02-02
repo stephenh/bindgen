@@ -4,7 +4,7 @@ Intro
 
 A data binding framework that generates type-safe binding classes.
 
-Or, OGNL with no strings:
+Or, OGNL with no strings. A test case:
 
     public void testEmployerThroughEmployee() {
         Employer er = new Employer();
@@ -29,8 +29,41 @@ Or, OGNL with no strings:
 
 The point being that `eb.employer().name()` does not directly access the `name`, but instead returns a `StringBinding` that the web framework can bind values into/out of as it serves the request.
 
-Annotation
-==========
+Another Example
+===============
+
+This is a spike from a [Click][1]-like web framework I'm hacking around on:
+
+    @Bindable
+    public class HomePage extends AbstractPage {
+
+        public Form form = new Form("Login");
+        public String username = "blah";
+        public String password;
+        private HomePageBinding bind = new HomePageBinding(this);
+
+        @Override
+        public void onInit() {
+            this.form.add(new TextField(this.bind.username()));
+            this.form.add(new TextField(this.bind.password()));
+            this.form.add(new SubmitField(this.bind.submit()));
+        }
+
+        public void submit() {
+            // do stuff with this.username and this.password
+        }
+    }
+
+The `HomePageBinding` class is auto-generated because of the `@Bindable` annotation on the `HomePage` class.
+
+When the form POSTs, the TextFields call the `Binding.set` methods with their form values, which populates the `this.username` and `this.password` fields.
+
+Fun things like type conversion using `Binding.getType()` method to go from strings -> whatever would be possible too.
+
+[1]: http://click.sf.net
+
+Annotations
+===========
 
 Bindgen is implemented as JDK6 annotation processor--when configured in your IDE (e.g. with project-specific settings in Eclipse), and as soon as you add a `@Bindable` annotation to a class `Foo`, and hit save, the IDE immediately invokes Bindgen behind the scenes and `FooBinding` is created.
 
