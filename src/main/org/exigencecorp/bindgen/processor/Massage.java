@@ -4,11 +4,7 @@ public class Massage {
 
     public static String packageName(String bindingName) {
         // Watch for package.Foo.Inner -> package.Inner
-        bindingName = bindingName.replaceAll("\\.([A-Z]\\w+)\\.", ".");
-        if (bindingName.startsWith("java")) {
-            return "bindgen." + bindingName;
-        }
-        return bindingName;
+        return "bindgen." + bindingName.replaceAll("\\.([A-Z]\\w+)\\.", ".");
     }
 
     public static String stripGenerics(String originalName) {
