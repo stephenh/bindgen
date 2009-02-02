@@ -67,24 +67,26 @@ Todo
 
 * Currently only `void methodName()` methods are recognized and wrapped as `Runnables`--it would be nice to give parameters to the `@Bindable` annotation for other method patterns to look for, e.g.:
 
-      public interface TransactionBlock {
-          void go(Transaction txn);
-      }
+A block:
 
-  With a usage of:
+    public interface TransactionBlock {
+        boolean go(Transaction txn);
+    }
 
-      @Bindable(recognize = { TransactionBlock.class })
-      public class Foo {
-          public void someMethod(Transaction txn) {
-              ...
-          }
-      }
+With a usage of:
 
-  Then doing:
+    @Bindable(recognize = { TransactionBlock.class })
+    public class Foo {
+        public boolean someMethod(Transaction txn) {
+            ...
+        }
+    }
 
-      new FooBinding(foo).someMethod()
+Then doing:
 
-  Would return a `TransactionBlock` that you could pass around and call `go(txn)` against later.
+    new FooBinding(foo).someMethod()
+
+Would return a `TransactionBlock` instance bound to `foo` that you could pass around and call `go(txn)` against later.
 
 * No real tests--currently I just make changes and see if the `tests/example` use cases still work. Some (ugh) mock meta models/something might be more appropriate to get true unit test coverage going
 
