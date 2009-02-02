@@ -62,6 +62,32 @@ Fun things like type conversion using `Binding.getType()` method to go from stri
 
 [1]: http://click.sf.net
 
+Todo
+====
+
+* Currently only `void methodName()` methods are recognized and wrapped as `Runnables`--it would be nice to give parameters to the `@Bindable` annotation for other method patterns to look for, e.g.:
+
+    public interface TransactionBlock {
+        void go(Transaction txn);
+    }
+
+  With a usage of:
+
+    @Bindable(recognize = { TransactionBlock.class })
+    public class Foo {
+        public void someMethod(Transaction txn) {
+            ...
+        }
+    }
+
+  Then doing:
+
+    new FooBinding(foo).someMethod()
+
+  Would return a `TransactionBlock` that you could pass around and call `go(txn)` against later.
+
+* No real tests--currently I just make changes and see if the `tests/example` use cases still work. Some (ugh) mock meta models/something might be more appropriate to get true unit test coverage going
+
 Annotations
 ===========
 
