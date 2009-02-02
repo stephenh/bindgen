@@ -67,22 +67,22 @@ Todo
 
 * Currently only `void methodName()` methods are recognized and wrapped as `Runnables`--it would be nice to give parameters to the `@Bindable` annotation for other method patterns to look for, e.g.:
 
-    public interface TransactionBlock {
-        void go(Transaction txn);
-    }
+      public interface TransactionBlock {
+          void go(Transaction txn);
+      }
 
   With a usage of:
 
-    @Bindable(recognize = { TransactionBlock.class })
-    public class Foo {
-        public void someMethod(Transaction txn) {
-            ...
-        }
-    }
+      @Bindable(recognize = { TransactionBlock.class })
+      public class Foo {
+          public void someMethod(Transaction txn) {
+              ...
+          }
+      }
 
   Then doing:
 
-    new FooBinding(foo).someMethod()
+      new FooBinding(foo).someMethod()
 
   Would return a `TransactionBlock` that you could pass around and call `go(txn)` against later.
 
