@@ -29,6 +29,13 @@ Or, OGNL with no strings. A test case:
 
 The point being that `eb.employer().name()` does not directly access the `name`, but instead returns a `StringBinding` that the web framework can bind values into/out of as it serves the request.
 
+Annotations
+===========
+
+Bindgen is implemented as JDK6 annotation processor--when configured in your IDE (e.g. with project-specific settings in Eclipse), and as soon as you add a `@Bindable` annotation to a class `Foo`, and hit save, the IDE immediately invokes the Bindgen [processor][2] behind the scenes and `FooBinding` is created.
+
+[2]: master/src/main/org/exigencecorp/bindgen/processor/BindgenAnnotationProcessor.java
+
 Another Example
 ===============
 
@@ -91,9 +98,4 @@ Would return a `TransactionBlock` instance bound to `foo` that you could pass ar
 * No real tests--currently I just make changes and see if the `tests/example` use cases still work. Some (ugh) mock meta models/something might be more appropriate to get true unit test coverage going
 
 * Somehow suppress the deprecation/raw type warnings that result from bindgen traversing into old APIs (e.g. the servlet API)
-
-Annotations
-===========
-
-Bindgen is implemented as JDK6 annotation processor--when configured in your IDE (e.g. with project-specific settings in Eclipse), and as soon as you add a `@Bindable` annotation to a class `Foo`, and hit save, the IDE immediately invokes Bindgen behind the scenes and `FooBinding` is created.
 
