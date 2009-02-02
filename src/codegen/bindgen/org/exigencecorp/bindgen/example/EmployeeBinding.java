@@ -1,7 +1,9 @@
-package org.exigencecorp.bindgen.example;
+package bindgen.org.exigencecorp.bindgen.example;
 
 import bindgen.java.lang.StringBinding;
 import org.exigencecorp.bindgen.Binding;
+import org.exigencecorp.bindgen.example.Employee;
+import org.exigencecorp.bindgen.example.Employer;
 
 public class EmployeeBinding implements Binding<Employee> {
 

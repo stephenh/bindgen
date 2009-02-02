@@ -1,6 +1,7 @@
-package org.exigencecorp.bindgen.example;
+package bindgen.org.exigencecorp.bindgen.example;
 
 import org.exigencecorp.bindgen.Binding;
+import org.exigencecorp.bindgen.example.RunnableExample;
 
 public class RunnableExampleBinding implements Binding<RunnableExample> {
 

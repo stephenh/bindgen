@@ -1,7 +1,8 @@
-package org.exigencecorp.bindgen.example.subpackage;
+package bindgen.org.exigencecorp.bindgen.example.subpackage;
 
 import bindgen.java.lang.StringBinding;
 import org.exigencecorp.bindgen.Binding;
+import org.exigencecorp.bindgen.example.subpackage.PackageExample;
 
 public class PackageExampleBinding implements Binding<PackageExample> {
 

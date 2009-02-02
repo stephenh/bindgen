@@ -1,7 +1,8 @@
-package org.exigencecorp.bindgen.example;
+package bindgen.org.exigencecorp.bindgen.example;
 
 import bindgen.java.lang.StringBinding;
 import org.exigencecorp.bindgen.Binding;
+import org.exigencecorp.bindgen.example.FieldExample;
 
 public class FieldExampleBinding implements Binding<FieldExample> {
 

@@ -5,6 +5,7 @@ import java.util.List;
 
 import junit.framework.Assert;
 import junit.framework.TestCase;
+import bindgen.org.exigencecorp.bindgen.example.MethodWithGenericsExampleBinding;
 
 public class MethodWithGenericsExampleTest extends TestCase {
 

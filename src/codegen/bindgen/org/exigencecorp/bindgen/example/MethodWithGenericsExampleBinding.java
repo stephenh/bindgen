@@ -1,8 +1,9 @@
-package org.exigencecorp.bindgen.example;
+package bindgen.org.exigencecorp.bindgen.example;
 
 import bindgen.java.util.ListBinding;
 import java.util.List;
 import org.exigencecorp.bindgen.Binding;
+import org.exigencecorp.bindgen.example.MethodWithGenericsExample;
 
 public class MethodWithGenericsExampleBinding implements Binding<MethodWithGenericsExample> {
 

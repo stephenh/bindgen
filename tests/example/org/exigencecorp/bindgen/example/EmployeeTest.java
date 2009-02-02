@@ -5,6 +5,9 @@ import junit.framework.TestCase;
 
 import org.exigencecorp.bindgen.Binding;
 
+import bindgen.org.exigencecorp.bindgen.example.EmployeeBinding;
+import bindgen.org.exigencecorp.bindgen.example.EmployerBinding;
+
 public class EmployeeTest extends TestCase {
 
     public void testEmployee() {

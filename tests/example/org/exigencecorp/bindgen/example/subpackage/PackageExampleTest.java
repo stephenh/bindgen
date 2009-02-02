@@ -2,6 +2,7 @@ package org.exigencecorp.bindgen.example.subpackage;
 
 import junit.framework.Assert;
 import junit.framework.TestCase;
+import bindgen.org.exigencecorp.bindgen.example.subpackage.PackageExampleBinding;
 
 public class PackageExampleTest extends TestCase {
 
