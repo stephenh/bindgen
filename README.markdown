@@ -99,3 +99,5 @@ Would return a `TransactionBlock` instance bound to `foo` that you could pass ar
 
 * Somehow suppress the deprecation/raw type warnings that result from bindgen traversing into old APIs (e.g. the servlet API)
 
+* Add jarjar so that the dependencies included in `bindgen.jar` do not cause conflicts
+
