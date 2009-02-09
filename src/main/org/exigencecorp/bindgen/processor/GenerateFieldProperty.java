@@ -24,8 +24,10 @@ public class GenerateFieldProperty {
     public void generate() {
         String fieldName = this.enclosed.getSimpleName().toString();
         String fieldType = this.getProcessingEnv().getTypeUtils().erasure(this.enclosed.asType()).toString();
-        String fieldBindingType = Massage.packageName(fieldType + "Binding"); // e.g. bindgen.java.lang.StringBinding, app.EmployeeBinding
+        // e.g. bindgen.java.lang.StringBinding, bindgen.app.EmployeeBinding
+        String fieldBindingType = Massage.packageName(fieldType + "Binding");
 
+        // Probably need to use ClassName like GenerateMethodProperty to not cause warnings on public fields with generics
         TypeElement fieldTypeElement = this.getProcessingEnv().getElementUtils().getTypeElement(fieldType);
         if (fieldTypeElement == null) {
             this.getProcessingEnv().getMessager().printMessage(

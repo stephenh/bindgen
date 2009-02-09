@@ -28,21 +28,15 @@ public class GenerateMethodProperty {
         String methodName = this.enclosed.getSimpleName().toString();
         String propertyName = StringUtils.uncapitalize(StringUtils.removeStart(methodName, "get"));
         TypeMirror returnType = this.enclosed.getReturnType();
-        // Skip arrays for now
         if (returnType instanceof ArrayType) {
-            return;
+            return; // Skip arrays for now
         }
 
-        String propertyType = returnType.toString();
-        String propertyGeneric = "";
-        int firstBracket = propertyType.indexOf("<");
-        if (firstBracket != -1) {
-            propertyGeneric = propertyType.substring(firstBracket);
-            propertyType = propertyType.substring(0, firstBracket);
-        }
-        String propertyBindingType = Massage.packageName(propertyType + "Binding" + propertyGeneric); // e.g. java.lang.StringBinding, app.EmployeeBinding, java.util.ListBinding<String>
+        ClassName propertyType = new ClassName(returnType);
+        // e.g. bindgen.java.lang.StringBinding, bindgen.app.EmployeeBinding, bindgen.java.util.ListBinding<String>
+        String propertyBindingType = Massage.packageName(propertyType.getWithoutGenericPart() + "Binding" + propertyType.getGenericPart());
 
-        TypeElement propertyTypeElement = this.getProcessingEnv().getElementUtils().getTypeElement(propertyType);
+        TypeElement propertyTypeElement = this.getProcessingEnv().getElementUtils().getTypeElement(propertyType.getWithoutGenericPart());
         if (propertyTypeElement == null) {
             this.getProcessingEnv().getMessager().printMessage(
                 Kind.ERROR,
@@ -52,9 +46,6 @@ public class GenerateMethodProperty {
             this.generator.generate(propertyTypeElement);
         }
 
-        // Go back go having List<String>
-        propertyType = propertyType + propertyGeneric;
-
         this.bindingClass.getField(propertyName).type(propertyBindingType);
         GClass fieldClass = this.bindingClass.getInnerClass("My{}Binding", StringUtils.capitalize(propertyName)).notStatic();
         fieldClass.baseClassName(propertyBindingType);
@@ -62,12 +53,12 @@ public class GenerateMethodProperty {
         GMethod fieldClassName = fieldClass.getMethod("getName").returnType(String.class);
         fieldClassName.body.line("return \"{}\";", propertyName);
 
-        GMethod fieldClassGet = fieldClass.getMethod("get").returnType(propertyType);
+        GMethod fieldClassGet = fieldClass.getMethod("get").returnType(propertyType.get());
         fieldClassGet.body.line("return {}.this.get().get{}();",//
             this.bindingClass.getSimpleClassNameWithoutGeneric(),
             StringUtils.capitalize(propertyName));
 
-        GMethod fieldClassSet = fieldClass.getMethod("set").argument(propertyType, propertyName);
+        GMethod fieldClassSet = fieldClass.getMethod("set").argument(propertyType.get(), propertyName);
         if (this.hasSetter()) {
             fieldClassSet.body.line("{}.this.get().set{}({});", this.bindingClass.getSimpleClassNameWithoutGeneric(), StringUtils
                 .capitalize(propertyName), propertyName);
