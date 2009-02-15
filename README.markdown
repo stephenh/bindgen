@@ -110,3 +110,5 @@ Would return a `TransactionBlock` instance bound to `foo` that you could pass ar
 
 * Support extension methods, e.g. StringBinding could have extra methods like `length()`, `substring()`, etc., ideally configurable
 
+* Does inheritance work? E.g. `BaseBinding Base.getBinding()`, then `SubBinding Sub.getBinding()`, `SubBinding` would need to extend `BaseBinding`--might be tricky
+
