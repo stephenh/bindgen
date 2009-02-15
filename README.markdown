@@ -104,7 +104,7 @@ Would return a `TransactionBlock` instance bound to `foo` that you could pass ar
 
 * Add jarjar so that the dependencies included in `bindgen.jar` do not cause conflicts
 
-* Figure out configuration--e.g. @Bindable(YourConfiguration.class), hopefully at processor time we can look that up and read/infer meta data out of it.
+* Figure out configuration--e.g. `@Bindable(YourConfiguration.class)`, hopefully at processor time we can look that up and read/infer meta data out of it.
 
 * Recognize `hasErrors`, `toString`, etc., along with just getters/setters
 
