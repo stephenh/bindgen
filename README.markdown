@@ -72,6 +72,14 @@ Fun things like type conversion using `Binding.getType()` method to go from stri
 
 [1]: http://click.sf.net
 
+Gotchas
+=======
+
+* Annotating packages as `@Bindable` works in `javac` but not in Eclipse until `3.5-M5`
+* Clean builds in Eclipse do not regenerate the bindings (see [263985][3])
+
+[3]: https://bugs.eclipse.org/bugs/show_bug.cgi?id=263985
+
 Todo
 ====
 
