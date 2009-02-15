@@ -4,7 +4,9 @@ Intro
 
 A data binding framework that generates type-safe binding classes.
 
-Or, OGNL with no strings. A test case:
+Or, OGNL with no strings.
+
+A test case:
 
     public void testEmployerThroughEmployee() {
         Employer er = new Employer();
@@ -22,7 +24,6 @@ Or, OGNL with no strings. A test case:
 
         Assert.assertEquals("employer", textBox(eb.employer()).getName());
 
-        textBox(eb.employer().name()).set("fromTheBrowser");
         textBox(eb.employer().name()).set("fromTheBrowser");
         Assert.assertEquals("fromTheBrowser", er.name);
     }
