@@ -14,26 +14,28 @@ A test case:
 
         Employee ee = new Employee();
         ee.name = "bob";
-        ee.department = "accounting";
         ee.employer = er;
 
         EmployeeBinding eb = new EmployeeBinding(ee);
-        Assert.assertEquals("bob", textBox(eb.name()).toString());
-        Assert.assertEquals("accounting", textBox(eb.department()).toString());
-        Assert.assertEquals("at&t", textBox(eb.employer().name()).toString());
+        eb.name(); // Note name() returns a StringBinding instance
 
-        Assert.assertEquals("employer", textBox(eb.employer()).getName());
+        // During rendering TextBox calls StringBinding.get()
+        Assert.assertEquals("bob", new TextBox(eb.name()).toString());
+        Assert.assertEquals("at&t", new TextBox(eb.employer().name()).toString());
 
-        textBox(eb.employer().name()).set("fromTheBrowser");
-        Assert.assertEquals("fromTheBrowser", er.name);
+        // During POST procesing TextBox calls StringBinding.set()
+        new TextBox(eb.name()).set("newBob");
+        new TextBox(eb.employer().name()).set("newAt&t");
+        Assert.assertEquals("newBob", ee.name);
+        Assert.assertEquals("newAt&t", er.name);
     }
 
-The point being that `eb.employer().name()` does not directly access the `name`, but instead returns a `StringBinding` that the web framework can bind values into/out of as it serves the request.
+The point being that `eb.employer().name()` does not immediately return the value of `name`, but instead returns a `StringBinding` that the web framework can bind values into/out of as it serves the request.
 
 Annotations
 ===========
 
-Bindgen is implemented as JDK6 annotation processor--when configured in your IDE (e.g. with project-specific settings in Eclipse), and as soon as you add a `@Bindable` annotation to a class `Foo`, and hit save, the IDE immediately invokes the Bindgen [processor][2] behind the scenes and `FooBinding` is created.
+Bindgen is implemented as JDK6 annotation processor. When configured in your IDE (e.g. with project-specific settings in Eclipse), as soon as you add a `@Bindable` annotation to a class `Foo`, and hit save, the IDE immediately invokes the [BindgenAnnotationProcessor][2] behind the scenes and `FooBinding` is created.
 
 [2]: master/src/main/org/exigencecorp/bindgen/processor/BindgenAnnotationProcessor.java
 

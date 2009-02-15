@@ -5,6 +5,7 @@ import junit.framework.TestCase;
 
 import org.exigencecorp.bindgen.Binding;
 
+import bindgen.java.lang.StringBinding;
 import bindgen.org.exigencecorp.bindgen.example.EmployeeBinding;
 import bindgen.org.exigencecorp.bindgen.example.EmployerBinding;
 
@@ -16,11 +17,11 @@ public class EmployeeTest extends TestCase {
         e.department = "accounting";
 
         EmployeeBinding eb = new EmployeeBinding(e);
-        Assert.assertEquals("bob", textBox(eb.name()).toString());
-        Assert.assertEquals("accounting", textBox(eb.department()).toString());
+        Assert.assertEquals("bob", new TextBox(eb.name()).toString());
+        Assert.assertEquals("accounting", new TextBox(eb.department()).toString());
 
-        Assert.assertEquals("name", textBox(eb.name()).getName());
-        Assert.assertEquals("department", textBox(eb.department()).getName());
+        Assert.assertEquals("name", new TextBox(eb.name()).getName());
+        Assert.assertEquals("department", new TextBox(eb.department()).getName());
     }
 
     public void testEmployer() {
@@ -28,8 +29,8 @@ public class EmployeeTest extends TestCase {
         e.name = "at&t";
 
         EmployerBinding eb = new EmployerBinding(e);
-        Assert.assertEquals("at&t", textBox(eb.name()).toString());
-        Assert.assertEquals("name", textBox(eb.name()).getName());
+        Assert.assertEquals("at&t", new TextBox(eb.name()).toString());
+        Assert.assertEquals("name", new TextBox(eb.name()).getName());
     }
 
     public void testEmployerThroughEmployee() {
@@ -42,15 +43,20 @@ public class EmployeeTest extends TestCase {
         ee.employer = er;
 
         EmployeeBinding eb = new EmployeeBinding(ee);
-        Assert.assertEquals("bob", textBox(eb.name()).toString());
-        Assert.assertEquals("accounting", textBox(eb.department()).toString());
-        Assert.assertEquals("at&t", textBox(eb.employer().name()).toString());
+        Assert.assertTrue(StringBinding.class.isAssignableFrom(eb.name().getClass()));
 
-        Assert.assertEquals("employer", textBox(eb.employer()).getName());
+        // Simulate page rendering
+        Assert.assertEquals("bob", new TextBox(eb.name()).toString());
+        Assert.assertEquals("accounting", new TextBox(eb.department()).toString());
+        Assert.assertEquals("at&t", new TextBox(eb.employer().name()).toString());
 
-        textBox(eb.employer().name()).set("fromTheBrowser");
-        textBox(eb.employer().name()).set("fromTheBrowser");
-        Assert.assertEquals("fromTheBrowser", er.name);
+        Assert.assertEquals("employer", new TextBox(eb.employer()).getName());
+
+        // Simulate form POST processing
+        new TextBox(eb.name()).set("newBob");
+        new TextBox(eb.employer().name()).set("newAt&t");
+        Assert.assertEquals("newBob", ee.name);
+        Assert.assertEquals("newAt&t", er.name);
     }
 
     public void testSetEmployer() {
@@ -64,10 +70,10 @@ public class EmployeeTest extends TestCase {
         ee.employer = er1;
 
         EmployeeBinding eb = new EmployeeBinding(ee);
-        Assert.assertEquals("at&t", textBox(eb.employer().name()).toString());
+        Assert.assertEquals("at&t", new TextBox(eb.employer().name()).toString());
 
         eb.employer().set(er2);
-        Assert.assertEquals("exigence", textBox(eb.employer().name()).toString());
+        Assert.assertEquals("exigence", new TextBox(eb.employer().name()).toString());
     }
 
     public void testDelayedEmployee() {
@@ -75,7 +81,7 @@ public class EmployeeTest extends TestCase {
         Employee e2 = new Employee("fred");
 
         EmployeeBinding eb = new EmployeeBinding();
-        TextBox<String> tb = textBox(eb.name());
+        TextBox tb = new TextBox(eb.name());
 
         eb.set(e1);
         Assert.assertEquals("bob", tb.toString());
@@ -84,15 +90,11 @@ public class EmployeeTest extends TestCase {
         Assert.assertEquals("fred", tb.toString());
     }
 
-    public static <T> TextBox<T> textBox(Binding<T> binding) {
-        return new TextBox<T>(binding);
-    }
+    public static class TextBox {
+        Binding<Object> binding;
 
-    public static class TextBox<T> {
-        Binding<T> binding;
-
-        public TextBox(Binding<T> binding) {
-            this.binding = binding;
+        public TextBox(Binding<?> binding) {
+            this.binding = (Binding<Object>) binding;
         }
 
         public String getName() {
@@ -104,8 +106,7 @@ public class EmployeeTest extends TestCase {
         }
 
         public void set(String value) {
-            T changed = (T) value;
-            this.binding.set(changed);
+            this.binding.set(value);
         }
     }
 
