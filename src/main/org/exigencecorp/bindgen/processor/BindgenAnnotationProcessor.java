@@ -23,7 +23,6 @@ public class BindgenAnnotationProcessor extends AbstractProcessor {
 
     @Override
     public void init(ProcessingEnvironment processingEnv) {
-        System.out.println("Initing");
         super.init(processingEnv);
         this.generator = new BindingGenerator(processingEnv);
     }
@@ -36,13 +35,11 @@ public class BindgenAnnotationProcessor extends AbstractProcessor {
                     this.generator.generate((TypeElement) nested);
                 }
             } else if (element instanceof TypeElement) {
-                System.out.println("Generating " + element);
                 this.generator.generate((TypeElement) element);
             } else {
                 this.processingEnv.getMessager().printMessage(Kind.WARNING, "Unhandled element " + element);
             }
         }
-        System.out.println("Done bindgen processing");
         return true;
     }
 
