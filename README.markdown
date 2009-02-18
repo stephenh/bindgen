@@ -75,8 +75,9 @@ Fun things like type conversion using `Binding.getType()` method to go from stri
 Gotchas
 =======
 
-* Annotating packages as `@Bindable` works in `javac` but not in Eclipse until `3.5-M5`
-* Clean builds in Eclipse do not regenerate the bindings (see [263985][3])
+* Eclipse: Annotating packages as `@Bindable` does not work until 3.5-M5
+* Eclipse: Clean builds cause compile errors if your `Foo` class references its own `FooBinding` (see [263985][3])
+* IntelliJ: Does not support annotation processors (from what I can tell)
 
 [3]: https://bugs.eclipse.org/bugs/show_bug.cgi?id=263985
 
