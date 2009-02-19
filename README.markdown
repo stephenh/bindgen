@@ -121,3 +121,5 @@ Would return a `TransactionBlock` instance bound to `foo` that you could pass ar
 
 * Does inheritance work? E.g. `BaseBinding Base.getBinding()`, then `SubBinding Sub.getBinding()`, `SubBinding` would need to extend `BaseBinding`--might be tricky
 
+* Optional null-safe get/set, e.g. `eb.employer().name()` with a null `employer` could have `get()` return `null` and not NPE and `set()` could create a `new Employer()` to then call `setName()` on to again avoid the NPE
+
