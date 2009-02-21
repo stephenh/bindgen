@@ -37,7 +37,7 @@ Annotations
 
 Bindgen is implemented as JDK6 annotation processor. When configured in your IDE (e.g. with project-specific settings in Eclipse), as soon as you add a `@Bindable` annotation to a class `Foo`, and hit save, the IDE immediately invokes the [BindgenAnnotationProcessor][2] behind the scenes and `FooBinding` is created.
 
-[2]: master/src/main/org/exigencecorp/bindgen/processor/BindgenAnnotationProcessor.java
+[2]: master/bindgen/src/main/org/exigencecorp/bindgen/processor/BindgenAnnotationProcessor.java
 
 Another Example
 ===============

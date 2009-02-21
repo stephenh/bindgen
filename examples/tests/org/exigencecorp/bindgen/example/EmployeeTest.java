@@ -93,14 +93,15 @@ public class EmployeeTest extends TestCase {
     public static class TextBox {
         Binding<Object> binding;
 
-        public TextBox(Binding<?> binding) {
+        @SuppressWarnings("unchecked")
+		public TextBox(Binding<?> binding) {
             this.binding = (Binding<Object>) binding;
         }
 
         public String getName() {
             return this.binding.getName();
         }
-
+        
         public String toString() {
             return this.binding.get().toString();
         }
