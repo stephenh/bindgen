@@ -70,14 +70,16 @@ public class GenerateBindingClass {
 
     private void generateProperties() {
         for (Element enclosed : this.getProcessingEnv().getElementUtils().getAllMembers(this.element)) {
-            if (enclosed.getModifiers().contains(Modifier.PUBLIC) && !enclosed.getModifiers().contains(Modifier.STATIC)) {
-                if (enclosed.getKind() == ElementKind.FIELD && this.isFieldProperty(enclosed)) {
-                    new GenerateFieldProperty(this.generator, this.bindingClass, enclosed).generate();
-                } else if (enclosed.getKind() == ElementKind.METHOD && this.isMethodProperty(enclosed)) {
-                    new GenerateMethodProperty(this.generator, this.bindingClass, (ExecutableElement) enclosed).generate();
-                } else if (enclosed.getKind() == ElementKind.METHOD && this.isMethodCallable(enclosed)) {
-                    new GenerateMethodCallable(this.generator, this.bindingClass, (ExecutableElement) enclosed).generate();
-                }
+            if (!enclosed.getModifiers().contains(Modifier.PUBLIC) || enclosed.getModifiers().contains(Modifier.STATIC)) {
+                continue;
+            }
+
+            if (enclosed.getKind() == ElementKind.FIELD && this.isFieldProperty(enclosed)) {
+                new GenerateFieldProperty(this.generator, this.bindingClass, enclosed).generate();
+            } else if (enclosed.getKind() == ElementKind.METHOD && this.isMethodProperty(enclosed)) {
+                new GenerateMethodProperty(this.generator, this.bindingClass, (ExecutableElement) enclosed).generate();
+            } else if (enclosed.getKind() == ElementKind.METHOD && this.isMethodCallable(enclosed)) {
+                new GenerateMethodCallable(this.generator, this.bindingClass, (ExecutableElement) enclosed).generate();
             }
         }
     }
