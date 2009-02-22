@@ -37,4 +37,7 @@ public class ClassName {
         return this.fullClassNameWithGenerics;
     }
 
+    public void appendGenericType(String type) {
+        this.fullClassNameWithGenerics += "<" + type + ">";
+    }
 }

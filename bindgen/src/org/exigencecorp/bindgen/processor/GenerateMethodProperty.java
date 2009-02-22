@@ -9,6 +9,7 @@ import javax.lang.model.type.TypeMirror;
 import javax.tools.Diagnostic.Kind;
 
 import org.apache.commons.lang.StringUtils;
+import org.exigencecorp.bindgen.Requirements;
 import org.exigencecorp.gen.GClass;
 import org.exigencecorp.gen.GMethod;
 
@@ -17,6 +18,7 @@ public class GenerateMethodProperty {
     private final BindingGenerator generator;
     private final GClass bindingClass;
     private final ExecutableElement enclosed;
+    private boolean isFixingRawType = false;
 
     public GenerateMethodProperty(BindingGenerator generator, GClass bindingClass, ExecutableElement enclosed) {
         this.generator = generator;
@@ -33,6 +35,8 @@ public class GenerateMethodProperty {
         }
 
         ClassName propertyType = new ClassName(returnType);
+        this.fixRawTypeIfNeeded(propertyType, propertyName);
+
         // e.g. bindgen.java.lang.StringBinding, bindgen.app.EmployeeBinding, bindgen.java.util.ListBinding<String>
         String propertyBindingType = Massage.packageName(propertyType.getWithoutGenericPart() + "Binding" + propertyType.getGenericPart());
 
@@ -57,6 +61,9 @@ public class GenerateMethodProperty {
         fieldClassGet.body.line("return {}.this.get().get{}();",//
             this.bindingClass.getSimpleClassNameWithoutGeneric(),
             StringUtils.capitalize(propertyName));
+        if (this.isFixingRawType) {
+            fieldClassGet.addAnnotation("@SuppressWarnings(\"unchecked\")");
+        }
 
         GMethod fieldClassSet = fieldClass.getMethod("set").argument(propertyType.get(), propertyName);
         if (this.hasSetter()) {
@@ -87,6 +94,25 @@ public class GenerateMethodProperty {
             }
         }
         return false;
+    }
+
+    /** Add generic suffixes to avoid warnings in bindings for pre-1.5 APIs.
+     *
+     * This is for old pre-1.5 APIs that use, say, Enumeration. We upgrade it
+     * to something like Enumeration<String> based on the user configuration,
+     * e.g.:
+     *
+     * <code>fixRawType.javax.servlet.http.HttpServletRequest.attributeNames=String</code>
+     *
+     */
+    private void fixRawTypeIfNeeded(ClassName propertyType, String propertyName) {
+        Requirements.fixRawTypesByAddingGenericHints.fulfills();
+        String configKey = "fixRawType." + this.enclosed.getEnclosingElement().toString() + "." + propertyName;
+        String configValue = this.generator.getProperties().getProperty(configKey);
+        if ("".equals(propertyType.getGenericPart()) && configValue != null) {
+            propertyType.appendGenericType(configValue);
+            this.isFixingRawType = true;
+        }
     }
 
 }
