@@ -1,11 +1,11 @@
-package org.exigencecorp.bindgen.example;
+package org.exigencecorp.bindgen.example.methods;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import junit.framework.Assert;
 import junit.framework.TestCase;
-import bindgen.org.exigencecorp.bindgen.example.MethodWithGenericsExampleBinding;
+import bindgen.org.exigencecorp.bindgen.example.methods.MethodWithGenericsExampleBinding;
 
 public class MethodWithGenericsExampleTest extends TestCase {
 

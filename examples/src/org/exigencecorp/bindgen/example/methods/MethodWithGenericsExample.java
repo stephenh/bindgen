@@ -1,4 +1,4 @@
-package org.exigencecorp.bindgen.example;
+package org.exigencecorp.bindgen.example.methods;
 
 import java.util.ArrayList;
 import java.util.List;

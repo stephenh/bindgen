@@ -5,6 +5,7 @@ import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.ArrayType;
+import javax.lang.model.type.PrimitiveType;
 import javax.lang.model.type.TypeMirror;
 import javax.tools.Diagnostic.Kind;
 
@@ -28,8 +29,11 @@ public class MethodPropertyGenerator {
 
     public void generate() {
         String methodName = this.enclosed.getSimpleName().toString();
-        String propertyName = StringUtils.uncapitalize(StringUtils.removeStart(methodName, "get"));
+        String propertyName = StringUtils.uncapitalize(StringUtils.removeStart(methodName, this.getPrefix()));
         TypeMirror returnType = this.enclosed.getReturnType();
+        if (returnType instanceof PrimitiveType) {
+            returnType = this.generator.getProcessingEnv().getTypeUtils().boxedClass((PrimitiveType) returnType).asType();
+        }
         if (returnType instanceof ArrayType) {
             return; // Skip arrays for now
         }
@@ -55,9 +59,9 @@ public class MethodPropertyGenerator {
         fieldClassName.body.line("return \"{}\";", propertyName);
 
         GMethod fieldClassGet = fieldClass.getMethod("get").returnType(propertyType.get());
-        fieldClassGet.body.line("return {}.this.get().get{}();",//
+        fieldClassGet.body.line("return {}.this.get().{}();",//
             this.bindingClass.getSimpleClassNameWithoutGeneric(),
-            StringUtils.capitalize(propertyName));
+            methodName);
         if (this.isFixingRawType) {
             fieldClassGet.addAnnotation("@SuppressWarnings(\"unchecked\")");
         }
@@ -83,7 +87,7 @@ public class MethodPropertyGenerator {
 
     private boolean hasSetter() {
         String methodName = this.enclosed.getSimpleName().toString();
-        String setterName = "set" + StringUtils.removeStart(methodName, "get");
+        String setterName = "set" + StringUtils.removeStart(methodName, this.getPrefix());
         for (Element other : this.enclosed.getEnclosingElement().getEnclosedElements()) {
             if (other.getSimpleName().toString().equals(setterName)) {
                 ExecutableElement e = (ExecutableElement) other;
@@ -110,6 +114,16 @@ public class MethodPropertyGenerator {
             propertyType.appendGenericType(configValue);
             this.isFixingRawType = true;
         }
+    }
+
+    private String getPrefix() {
+        String methodName = this.enclosed.getSimpleName().toString();
+        for (String possible : new String[] { "get", "to", "has", "is" }) {
+            if (methodName.startsWith(possible)) {
+                return possible;
+            }
+        }
+        return null;
     }
 
 }
