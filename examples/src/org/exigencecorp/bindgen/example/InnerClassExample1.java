@@ -13,13 +13,12 @@ public class InnerClassExample1 {
     @Bindable
     public final class InnerClass {
         public String name;
-        private InnerClassBinding bind = new InnerClassBinding(this);
 
         public InnerClass() {
         }
 
         public InnerClassBinding getBind() {
-            return this.bind;
+            return new InnerClassBinding(this);
         }
     }
 
