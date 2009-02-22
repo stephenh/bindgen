@@ -1,4 +1,4 @@
-package org.exigencecorp.bindgen.example;
+package org.exigencecorp.bindgen.example.employee;
 
 import junit.framework.Assert;
 import junit.framework.TestCase;
@@ -6,8 +6,8 @@ import junit.framework.TestCase;
 import org.exigencecorp.bindgen.Binding;
 
 import bindgen.java.lang.StringBinding;
-import bindgen.org.exigencecorp.bindgen.example.EmployeeBinding;
-import bindgen.org.exigencecorp.bindgen.example.EmployerBinding;
+import bindgen.org.exigencecorp.bindgen.example.employee.EmployeeBinding;
+import bindgen.org.exigencecorp.bindgen.example.employee.EmployerBinding;
 
 public class EmployeeTest extends TestCase {
 
@@ -88,6 +88,24 @@ public class EmployeeTest extends TestCase {
 
         eb.set(e2);
         Assert.assertEquals("fred", tb.toString());
+    }
+
+    public void testEmployerNameWhenNullFails() {
+        Employee ee = new Employee("bob");
+        EmployeeBinding eb = new EmployeeBinding(ee);
+
+        StringBinding erName = eb.employer().name();
+        try {
+            erName.get();
+            Assert.fail();
+        } catch (NullPointerException npe) {
+        }
+
+        try {
+            erName.set("at&t");
+            Assert.fail();
+        } catch (NullPointerException npe) {
+        }
     }
 
     public static class TextBox {
