@@ -120,8 +120,8 @@ public class GenerateBindingClass {
 
     private void saveCode() {
         try {
-            JavaFileObject jfo = this.getProcessingEnv().getFiler().createSourceFile(
-                Massage.stripGenerics(this.bindingClass.getFullClassName()),
+            JavaFileObject jfo = this.getProcessingEnv().getFiler().createSourceFile(//
+                this.bindingClass.getFullClassNameWithoutGeneric(),
                 this.element);
             Writer w = jfo.openWriter();
             w.write(this.bindingClass.toCode());
