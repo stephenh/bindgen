@@ -76,7 +76,7 @@ Gotchas
 =======
 
 * Eclipse: Annotating packages as `@Bindable` does not work until 3.5-M5
-* Eclipse: Clean builds cause compile errors if your `Foo` class references its own `FooBinding` (see [263985][3])
+* Eclipse: Clean builds cause compile errors if your `Foo` class references its own `FooBinding` (see [263985][3]) *and* you declare `FooBinding` as a field/method return--for now declaring `FooBinding` inside a method as a local variable works fine
 * IntelliJ: Does not support annotation processors (from what I can tell)
 
 [3]: https://bugs.eclipse.org/bugs/show_bug.cgi?id=263985
