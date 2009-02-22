@@ -1,5 +1,6 @@
 package org.exigencecorp.bindgen.processor;
 
+import java.io.InputStream;
 import java.util.HashSet;
 import java.util.Properties;
 import java.util.Set;
@@ -17,7 +18,9 @@ public class BindingGenerator {
     public BindingGenerator(ProcessingEnvironment processingEnv) {
         this.processingEnv = processingEnv;
         try {
-            this.properties.load(this.getClass().getResourceAsStream("/bindgen.properties"));
+            InputStream is = this.getClass().getResourceAsStream("/bindgen.properties");
+            this.properties.load(is);
+            is.close();
         } catch (Exception e) {
             this.processingEnv.getMessager().printMessage(Kind.ERROR, "bindgen.properties failed: " + e.getMessage());
         }
