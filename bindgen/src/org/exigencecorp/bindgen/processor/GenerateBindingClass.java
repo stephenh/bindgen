@@ -73,7 +73,6 @@ public class GenerateBindingClass {
             if (!enclosed.getModifiers().contains(Modifier.PUBLIC) || enclosed.getModifiers().contains(Modifier.STATIC)) {
                 continue;
             }
-
             if (this.isInterestingFieldProperty(enclosed)) {
                 new GenerateFieldProperty(this.generator, this.bindingClass, enclosed).generate();
             } else if (this.isInterestingMethodProperty(enclosed)) {
