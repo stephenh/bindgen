@@ -16,6 +16,7 @@ import javax.tools.Diagnostic.Kind;
 
 import org.apache.commons.lang.StringUtils;
 import org.exigencecorp.bindgen.Binding;
+import org.exigencecorp.bindgen.Requirements;
 import org.exigencecorp.gen.GClass;
 import org.exigencecorp.gen.GMethod;
 
@@ -88,7 +89,16 @@ public class GenerateBindingClass {
             return false;
         }
         String fieldType = this.getProcessingEnv().getTypeUtils().erasure(enclosed.asType()).toString();
-        return !fieldType.endsWith("Binding");
+        if (fieldType.endsWith("Binding")) {
+            return false;
+        }
+
+        String fieldName = enclosed.getSimpleName().toString();
+        if (this.shouldSkipAttribute(fieldName)) {
+            return false;
+        }
+
+        return true;
     }
 
     private boolean isInterestingMethodProperty(Element enclosed) {
@@ -97,11 +107,22 @@ public class GenerateBindingClass {
         }
         String methodName = enclosed.getSimpleName().toString();
         ExecutableType e = (ExecutableType) enclosed.asType();
-        return methodName.startsWith("get")
+
+        boolean okay = methodName.startsWith("get")
             && e.getThrownTypes().size() == 0
             && e.getParameterTypes().size() == 0
             && !methodName.equals("getClass")
             && !e.getReturnType().toString().endsWith("Binding");
+        if (!okay) {
+            return false;
+        }
+
+        String propertyName = StringUtils.uncapitalize(methodName.substring(3));
+        if (this.shouldSkipAttribute(propertyName)) {
+            return false;
+        }
+
+        return true;
     }
 
     private boolean isInterestingMethodCallable(Element enclosed) {
@@ -110,12 +131,22 @@ public class GenerateBindingClass {
         }
         String methodName = enclosed.getSimpleName().toString();
         ExecutableType e = (ExecutableType) enclosed.asType();
-        return e.getParameterTypes().size() == 0
+
+        boolean okay = e.getParameterTypes().size() == 0
             && e.getReturnType().getKind() == TypeKind.VOID
             && e.getThrownTypes().size() == 0
             && !methodName.equals("wait")
             && !methodName.equals("notify")
             && !methodName.equals("notifyAll");
+        if (!okay) {
+            return false;
+        }
+
+        if (this.shouldSkipAttribute(methodName)) {
+            return false;
+        }
+
+        return true;
     }
 
     private void saveCode() {
@@ -147,4 +178,10 @@ public class GenerateBindingClass {
         return typeParameters;
     }
 
+    private boolean shouldSkipAttribute(String name) {
+        Requirements.skipAttributes.fulfills();
+        String configKey = "skipAttribute." + this.element.toString() + "." + name;
+        String configValue = this.generator.getProperties().getProperty(configKey);
+        return "true".equals(configValue);
+    }
 }
