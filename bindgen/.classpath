@@ -3,8 +3,7 @@
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.6"/>
-	<classpathentry exported="true" kind="lib" path="lib/commons-lang-2.3.jar" sourcepath="lib/commons-lang-2.3.zip"/>
-	<classpathentry exported="true" kind="lib" path="lib/exigence-utilities.jar" sourcepath="lib/main/exigence-utilities.zip"/>
-	<classpathentry exported="true" kind="lib" path="lib/log4j-1.2.15.jar" sourcepath="lib/log4j-1.2.15.zip"/>
+	<classpathentry exported="true" kind="lib" path="lib/main/commons-lang-2.3.jar" sourcepath="lib/main/commons-lang-2.3.zip"/>
+	<classpathentry exported="true" kind="lib" path="lib/main/exigence-utilities.jar" sourcepath="lib/main/exigence-utilities.zip"/>
 	<classpathentry kind="output" path="bin/eclipse"/>
 </classpath>

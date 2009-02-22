@@ -8,8 +8,7 @@ Bundle-ActivationPolicy: lazy
 Bundle-ManifestVersion: 2
 Bundle-SymbolicName: org.exigencecorp.bindgen;singleton:=true
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Bundle-ClassPath: lib/commons-lang-2.3.jar,
- lib/exigence-utilities.jar,
- lib/log4j-1.2.15.jar,
+Bundle-ClassPath: lib/main/commons-lang-2.3.jar,
+ lib/main/exigence-utilities.jar,
  .
 

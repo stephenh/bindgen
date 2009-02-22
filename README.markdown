@@ -109,8 +109,6 @@ Would return a `TransactionBlock` instance bound to `foo` that you could pass ar
 
 * No real tests--currently I just make changes and see if the `tests/example` use cases still work. Some (ugh) mock meta models/something might be more appropriate to get true unit test coverage going
 
-* Add jarjar so that the dependencies included in `bindgen.jar` do not cause conflicts
-
 * Recognize `hasErrors`, `toString`, etc., along with just getters/setters
 
 * Support extension methods, e.g. StringBinding could have extra methods like `length()`, `substring()`, etc., ideally configurable
