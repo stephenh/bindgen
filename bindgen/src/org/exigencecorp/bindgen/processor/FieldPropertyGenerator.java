@@ -9,13 +9,13 @@ import org.apache.commons.lang.StringUtils;
 import org.exigencecorp.gen.GClass;
 import org.exigencecorp.gen.GMethod;
 
-public class GenerateFieldProperty {
+public class FieldPropertyGenerator {
 
     private final BindingGenerator generator;
     private final GClass bindingClass;
     private final Element enclosed;
 
-    public GenerateFieldProperty(BindingGenerator generator, GClass bindingClass, Element enclosed) {
+    public FieldPropertyGenerator(BindingGenerator generator, GClass bindingClass, Element enclosed) {
         this.generator = generator;
         this.bindingClass = bindingClass;
         this.enclosed = enclosed;

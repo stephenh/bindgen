@@ -27,7 +27,7 @@ public class BindingGenerator {
         if (this.shouldIgnore(element)) {
             return;
         }
-        new GenerateBindingClass(this, element).generate();
+        new ClassGenerator(this, element).generate();
     }
 
     public ProcessingEnvironment getProcessingEnv() {

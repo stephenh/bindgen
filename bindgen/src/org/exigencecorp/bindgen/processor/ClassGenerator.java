@@ -20,14 +20,14 @@ import org.exigencecorp.bindgen.Requirements;
 import org.exigencecorp.gen.GClass;
 import org.exigencecorp.gen.GMethod;
 
-public class GenerateBindingClass {
+public class ClassGenerator {
 
     private final BindingGenerator generator;
     private final TypeElement element;
     private final ClassName name;
     private GClass bindingClass;
 
-    public GenerateBindingClass(BindingGenerator generator, TypeElement element) {
+    public ClassGenerator(BindingGenerator generator, TypeElement element) {
         this.generator = generator;
         this.element = element;
         this.name = new ClassName(element.asType());
@@ -76,11 +76,11 @@ public class GenerateBindingClass {
                 continue;
             }
             if (this.isInterestingFieldProperty(enclosed)) {
-                new GenerateFieldProperty(this.generator, this.bindingClass, enclosed).generate();
+                new FieldPropertyGenerator(this.generator, this.bindingClass, enclosed).generate();
             } else if (this.isInterestingMethodProperty(enclosed)) {
-                new GenerateMethodProperty(this.generator, this.bindingClass, (ExecutableElement) enclosed).generate();
+                new MethodPropertyGenerator(this.generator, this.bindingClass, (ExecutableElement) enclosed).generate();
             } else if (this.isInterestingMethodCallable(enclosed)) {
-                new GenerateMethodCallable(this.generator, this.bindingClass, (ExecutableElement) enclosed).generate();
+                new MethodCallableGenerator(this.generator, this.bindingClass, (ExecutableElement) enclosed).generate();
             }
         }
     }

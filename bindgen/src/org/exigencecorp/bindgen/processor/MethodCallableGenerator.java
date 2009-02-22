@@ -6,14 +6,14 @@ import org.apache.commons.lang.StringUtils;
 import org.exigencecorp.gen.GClass;
 import org.exigencecorp.gen.GMethod;
 
-public class GenerateMethodCallable {
+public class MethodCallableGenerator {
 
     @SuppressWarnings("unused")
     private final BindingGenerator generator;
     private final GClass bindingClass;
     private final ExecutableElement enclosed;
 
-    public GenerateMethodCallable(BindingGenerator generator, GClass bindingClass, ExecutableElement enclosed) {
+    public MethodCallableGenerator(BindingGenerator generator, GClass bindingClass, ExecutableElement enclosed) {
         this.generator = generator;
         this.bindingClass = bindingClass;
         this.enclosed = enclosed;

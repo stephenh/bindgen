@@ -13,14 +13,14 @@ import org.exigencecorp.bindgen.Requirements;
 import org.exigencecorp.gen.GClass;
 import org.exigencecorp.gen.GMethod;
 
-public class GenerateMethodProperty {
+public class MethodPropertyGenerator {
 
     private final BindingGenerator generator;
     private final GClass bindingClass;
     private final ExecutableElement enclosed;
     private boolean isFixingRawType = false;
 
-    public GenerateMethodProperty(BindingGenerator generator, GClass bindingClass, ExecutableElement enclosed) {
+    public MethodPropertyGenerator(BindingGenerator generator, GClass bindingClass, ExecutableElement enclosed) {
         this.generator = generator;
         this.bindingClass = bindingClass;
         this.enclosed = enclosed;
