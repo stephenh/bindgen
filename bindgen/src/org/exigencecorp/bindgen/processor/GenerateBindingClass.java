@@ -74,22 +74,28 @@ public class GenerateBindingClass {
                 continue;
             }
 
-            if (enclosed.getKind() == ElementKind.FIELD && this.isFieldProperty(enclosed)) {
+            if (this.isFieldProperty(enclosed)) {
                 new GenerateFieldProperty(this.generator, this.bindingClass, enclosed).generate();
-            } else if (enclosed.getKind() == ElementKind.METHOD && this.isMethodProperty(enclosed)) {
+            } else if (this.isMethodProperty(enclosed)) {
                 new GenerateMethodProperty(this.generator, this.bindingClass, (ExecutableElement) enclosed).generate();
-            } else if (enclosed.getKind() == ElementKind.METHOD && this.isMethodCallable(enclosed)) {
+            } else if (this.isMethodCallable(enclosed)) {
                 new GenerateMethodCallable(this.generator, this.bindingClass, (ExecutableElement) enclosed).generate();
             }
         }
     }
 
     private boolean isFieldProperty(Element enclosed) {
+        if (!enclosed.getKind().isField()) {
+            return false;
+        }
         String fieldType = this.getProcessingEnv().getTypeUtils().erasure(enclosed.asType()).toString();
         return !fieldType.endsWith("Binding");
     }
 
     private boolean isMethodProperty(Element enclosed) {
+        if (enclosed.getKind() != ElementKind.METHOD) {
+            return false;
+        }
         String methodName = enclosed.getSimpleName().toString();
         ExecutableType e = (ExecutableType) enclosed.asType();
         return methodName.startsWith("get")
@@ -100,6 +106,9 @@ public class GenerateBindingClass {
     }
 
     private boolean isMethodCallable(Element enclosed) {
+        if (enclosed.getKind() != ElementKind.METHOD) {
+            return false;
+        }
         String methodName = enclosed.getSimpleName().toString();
         ExecutableType e = (ExecutableType) enclosed.asType();
         return e.getParameterTypes().size() == 0
