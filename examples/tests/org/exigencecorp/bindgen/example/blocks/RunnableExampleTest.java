@@ -1,8 +1,8 @@
-package org.exigencecorp.bindgen.example;
+package org.exigencecorp.bindgen.example.blocks;
 
 import junit.framework.Assert;
 import junit.framework.TestCase;
-import bindgen.org.exigencecorp.bindgen.example.RunnableExampleBinding;
+import bindgen.org.exigencecorp.bindgen.example.blocks.RunnableExampleBinding;
 
 public class RunnableExampleTest extends TestCase {
 

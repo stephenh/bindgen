@@ -1,4 +1,4 @@
-package org.exigencecorp.bindgen.example;
+package org.exigencecorp.bindgen.example.blocks;
 
 import org.exigencecorp.bindgen.Bindable;
 

@@ -84,29 +84,6 @@ Gotchas
 Todo
 ====
 
-* Currently only `void methodName()` methods are recognized and wrapped as `Runnables`--it would be nice to give parameters to the `@Bindable` annotation for other method patterns to look for, e.g.:
-
-A block:
-
-    public interface TransactionBlock {
-        boolean go(Transaction txn);
-    }
-
-With a usage of:
-
-    @Bindable(recognize = { TransactionBlock.class })
-    public class Foo {
-        public boolean someMethod(Transaction txn) {
-            ...
-        }
-    }
-
-Then doing:
-
-    new FooBinding(foo).someMethod()
-
-Would return a `TransactionBlock` instance bound to `foo` that you could pass around and call `go(txn)` against later.
-
 * Support extension methods, e.g. StringBinding could have extra methods like `length()`, `substring()`, etc., ideally configurable
 
 * Does inheritance work? E.g. `BaseBinding Base.getBinding()`, then `SubBinding Sub.getBinding()`, `SubBinding` would need to extend `BaseBinding`--might be tricky

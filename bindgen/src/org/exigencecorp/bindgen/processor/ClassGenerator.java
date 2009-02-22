@@ -2,6 +2,7 @@ package org.exigencecorp.bindgen.processor;
 
 import java.io.IOException;
 import java.io.Writer;
+import java.util.List;
 
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.Element;
@@ -10,7 +11,8 @@ import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.ExecutableType;
-import javax.lang.model.type.TypeKind;
+import javax.lang.model.type.TypeMirror;
+import javax.lang.model.util.ElementFilter;
 import javax.tools.JavaFileObject;
 import javax.tools.Diagnostic.Kind;
 
@@ -80,7 +82,7 @@ public class ClassGenerator {
             } else if (this.isInterestingMethodProperty(enclosed)) {
                 new MethodPropertyGenerator(this.generator, this.bindingClass, (ExecutableElement) enclosed).generate();
             } else if (this.isInterestingMethodCallable(enclosed)) {
-                new MethodCallableGenerator(this.generator, this.bindingClass, (ExecutableElement) enclosed).generate();
+                // new MethodCallableGenerator(this.generator, this.bindingClass, (ExecutableElement) enclosed).generate();
             }
         }
     }
@@ -141,21 +143,64 @@ public class ClassGenerator {
         if (enclosed.getKind() != ElementKind.METHOD) {
             return false;
         }
-        String methodName = enclosed.getSimpleName().toString();
-        ExecutableType e = (ExecutableType) enclosed.asType();
 
-        boolean okay = e.getParameterTypes().size() == 0
-            && e.getReturnType().getKind() == TypeKind.VOID
-            && e.getThrownTypes().size() == 0
-            && !methodName.equals("wait")
-            && !methodName.equals("notify")
-            && !methodName.equals("notifyAll");
-        if (!okay) {
+        ExecutableType method = (ExecutableType) enclosed.asType();
+        String methodName = enclosed.getSimpleName().toString();
+        if (methodName.equals("wait") || methodName.equals("notify") || methodName.equals("notifyAll")) {
+            return false;
+        }
+        if (this.shouldSkipAttribute(methodName)) {
             return false;
         }
 
-        if (this.shouldSkipAttribute(methodName)) {
-            return false;
+        String attempts = this.generator.getProperties().getProperty("blockTypes");
+        if (attempts == null) {
+            attempts = "java.lang.Runnable";
+        } else {
+            attempts += ",java.lang.Runnable";
+        }
+
+        for (String attempt : StringUtils.split(attempts, ",")) {
+            TypeElement attemptType = this.generator.getProcessingEnv().getElementUtils().getTypeElement(attempt);
+            if (attemptType == null) {
+                continue;
+            }
+            List<ExecutableElement> methods = ElementFilter.methodsIn(attemptType.getEnclosedElements());
+            if (methods.size() != 1) {
+                continue;
+            }
+
+            ExecutableElement methodToMatch = methods.get(0);
+
+            boolean returnMatches = methodToMatch.getReturnType().equals(method.getReturnType());
+            boolean paramsMatch = false;
+            if (methodToMatch.getParameters().size() == method.getParameterTypes().size()) {
+                boolean allMatch = true;
+                for (int i = 0; i < methodToMatch.getParameters().size(); i++) {
+                    if (!methodToMatch.getParameters().get(i).asType().equals(method.getParameterTypes().get(i))) {
+                        allMatch = false;
+                    }
+                }
+                paramsMatch = allMatch;
+            }
+            boolean throwsMatch = true;
+            for (TypeMirror throwsType : method.getThrownTypes()) {
+                boolean okay = false;
+                for (TypeMirror otherType : methodToMatch.getThrownTypes()) {
+                    if (otherType.equals(throwsType)) {
+                        okay = true;
+                    }
+                }
+                if (!okay) {
+                    throwsMatch = false;
+                    break;
+                }
+            }
+
+            if (returnMatches && paramsMatch && throwsMatch) {
+                new MethodCallableGenerator(this.generator, this.bindingClass, (ExecutableElement) enclosed, attemptType, methodToMatch).generate();
+                return true;
+            }
         }
 
         return true;
