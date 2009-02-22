@@ -45,4 +45,9 @@ public class MethodExample {
         return false;
     }
 
+    // Putting the @deprecated here ensures a warning would show up if is "to" prefix got recognized
+    @Deprecated
+    public boolean tobacco() {
+        return false;
+    }
 }

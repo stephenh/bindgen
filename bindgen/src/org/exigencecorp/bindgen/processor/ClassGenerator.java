@@ -107,11 +107,12 @@ public class ClassGenerator {
             return false;
         }
         String methodName = enclosed.getSimpleName().toString();
-        ExecutableType e = (ExecutableType) enclosed.asType();
 
         String propertyName = null;
         for (String possible : new String[] { "get", "to", "has", "is" }) {
-            if (methodName.startsWith(possible)) {
+            if (methodName.startsWith(possible)
+                && methodName.length() > possible.length() + 1
+                && methodName.substring(possible.length(), possible.length() + 1).matches("[A-Z]")) {
                 propertyName = StringUtils.uncapitalize(methodName.substring(possible.length()));
                 break;
             }
@@ -120,6 +121,7 @@ public class ClassGenerator {
             return false;
         }
 
+        ExecutableType e = (ExecutableType) enclosed.asType();
         boolean okay = e.getThrownTypes().size() == 0
             && e.getParameterTypes().size() == 0
             && !methodName.equals("getClass")
