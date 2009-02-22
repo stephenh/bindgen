@@ -37,9 +37,6 @@ public class GenerateMethodProperty {
         ClassName propertyType = new ClassName(returnType);
         this.fixRawTypeIfNeeded(propertyType, propertyName);
 
-        // e.g. bindgen.java.lang.StringBinding, bindgen.app.EmployeeBinding, bindgen.java.util.ListBinding<String>
-        String propertyBindingType = Massage.packageName(propertyType.getWithoutGenericPart() + "Binding" + propertyType.getGenericPart());
-
         TypeElement propertyTypeElement = this.getProcessingEnv().getElementUtils().getTypeElement(propertyType.getWithoutGenericPart());
         if (propertyTypeElement == null) {
             this.getProcessingEnv().getMessager().printMessage(
@@ -50,9 +47,9 @@ public class GenerateMethodProperty {
             this.generator.generate(propertyTypeElement);
         }
 
-        this.bindingClass.getField(propertyName).type(propertyBindingType);
+        this.bindingClass.getField(propertyName).type(propertyType.getBindingType());
         GClass fieldClass = this.bindingClass.getInnerClass("My{}Binding", StringUtils.capitalize(propertyName)).notStatic();
-        fieldClass.baseClassName(propertyBindingType);
+        fieldClass.baseClassName(propertyType.getBindingType());
 
         GMethod fieldClassName = fieldClass.getMethod("getName").returnType(String.class);
         fieldClassName.body.line("return \"{}\";", propertyName);
@@ -73,7 +70,7 @@ public class GenerateMethodProperty {
             fieldClassSet.body.line("throw new RuntimeException(this.getName() + \" is read only\");");
         }
 
-        GMethod fieldGet = this.bindingClass.getMethod(propertyName).returnType(propertyBindingType);
+        GMethod fieldGet = this.bindingClass.getMethod(propertyName).returnType(propertyType.getBindingType());
         fieldGet.body.line("if (this.{} == null) {", propertyName);
         fieldGet.body.line("    this.{} = new My{}Binding();", propertyName, StringUtils.capitalize(propertyName));
         fieldGet.body.line("}");

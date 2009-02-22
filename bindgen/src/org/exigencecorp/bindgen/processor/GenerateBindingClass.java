@@ -24,11 +24,13 @@ public class GenerateBindingClass {
 
     private final BindingGenerator generator;
     private final TypeElement element;
+    private final ClassName name;
     private GClass bindingClass;
 
     public GenerateBindingClass(BindingGenerator generator, TypeElement element) {
         this.generator = generator;
         this.element = element;
+        this.name = new ClassName(element.asType());
     }
 
     public void generate() {
@@ -41,23 +43,22 @@ public class GenerateBindingClass {
     }
 
     private void initializeBindingClass() {
-        String className = Massage.packageName(this.element.getQualifiedName() + "Binding") + this.getTypeParametersOrEmpty();
-        this.bindingClass = new GClass(className);
-        this.bindingClass.implementsInterface(Binding.class.getName() + "<{}>", this.getNameWithTypeParameters());
+        this.bindingClass = new GClass(this.name.getBindingType());
+        this.bindingClass.implementsInterface(Binding.class.getName() + "<{}>", this.name.get());
     }
 
     private void addConstructors() {
         this.bindingClass.getConstructor();
-        this.bindingClass.getConstructor(this.getNameWithTypeParameters() + " value").body.line("this.set(value);");
+        this.bindingClass.getConstructor(this.name.get() + " value").body.line("this.set(value);");
     }
 
     private void addValueGetAndSet() {
-        this.bindingClass.getField("value").type(this.getNameWithTypeParameters());
+        this.bindingClass.getField("value").type(this.name.get());
 
-        GMethod set = this.bindingClass.getMethod("set").argument(this.getNameWithTypeParameters(), "value");
+        GMethod set = this.bindingClass.getMethod("set").argument(this.name.get(), "value");
         set.body.line("this.value = value;");
 
-        GMethod get = this.bindingClass.getMethod("get").returnType(this.getNameWithTypeParameters());
+        GMethod get = this.bindingClass.getMethod("get").returnType(this.name.get());
         get.body.line("return this.value;");
     }
 
@@ -164,18 +165,6 @@ public class GenerateBindingClass {
 
     private ProcessingEnvironment getProcessingEnv() {
         return this.generator.getProcessingEnv();
-    }
-
-    private String getNameWithTypeParameters() {
-        return this.element.getQualifiedName() + this.getTypeParametersOrEmpty();
-    }
-
-    private String getTypeParametersOrEmpty() {
-        String typeParameters = "";
-        if (this.element.getTypeParameters().size() != 0) {
-            typeParameters = "<" + StringUtils.join(this.element.getTypeParameters(), ", ") + ">";
-        }
-        return typeParameters;
     }
 
     private boolean shouldSkipAttribute(String name) {

@@ -1,9 +1,15 @@
 package org.exigencecorp.bindgen.processor;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import javax.lang.model.type.TypeMirror;
+
+import org.apache.commons.lang.StringUtils;
 
 public class ClassName {
 
+    private static final Pattern p = Pattern.compile("\\.([A-Z]\\w+)\\.");
     private String fullClassNameWithGenerics;
 
     public ClassName(TypeMirror type) {
@@ -26,6 +32,18 @@ public class ClassName {
             return this.fullClassNameWithGenerics.substring(0, firstBracket);
         }
         return this.fullClassNameWithGenerics;
+    }
+
+    /** @return binding type, e.g. bindgen.java.lang.StringBinding, bindgen.app.EmployeeBinding */
+    public String getBindingType() {
+        // Watch for package.Foo.Inner -> package.foo.Inner
+        String bindingName = this.getWithoutGenericPart() + "Binding" + this.getGenericPart();
+        Matcher m = p.matcher(bindingName);
+        while (m.find()) {
+            bindingName = m.replaceFirst("." + StringUtils.uncapitalize(m.group(1)) + ".");
+            m = p.matcher(bindingName);
+        }
+        return "bindgen." + bindingName;
     }
 
     /** @return "com.app.Type<String, String>" if the type is "com.app.Type<String, String>" */

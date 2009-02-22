@@ -23,35 +23,32 @@ public class GenerateFieldProperty {
 
     public void generate() {
         String fieldName = this.enclosed.getSimpleName().toString();
-        String fieldType = this.getProcessingEnv().getTypeUtils().erasure(this.enclosed.asType()).toString();
-        // e.g. bindgen.java.lang.StringBinding, bindgen.app.EmployeeBinding
-        String fieldBindingType = Massage.packageName(fieldType + "Binding");
+        ClassName propertyType = new ClassName(this.enclosed.asType());
 
-        // Probably need to use ClassName like GenerateMethodProperty to not cause warnings on public fields with generics
-        TypeElement fieldTypeElement = this.getProcessingEnv().getElementUtils().getTypeElement(fieldType);
+        TypeElement fieldTypeElement = this.getProcessingEnv().getElementUtils().getTypeElement(propertyType.getWithoutGenericPart());
         if (fieldTypeElement == null) {
             this.getProcessingEnv().getMessager().printMessage(
                 Kind.ERROR,
-                "No type element found for " + fieldType + " in " + this.bindingClass.getFullClassName() + "." + fieldName);
+                "No type element found for " + propertyType + " in " + this.bindingClass.getFullClassName() + "." + fieldName);
             return;
         }
 
         this.generator.generate(fieldTypeElement);
 
-        this.bindingClass.getField(fieldName).type(fieldBindingType);
+        this.bindingClass.getField(fieldName).type(propertyType.getBindingType());
         GClass fieldClass = this.bindingClass.getInnerClass("My{}Binding", StringUtils.capitalize(fieldName)).notStatic();
-        fieldClass.baseClassName(fieldBindingType);
+        fieldClass.baseClassName(propertyType.getBindingType());
 
         GMethod fieldClassName = fieldClass.getMethod("getName").returnType(String.class);
         fieldClassName.body.line("return \"{}\";", fieldName);
 
-        GMethod fieldClassGet = fieldClass.getMethod("get").returnType(fieldType);
+        GMethod fieldClassGet = fieldClass.getMethod("get").returnType(propertyType.get());
         fieldClassGet.body.line("return {}.this.get().{};", this.bindingClass.getSimpleClassNameWithoutGeneric(), fieldName);
 
-        GMethod fieldClassSet = fieldClass.getMethod("set").argument(fieldType, fieldName);
+        GMethod fieldClassSet = fieldClass.getMethod("set").argument(propertyType.get(), fieldName);
         fieldClassSet.body.line("{}.this.get().{} = {};", this.bindingClass.getSimpleClassNameWithoutGeneric(), fieldName, fieldName);
 
-        GMethod fieldGet = this.bindingClass.getMethod(fieldName).returnType(fieldBindingType);
+        GMethod fieldGet = this.bindingClass.getMethod(fieldName).returnType(propertyType.getBindingType());
         fieldGet.body.line("if (this.{} == null) {", fieldName);
         fieldGet.body.line("    this.{} = new My{}Binding();", fieldName, StringUtils.capitalize(fieldName));
         fieldGet.body.line("}");
