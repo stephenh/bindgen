@@ -109,8 +109,6 @@ Would return a `TransactionBlock` instance bound to `foo` that you could pass ar
 
 * No real tests--currently I just make changes and see if the `tests/example` use cases still work. Some (ugh) mock meta models/something might be more appropriate to get true unit test coverage going
 
-* Somehow suppress the deprecation/raw type warnings that result from bindgen traversing into old APIs (e.g. the servlet API)
-
 * Add jarjar so that the dependencies included in `bindgen.jar` do not cause conflicts
 
 * Figure out configuration--e.g. `@Bindable(YourConfiguration.class)`, hopefully at processor time we can look that up and read/infer meta data out of it.
