@@ -74,17 +74,17 @@ public class GenerateBindingClass {
                 continue;
             }
 
-            if (this.isFieldProperty(enclosed)) {
+            if (this.isInterestingFieldProperty(enclosed)) {
                 new GenerateFieldProperty(this.generator, this.bindingClass, enclosed).generate();
-            } else if (this.isMethodProperty(enclosed)) {
+            } else if (this.isInterestingMethodProperty(enclosed)) {
                 new GenerateMethodProperty(this.generator, this.bindingClass, (ExecutableElement) enclosed).generate();
-            } else if (this.isMethodCallable(enclosed)) {
+            } else if (this.isInterestingMethodCallable(enclosed)) {
                 new GenerateMethodCallable(this.generator, this.bindingClass, (ExecutableElement) enclosed).generate();
             }
         }
     }
 
-    private boolean isFieldProperty(Element enclosed) {
+    private boolean isInterestingFieldProperty(Element enclosed) {
         if (!enclosed.getKind().isField()) {
             return false;
         }
@@ -92,7 +92,7 @@ public class GenerateBindingClass {
         return !fieldType.endsWith("Binding");
     }
 
-    private boolean isMethodProperty(Element enclosed) {
+    private boolean isInterestingMethodProperty(Element enclosed) {
         if (enclosed.getKind() != ElementKind.METHOD) {
             return false;
         }
@@ -105,7 +105,7 @@ public class GenerateBindingClass {
             && !e.getReturnType().toString().endsWith("Binding");
     }
 
-    private boolean isMethodCallable(Element enclosed) {
+    private boolean isInterestingMethodCallable(Element enclosed) {
         if (enclosed.getKind() != ElementKind.METHOD) {
             return false;
         }
