@@ -2,6 +2,7 @@ package org.exigencecorp.bindgen.processor;
 
 import java.io.InputStream;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
@@ -23,6 +24,9 @@ public class BindingGenerator {
             is.close();
         } catch (Exception e) {
             this.processingEnv.getMessager().printMessage(Kind.ERROR, "bindgen.properties failed: " + e.getMessage());
+        }
+        for (Map.Entry<String, String> entry : processingEnv.getOptions().entrySet()) {
+            this.properties.put(entry.getKey(), entry.getValue());
         }
     }
 
