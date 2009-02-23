@@ -77,37 +77,35 @@ public class ClassGenerator {
             if (!enclosed.getModifiers().contains(Modifier.PUBLIC) || enclosed.getModifiers().contains(Modifier.STATIC)) {
                 continue;
             }
-            if (this.isInterestingFieldProperty(enclosed)) {
-                new FieldPropertyGenerator(this.generator, this.bindingClass, enclosed).generate();
-            } else if (this.isInterestingMethodProperty(enclosed)) {
-                new MethodPropertyGenerator(this.generator, this.bindingClass, (ExecutableElement) enclosed).generate();
-            } else if (this.isInterestingMethodCallable(enclosed)) {
-                // new MethodCallableGenerator(this.generator, this.bindingClass, (ExecutableElement) enclosed).generate();
-            }
+            this.generateFieldPropertyIfNeeded(enclosed);
+            this.generateMethodPropertyIfNeeded(enclosed);
+            this.generateMethodCallableIfNeeded(enclosed);
         }
     }
 
-    private boolean isInterestingFieldProperty(Element enclosed) {
+    private void generateFieldPropertyIfNeeded(Element enclosed) {
         if (!enclosed.getKind().isField()) {
-            return false;
+            return;
         }
+
         String fieldType = this.getProcessingEnv().getTypeUtils().erasure(enclosed.asType()).toString();
         if (fieldType.endsWith("Binding")) {
-            return false;
+            return;
         }
 
         String fieldName = enclosed.getSimpleName().toString();
         if (this.shouldSkipAttribute(fieldName)) {
-            return false;
+            return;
         }
 
-        return true;
+        new FieldPropertyGenerator(this.generator, this.bindingClass, enclosed).generate();
     }
 
-    private boolean isInterestingMethodProperty(Element enclosed) {
+    private void generateMethodPropertyIfNeeded(Element enclosed) {
         if (enclosed.getKind() != ElementKind.METHOD) {
-            return false;
+            return;
         }
+
         String methodName = enclosed.getSimpleName().toString();
 
         String propertyName = null;
@@ -120,7 +118,11 @@ public class ClassGenerator {
             }
         }
         if (propertyName == null) {
-            return false;
+            return;
+        }
+
+        if (this.shouldSkipAttribute(propertyName)) {
+            return;
         }
 
         ExecutableType e = (ExecutableType) enclosed.asType();
@@ -129,38 +131,28 @@ public class ClassGenerator {
             && !methodName.equals("getClass")
             && !e.getReturnType().toString().endsWith("Binding");
         if (!okay) {
-            return false;
+            return;
         }
 
-        if (this.shouldSkipAttribute(propertyName)) {
-            return false;
-        }
-
-        return true;
+        new MethodPropertyGenerator(this.generator, this.bindingClass, (ExecutableElement) enclosed).generate();
     }
 
-    private boolean isInterestingMethodCallable(Element enclosed) {
+    private void generateMethodCallableIfNeeded(Element enclosed) {
         if (enclosed.getKind() != ElementKind.METHOD) {
-            return false;
+            return;
         }
 
         ExecutableType method = (ExecutableType) enclosed.asType();
         String methodName = enclosed.getSimpleName().toString();
         if (methodName.equals("wait") || methodName.equals("notify") || methodName.equals("notifyAll")) {
-            return false;
+            return;
         }
+
         if (this.shouldSkipAttribute(methodName)) {
-            return false;
+            return;
         }
 
-        String attempts = this.generator.getProperties().getProperty("blockTypes");
-        if (attempts == null) {
-            attempts = "java.lang.Runnable";
-        } else {
-            attempts += ",java.lang.Runnable";
-        }
-
-        for (String attempt : StringUtils.split(attempts, ",")) {
+        for (String attempt : this.getBlockTypesToAttempt()) {
             TypeElement attemptType = this.generator.getProcessingEnv().getElementUtils().getTypeElement(attempt);
             if (attemptType == null) {
                 continue;
@@ -169,41 +161,57 @@ public class ClassGenerator {
             if (methods.size() != 1) {
                 continue;
             }
-
             ExecutableElement methodToMatch = methods.get(0);
-
-            boolean returnMatches = methodToMatch.getReturnType().equals(method.getReturnType());
-            boolean paramsMatch = false;
-            if (methodToMatch.getParameters().size() == method.getParameterTypes().size()) {
-                boolean allMatch = true;
-                for (int i = 0; i < methodToMatch.getParameters().size(); i++) {
-                    if (!methodToMatch.getParameters().get(i).asType().equals(method.getParameterTypes().get(i))) {
-                        allMatch = false;
-                    }
-                }
-                paramsMatch = allMatch;
-            }
-            boolean throwsMatch = true;
-            for (TypeMirror throwsType : method.getThrownTypes()) {
-                boolean okay = false;
-                for (TypeMirror otherType : methodToMatch.getThrownTypes()) {
-                    if (otherType.equals(throwsType)) {
-                        okay = true;
-                    }
-                }
-                if (!okay) {
-                    throwsMatch = false;
-                    break;
-                }
-            }
-
+            boolean returnMatches = this.doBlockReturnTypesMatch(method, methodToMatch);
+            boolean paramsMatch = this.doBlockParamsMatch(method, methodToMatch);
+            boolean throwsMatch = this.doBlockThrowsMatch(method, methodToMatch);
             if (returnMatches && paramsMatch && throwsMatch) {
                 new MethodCallableGenerator(this.generator, this.bindingClass, (ExecutableElement) enclosed, attemptType, methodToMatch).generate();
-                return true;
+                return;
             }
         }
+    }
 
+    private boolean doBlockReturnTypesMatch(ExecutableType method, ExecutableElement methodToMatch) {
+        return methodToMatch.getReturnType().equals(method.getReturnType());
+    }
+
+    private boolean doBlockParamsMatch(ExecutableType method, ExecutableElement methodToMatch) {
+        if (methodToMatch.getParameters().size() != method.getParameterTypes().size()) {
+            return false;
+        }
+        boolean allMatch = true;
+        for (int i = 0; i < methodToMatch.getParameters().size(); i++) {
+            if (!methodToMatch.getParameters().get(i).asType().equals(method.getParameterTypes().get(i))) {
+                allMatch = false;
+            }
+        }
+        return allMatch;
+    }
+
+    private boolean doBlockThrowsMatch(ExecutableType method, ExecutableElement methodToMatch) {
+        for (TypeMirror throwsType : method.getThrownTypes()) {
+            boolean matchesOne = false;
+            for (TypeMirror otherType : methodToMatch.getThrownTypes()) {
+                if (otherType.equals(throwsType)) {
+                    matchesOne = true;
+                }
+            }
+            if (!matchesOne) {
+                return false;
+            }
+        }
         return true;
+    }
+
+    private String[] getBlockTypesToAttempt() {
+        String attempts = this.generator.getProperties().getProperty("blockTypes");
+        if (attempts == null) {
+            attempts = "java.lang.Runnable";
+        } else {
+            attempts += ",java.lang.Runnable";
+        }
+        return StringUtils.split(attempts, ",");
     }
 
     private void saveCode() {
