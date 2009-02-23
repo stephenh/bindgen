@@ -33,7 +33,7 @@ public class FieldPropertyGenerator {
             return;
         }
 
-        this.generator.generate(fieldTypeElement);
+        this.generator.generate(fieldTypeElement, false);
 
         this.bindingClass.getField(fieldName).type(propertyType.getBindingType());
         GClass fieldClass = this.bindingClass.getInnerClass("My{}Binding", StringUtils.capitalize(fieldName)).notStatic();

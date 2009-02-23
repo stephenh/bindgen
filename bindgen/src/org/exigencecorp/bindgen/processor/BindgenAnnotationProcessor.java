@@ -32,10 +32,10 @@ public class BindgenAnnotationProcessor extends AbstractProcessor {
         for (Element element : roundEnv.getElementsAnnotatedWith(Bindable.class)) {
             if (element instanceof PackageElement) {
                 for (Element nested : ((PackageElement) element).getEnclosedElements()) {
-                    this.generator.generate((TypeElement) nested);
+                    this.generator.generate((TypeElement) nested, true);
                 }
             } else if (element instanceof TypeElement) {
-                this.generator.generate((TypeElement) element);
+                this.generator.generate((TypeElement) element, true);
             } else {
                 this.processingEnv.getMessager().printMessage(Kind.WARNING, "Unhandled element " + element);
             }

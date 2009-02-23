@@ -58,7 +58,7 @@ public class MethodPropertyGenerator {
                 "No type element found for " + propertyType + " in " + this.enclosed.getEnclosingElement().getSimpleName() + "." + propertyName);
             return;
         } else {
-            this.generator.generate(propertyTypeElement);
+            this.generator.generate(propertyTypeElement, false);
         }
 
         this.bindingClass.getField(propertyName).type(propertyType.getBindingType());
