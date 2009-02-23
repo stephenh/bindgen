@@ -1,7 +1,6 @@
 package org.exigencecorp.bindgen.processor;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Properties;
@@ -11,7 +10,6 @@ import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.TypeElement;
 import javax.tools.FileObject;
 import javax.tools.StandardLocation;
-import javax.tools.Diagnostic.Kind;
 
 public class BindingGenerator {
 
@@ -21,13 +19,23 @@ public class BindingGenerator {
 
     public BindingGenerator(ProcessingEnvironment processingEnv) {
         this.processingEnv = processingEnv;
-        try {
-            InputStream is = this.getClass().getResourceAsStream("/bindgen.properties");
-            this.properties.load(is);
-            is.close();
-        } catch (Exception e) {
-            this.processingEnv.getMessager().printMessage(Kind.ERROR, "bindgen.properties failed: " + e.getMessage());
-        }
+
+        // Default properties--this is ugly, but I could not get a bindgen.properties to be found on the classpath
+        this.properties.put("fixRawType.javax.servlet.ServletConfig.initParameterNames", "String");
+        this.properties.put("fixRawType.javax.servlet.ServletContext.attributeNames", "String");
+        this.properties.put("fixRawType.javax.servlet.ServletContext.initParameterNames", "String");
+        this.properties.put("fixRawType.javax.servlet.ServletRequest.attributeNames", "String");
+        this.properties.put("fixRawType.javax.servlet.ServletRequest.parameterNames", "String");
+        this.properties.put("fixRawType.javax.servlet.ServletRequest.locales", "Locale");
+        this.properties.put("fixRawType.javax.servlet.ServletRequest.parameterMap", "String, String[]");
+        this.properties.put("fixRawType.javax.servlet.http.HttpServletRequest.headerNames", "String");
+        this.properties.put("fixRawType.javax.servlet.http.HttpSession.attributeNames", "String");
+        this.properties.put("skipAttribute.javax.servlet.http.HttpSession.sessionContext", "true");
+        this.properties.put("skipAttribute.javax.servlet.http.HttpServletRequest.requestedSessionIdFromUrl", "true");
+        this.properties.put("skipAttribute.javax.servlet.ServletContext.servletNames", "true");
+        this.properties.put("skipAttribute.javax.servlet.ServletContext.servlets", "true");
+
+        // Now get the user-defined properties
         for (Map.Entry<String, String> entry : processingEnv.getOptions().entrySet()) {
             this.properties.put(entry.getKey(), entry.getValue());
         }
