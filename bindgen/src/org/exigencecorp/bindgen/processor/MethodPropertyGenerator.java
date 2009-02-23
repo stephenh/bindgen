@@ -9,6 +9,7 @@ import javax.lang.model.type.PrimitiveType;
 import javax.lang.model.type.TypeMirror;
 import javax.tools.Diagnostic.Kind;
 
+import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.exigencecorp.bindgen.Requirements;
 import org.exigencecorp.gen.GClass;
@@ -16,6 +17,10 @@ import org.exigencecorp.gen.GMethod;
 
 public class MethodPropertyGenerator {
 
+    private static final String[] javaKeywords = StringUtils
+        .split(
+            "abstract,continue,for,new,switch,assert,default,goto,package,synchronized,boolean,do,if,private,this,break,double,implements,protected,throw,byte,else,import,public,throws,case,enum,instanceof,return,transient,catch,extends,int,short,try,char,final,interface,static,void,class,finally,long,strictfp,volatile,const,float,native,super,while",
+            ",");
     private final BindingGenerator generator;
     private final GClass bindingClass;
     private final ExecutableElement enclosed;
@@ -29,7 +34,12 @@ public class MethodPropertyGenerator {
 
     public void generate() {
         String methodName = this.enclosed.getSimpleName().toString();
+
         String propertyName = StringUtils.uncapitalize(StringUtils.removeStart(methodName, this.getPrefix()));
+        if (ArrayUtils.contains(javaKeywords, propertyName)) {
+            propertyName = methodName;
+        }
+
         TypeMirror returnType = this.enclosed.getReturnType();
         if (returnType instanceof PrimitiveType) {
             returnType = this.generator.getProcessingEnv().getTypeUtils().boxedClass((PrimitiveType) returnType).asType();

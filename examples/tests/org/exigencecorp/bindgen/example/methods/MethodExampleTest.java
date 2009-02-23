@@ -51,4 +51,9 @@ public class MethodExampleTest extends TestCase {
         Assert.assertEquals(false, b.stuff().get().booleanValue());
     }
 
+    public void testBooleanThatIsAKeywordFallsBackOnMethodName() {
+        MethodExample e = new MethodExample("1", "name");
+        MethodExampleBinding b = new MethodExampleBinding(e);
+        Assert.assertEquals(false, b.isNew().get().booleanValue());
+    }
 }

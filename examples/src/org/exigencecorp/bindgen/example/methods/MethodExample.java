@@ -50,4 +50,9 @@ public class MethodExample {
     public boolean tobacco() {
         return false;
     }
+
+    // This method would be a property "new" which is a keyword
+    public boolean isNew() {
+        return false;
+    }
 }
