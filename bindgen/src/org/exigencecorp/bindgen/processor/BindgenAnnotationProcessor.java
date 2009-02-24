@@ -19,12 +19,12 @@ import org.exigencecorp.bindgen.Bindable;
 @SupportedSourceVersion(SourceVersion.RELEASE_6)
 public class BindgenAnnotationProcessor extends AbstractProcessor {
 
-    private BindingGenerator generator;
+    private GenerationQueue queue;
 
     @Override
     public void init(ProcessingEnvironment processingEnv) {
         super.init(processingEnv);
-        this.generator = new BindingGenerator(processingEnv);
+        this.queue = new GenerationQueue(processingEnv);
     }
 
     @Override
@@ -32,14 +32,15 @@ public class BindgenAnnotationProcessor extends AbstractProcessor {
         for (Element element : roundEnv.getElementsAnnotatedWith(Bindable.class)) {
             if (element instanceof PackageElement) {
                 for (Element nested : ((PackageElement) element).getEnclosedElements()) {
-                    this.generator.generate((TypeElement) nested, true);
+                    this.queue.enqueueForcefully((TypeElement) nested);
                 }
             } else if (element instanceof TypeElement) {
-                this.generator.generate((TypeElement) element, true);
+                this.queue.enqueueForcefully((TypeElement) element);
             } else {
                 this.processingEnv.getMessager().printMessage(Kind.WARNING, "Unhandled element " + element);
             }
         }
+        this.queue.processQueue();
         return true;
     }
 

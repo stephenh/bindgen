@@ -18,15 +18,15 @@ import org.exigencecorp.gen.GMethod;
 
 public class MethodCallableGenerator implements PropertyGenerator {
 
-    private final BindingGenerator generator;
+    private final GenerationQueue queue;
     private final GClass bindingClass;
     private final ExecutableElement enclosed;
     private final String methodName;
     private TypeElement blockType;
     private ExecutableElement blockMethod;
 
-    public MethodCallableGenerator(BindingGenerator generator, GClass bindingClass, ExecutableElement enclosed) {
-        this.generator = generator;
+    public MethodCallableGenerator(GenerationQueue queue, GClass bindingClass, ExecutableElement enclosed) {
+        this.queue = queue;
         this.bindingClass = bindingClass;
         this.enclosed = enclosed;
         this.methodName = this.enclosed.getSimpleName().toString();
@@ -39,7 +39,7 @@ public class MethodCallableGenerator implements PropertyGenerator {
 
         ExecutableType method = (ExecutableType) this.enclosed.asType();
         for (String attempt : this.getBlockTypesToAttempt()) {
-            TypeElement attemptType = this.generator.getProcessingEnv().getElementUtils().getTypeElement(attempt);
+            TypeElement attemptType = this.queue.getProcessingEnv().getElementUtils().getTypeElement(attempt);
             if (attemptType == null) {
                 continue;
             }
@@ -137,7 +137,7 @@ public class MethodCallableGenerator implements PropertyGenerator {
     }
 
     private String[] getBlockTypesToAttempt() {
-        String attempts = this.generator.getProperties().getProperty("blockTypes");
+        String attempts = this.queue.getProperties().getProperty("blockTypes");
         if (attempts == null) {
             attempts = "java.lang.Runnable";
         } else {
@@ -149,7 +149,7 @@ public class MethodCallableGenerator implements PropertyGenerator {
     private boolean shouldSkipAttribute(String name) {
         Requirements.skipAttributes.fulfills();
         String configKey = "skipAttribute." + this.enclosed.getEnclosingElement().toString() + "." + name;
-        String configValue = this.generator.getProperties().getProperty(configKey);
+        String configValue = this.queue.getProperties().getProperty(configKey);
         return "true".equals(configValue);
     }
 

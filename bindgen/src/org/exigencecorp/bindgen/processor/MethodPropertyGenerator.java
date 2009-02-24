@@ -20,7 +20,7 @@ public class MethodPropertyGenerator implements PropertyGenerator {
         .split(
             "abstract,continue,for,new,switch,assert,default,goto,package,synchronized,boolean,do,if,private,this,break,double,implements,protected,throw,byte,else,import,public,throws,case,enum,instanceof,return,transient,catch,extends,int,short,try,char,final,interface,static,void,class,finally,long,strictfp,volatile,const,float,native,super,while",
             ",");
-    private final BindingGenerator generator;
+    private final GenerationQueue queue;
     private final GClass bindingClass;
     private final ExecutableElement enclosed;
     private final String methodName;
@@ -29,8 +29,8 @@ public class MethodPropertyGenerator implements PropertyGenerator {
     private TypeElement propertyTypeElement;
     private boolean isFixingRawType = false;
 
-    public MethodPropertyGenerator(BindingGenerator generator, GClass bindingClass, ExecutableElement enclosed) {
-        this.generator = generator;
+    public MethodPropertyGenerator(GenerationQueue queue, GClass bindingClass, ExecutableElement enclosed) {
+        this.queue = queue;
         this.bindingClass = bindingClass;
         this.enclosed = enclosed;
         this.methodName = this.enclosed.getSimpleName().toString();
@@ -100,7 +100,7 @@ public class MethodPropertyGenerator implements PropertyGenerator {
     }
 
     private ProcessingEnvironment getProcessingEnv() {
-        return this.generator.getProcessingEnv();
+        return this.queue.getProcessingEnv();
     }
 
     private boolean hasSetter() {
@@ -127,7 +127,7 @@ public class MethodPropertyGenerator implements PropertyGenerator {
     private void fixRawTypeIfNeeded(ClassName propertyType, String propertyName) {
         Requirements.fixRawTypesByAddingGenericHints.fulfills();
         String configKey = "fixRawType." + this.enclosed.getEnclosingElement().toString() + "." + propertyName;
-        String configValue = this.generator.getProperties().getProperty(configKey);
+        String configValue = this.queue.getProperties().getProperty(configKey);
         if ("".equals(propertyType.getGenericPart()) && configValue != null) {
             propertyType.appendGenericType(configValue);
             this.isFixingRawType = true;
@@ -163,7 +163,7 @@ public class MethodPropertyGenerator implements PropertyGenerator {
 
     private TypeMirror boxIfNeeded(TypeMirror returnType) {
         if (returnType instanceof PrimitiveType) {
-            return this.generator.getProcessingEnv().getTypeUtils().boxedClass((PrimitiveType) returnType).asType();
+            return this.queue.getProcessingEnv().getTypeUtils().boxedClass((PrimitiveType) returnType).asType();
         }
         return returnType;
     }
@@ -171,7 +171,7 @@ public class MethodPropertyGenerator implements PropertyGenerator {
     private boolean shouldSkipAttribute(String name) {
         Requirements.skipAttributes.fulfills();
         String configKey = "skipAttribute." + this.enclosed.getEnclosingElement().toString() + "." + name;
-        String configValue = this.generator.getProperties().getProperty(configKey);
+        String configValue = this.queue.getProperties().getProperty(configKey);
         return "true".equals(configValue);
     }
 

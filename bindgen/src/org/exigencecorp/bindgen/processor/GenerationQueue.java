@@ -1,7 +1,9 @@
 package org.exigencecorp.bindgen.processor;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
@@ -11,13 +13,14 @@ import javax.lang.model.element.TypeElement;
 import javax.tools.FileObject;
 import javax.tools.StandardLocation;
 
-public class BindingGenerator {
+public class GenerationQueue {
 
     private final ProcessingEnvironment processingEnv;
     private final Properties properties = new Properties();
     private final Set<String> written = new HashSet<String>();
+    private final List<TypeElement> queue = new ArrayList<TypeElement>();
 
-    public BindingGenerator(ProcessingEnvironment processingEnv) {
+    public GenerationQueue(ProcessingEnvironment processingEnv) {
         this.processingEnv = processingEnv;
 
         // Default properties--this is ugly, but I could not get a bindgen.properties to be found on the classpath
@@ -41,11 +44,21 @@ public class BindingGenerator {
         }
     }
 
-    public void generate(TypeElement element, boolean override) {
-        if (!override && this.shouldIgnore(element)) {
-            return;
+    public void enqueueForcefully(TypeElement element) {
+        this.queue.add(element);
+    }
+
+    public void enqueueIfNew(TypeElement element) {
+        if (!this.shouldIgnore(element)) {
+            this.queue.add(element);
         }
-        new ClassGenerator(this, element).generate();
+    }
+
+    public void processQueue() {
+        while (this.queue.size() != 0) {
+            TypeElement element = this.queue.remove(0);
+            new ClassGenerator(this, element).generate();
+        }
     }
 
     public ProcessingEnvironment getProcessingEnv() {

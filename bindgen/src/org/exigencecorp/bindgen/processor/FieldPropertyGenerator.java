@@ -13,15 +13,15 @@ import org.exigencecorp.gen.GMethod;
 
 public class FieldPropertyGenerator implements PropertyGenerator {
 
-    private final BindingGenerator generator;
+    private final GenerationQueue queue;
     private final GClass bindingClass;
     private final Element enclosed;
     private final ClassName propertyType;
     private final String propertyName;
     private TypeElement propertyTypeElement;
 
-    public FieldPropertyGenerator(BindingGenerator generator, GClass bindingClass, Element enclosed) {
-        this.generator = generator;
+    public FieldPropertyGenerator(GenerationQueue queue, GClass bindingClass, Element enclosed) {
+        this.queue = queue;
         this.bindingClass = bindingClass;
         this.enclosed = enclosed;
         this.propertyType = new ClassName(this.boxIfNeeded(this.enclosed.asType()));
@@ -68,13 +68,13 @@ public class FieldPropertyGenerator implements PropertyGenerator {
     }
 
     private ProcessingEnvironment getProcessingEnv() {
-        return this.generator.getProcessingEnv();
+        return this.queue.getProcessingEnv();
     }
 
     private boolean shouldSkipAttribute(String name) {
         Requirements.skipAttributes.fulfills();
         String configKey = "skipAttribute." + this.enclosed.getEnclosingElement().toString() + "." + name;
-        String configValue = this.generator.getProperties().getProperty(configKey);
+        String configValue = this.queue.getProperties().getProperty(configKey);
         return "true".equals(configValue);
     }
 
@@ -88,7 +88,7 @@ public class FieldPropertyGenerator implements PropertyGenerator {
 
     private TypeMirror boxIfNeeded(TypeMirror returnType) {
         if (returnType instanceof PrimitiveType) {
-            return this.generator.getProcessingEnv().getTypeUtils().boxedClass((PrimitiveType) returnType).asType();
+            return this.queue.getProcessingEnv().getTypeUtils().boxedClass((PrimitiveType) returnType).asType();
         }
         return returnType;
     }

@@ -22,15 +22,15 @@ import org.exigencecorp.gen.GMethod;
 
 public class ClassGenerator {
 
-    private final BindingGenerator generator;
+    private final GenerationQueue queue;
     private final TypeElement element;
     private final TypeMirror baseElement;
     private final ClassName name;
     private final List<String> foundSubBindings = new ArrayList<String>();
     private GClass bindingClass;
 
-    public ClassGenerator(BindingGenerator generator, TypeElement element) {
-        this.generator = generator;
+    public ClassGenerator(GenerationQueue queue, TypeElement element) {
+        this.queue = queue;
         this.element = element;
         this.name = new ClassName(element.asType());
         this.baseElement = this.isOfTypeObjectOrNone(this.element.getSuperclass()) ? null : this.element.getSuperclass();
@@ -51,7 +51,7 @@ public class ClassGenerator {
         if (this.baseElement != null) {
             ClassName baseClassName = new ClassName(this.baseElement);
             this.bindingClass.baseClassName(baseClassName.getBindingType());
-            this.generator.generate((TypeElement) this.generator.getProcessingEnv().getTypeUtils().asElement(this.baseElement), false);
+            this.queue.enqueueIfNew((TypeElement) this.queue.getProcessingEnv().getTypeUtils().asElement(this.baseElement));
         } else {
             this.bindingClass.implementsInterface(Binding.class.getName() + "<{}>", this.name.get());
         }
@@ -85,7 +85,7 @@ public class ClassGenerator {
             pg.generate();
             if (pg.getPropertyName() != null) {
                 this.foundSubBindings.add(pg.getPropertyName());
-                this.generator.generate(pg.getPropertyTypeElement(), false);
+                this.queue.enqueueIfNew(pg.getPropertyTypeElement());
             }
         }
     }
@@ -109,7 +109,7 @@ public class ClassGenerator {
         List<String> names = new ArrayList<String>();
         TypeMirror current = this.baseElement;
         while (current != null) {
-            TypeElement currentElement = (TypeElement) this.generator.getProcessingEnv().getTypeUtils().asElement(current);
+            TypeElement currentElement = (TypeElement) this.queue.getProcessingEnv().getTypeUtils().asElement(current);
             for (PropertyGenerator pg : this.getPropertyGenerators(currentElement)) {
                 if (pg.getPropertyName() != null) {
                     names.add(pg.getPropertyName());
@@ -140,18 +140,18 @@ public class ClassGenerator {
                 continue;
             }
             if (enclosed.getKind().isField()) {
-                FieldPropertyGenerator fpg = new FieldPropertyGenerator(this.generator, this.bindingClass, enclosed);
+                FieldPropertyGenerator fpg = new FieldPropertyGenerator(this.queue, this.bindingClass, enclosed);
                 if (fpg.shouldGenerate()) {
                     generators.add(fpg);
                     continue;
                 }
             } else if (enclosed.getKind() == ElementKind.METHOD) {
-                MethodPropertyGenerator mpg = new MethodPropertyGenerator(this.generator, this.bindingClass, (ExecutableElement) enclosed);
+                MethodPropertyGenerator mpg = new MethodPropertyGenerator(this.queue, this.bindingClass, (ExecutableElement) enclosed);
                 if (mpg.shouldGenerate()) {
                     generators.add(mpg);
                     continue;
                 }
-                MethodCallableGenerator mcg = new MethodCallableGenerator(this.generator, this.bindingClass, (ExecutableElement) enclosed);
+                MethodCallableGenerator mcg = new MethodCallableGenerator(this.queue, this.bindingClass, (ExecutableElement) enclosed);
                 if (mcg.shouldGenerate()) {
                     generators.add(mcg);
                     continue;
@@ -166,7 +166,7 @@ public class ClassGenerator {
     }
 
     private ProcessingEnvironment getProcessingEnv() {
-        return this.generator.getProcessingEnv();
+        return this.queue.getProcessingEnv();
     }
 
 }
