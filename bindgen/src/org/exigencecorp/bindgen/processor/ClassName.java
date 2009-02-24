@@ -16,6 +16,10 @@ public class ClassName {
         this.fullClassNameWithGenerics = type.toString();
     }
 
+    public ClassName(String fullClassNameWithGenerics) {
+        this.fullClassNameWithGenerics = fullClassNameWithGenerics;
+    }
+
     /** @return "<String, String>" if the type is "com.app.Type<String, String>" or "" if no generics */
     public String getGenericPart() {
         int firstBracket = this.fullClassNameWithGenerics.indexOf("<");
@@ -57,5 +61,25 @@ public class ClassName {
 
     public void appendGenericType(String type) {
         this.fullClassNameWithGenerics += "<" + type + ">";
+    }
+
+    public String getSimpleName() {
+        String p = this.getWithoutGenericPart();
+        int lastDot = p.lastIndexOf('.');
+        if (lastDot == -1) {
+            return p;
+        } else {
+            return p.substring(lastDot + 1);
+        }
+    }
+
+    public String getPackageName() {
+        String p = this.getWithoutGenericPart();
+        int lastDot = p.lastIndexOf('.');
+        if (lastDot == -1) {
+            return "";
+        } else {
+            return p.substring(0, lastDot);
+        }
     }
 }

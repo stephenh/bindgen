@@ -68,11 +68,11 @@ public class BindingGenerator {
         // case we can skip it. If we really needed to do this one again, Eclipse would have
         // deleted our last output and this check wouldn't find anything.
         try {
-            String[] packageAndPath = this.getBindingTypePackageAndPath(element);
+            ClassName bindingClassName = new ClassName(new ClassName(element.asType()).getBindingType());
             FileObject fo = this.getProcessingEnv().getFiler().getResource(
                 StandardLocation.SOURCE_OUTPUT,
-                packageAndPath[0],
-                packageAndPath[1] + ".java");
+                bindingClassName.getPackageName(),
+                bindingClassName.getSimpleName() + ".java");
             if (fo.getLastModified() > 0) {
                 return true; // exists already
             }
@@ -83,23 +83,6 @@ public class BindingGenerator {
         this.written.add(element.toString());
 
         return false;
-    }
-
-    private String[] getBindingTypePackageAndPath(TypeElement element) {
-        String packageName = "";
-        String pathName = new ClassName(element.asType()).getBindingType();
-        // Kill generics
-        int firstBracket = pathName.indexOf('<');
-        if (firstBracket != -1) {
-            pathName = pathName.substring(0, firstBracket);
-        }
-        // Find the package
-        int lastDot = pathName.lastIndexOf('.');
-        if (lastDot != -1) {
-            packageName = pathName.substring(0, lastDot);
-            pathName = pathName.substring(lastDot + 1);
-        }
-        return new String[] { packageName, pathName };
     }
 
     public Properties getProperties() {
