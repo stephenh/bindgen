@@ -11,7 +11,7 @@ import org.exigencecorp.bindgen.Requirements;
 import org.exigencecorp.gen.GClass;
 import org.exigencecorp.gen.GMethod;
 
-public class FieldPropertyGenerator {
+public class FieldPropertyGenerator implements PropertyGenerator {
 
     private final BindingGenerator generator;
     private final GClass bindingClass;

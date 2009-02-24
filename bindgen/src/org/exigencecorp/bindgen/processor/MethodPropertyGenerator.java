@@ -14,7 +14,7 @@ import org.exigencecorp.bindgen.Requirements;
 import org.exigencecorp.gen.GClass;
 import org.exigencecorp.gen.GMethod;
 
-public class MethodPropertyGenerator {
+public class MethodPropertyGenerator implements PropertyGenerator {
 
     private static final String[] javaKeywords = StringUtils
         .split(

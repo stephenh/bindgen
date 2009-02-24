@@ -16,7 +16,7 @@ import org.exigencecorp.bindgen.Requirements;
 import org.exigencecorp.gen.GClass;
 import org.exigencecorp.gen.GMethod;
 
-public class MethodCallableGenerator {
+public class MethodCallableGenerator implements PropertyGenerator {
 
     private final BindingGenerator generator;
     private final GClass bindingClass;
@@ -94,6 +94,14 @@ public class MethodCallableGenerator {
         fieldGet.body.line("    this.{} = new My{}Binding();", methodName, StringUtils.capitalize(methodName));
         fieldGet.body.line("}");
         fieldGet.body.line("return this.{};", methodName);
+    }
+
+    public String getPropertyName() {
+        return null;
+    }
+
+    public TypeElement getPropertyTypeElement() {
+        return null;
     }
 
     private boolean doBlockReturnTypesMatch(ExecutableType method, ExecutableElement methodToMatch) {

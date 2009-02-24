@@ -81,47 +81,12 @@ public class ClassGenerator {
     }
 
     private void generateProperties() {
-        for (Element enclosed : this.element.getEnclosedElements()) {
-            if (!enclosed.getModifiers().contains(Modifier.PUBLIC) || enclosed.getModifiers().contains(Modifier.STATIC)) {
-                continue;
+        for (PropertyGenerator pg : this.getPropertyGenerators(this.element)) {
+            pg.generate();
+            if (pg.getPropertyName() != null) {
+                this.foundSubBindings.add(pg.getPropertyName());
+                this.generator.generate(pg.getPropertyTypeElement(), false);
             }
-            this.generateFieldPropertyIfNeeded(enclosed);
-            this.generateMethodPropertyIfNeeded(enclosed);
-            this.generateMethodCallableIfNeeded(enclosed);
-        }
-    }
-
-    private void generateFieldPropertyIfNeeded(Element enclosed) {
-        if (!enclosed.getKind().isField()) {
-            return;
-        }
-        FieldPropertyGenerator g = new FieldPropertyGenerator(this.generator, this.bindingClass, enclosed);
-        if (g.shouldGenerate()) {
-            g.generate();
-            this.foundSubBindings.add(g.getPropertyName());
-            this.generator.generate(g.getPropertyTypeElement(), false);
-        }
-    }
-
-    private void generateMethodPropertyIfNeeded(Element enclosed) {
-        if (enclosed.getKind() != ElementKind.METHOD) {
-            return;
-        }
-        MethodPropertyGenerator g = new MethodPropertyGenerator(this.generator, this.bindingClass, (ExecutableElement) enclosed);
-        if (g.shouldGenerate()) {
-            g.generate();
-            this.foundSubBindings.add(g.getPropertyName());
-            this.generator.generate(g.getPropertyTypeElement(), false);
-        }
-    }
-
-    private void generateMethodCallableIfNeeded(Element enclosed) {
-        if (enclosed.getKind() != ElementKind.METHOD) {
-            return;
-        }
-        MethodCallableGenerator g = new MethodCallableGenerator(this.generator, this.bindingClass, (ExecutableElement) enclosed);
-        if (g.shouldGenerate()) {
-            g.generate();
         }
     }
 
@@ -132,22 +97,27 @@ public class ClassGenerator {
         for (String foundSubBinding : this.foundSubBindings) {
             bindings.body.line("bindings.add(this.{}());", foundSubBinding);
         }
-        if (this.baseElement != null) {
-            // We currently don't have this type information at compile-time so hack it at runtime for now
-            bindings.body.line("for (Binding<?> base : super.getBindings()) {");
-            bindings.body.line("    boolean isOverriden = false;");
-            bindings.body.line("    for (Binding<?> existing : bindings) {");
-            bindings.body.line("        if (existing.getName().equals(base.getName())) {");
-            bindings.body.line("            isOverriden = true;");
-            bindings.body.line("            break;");
-            bindings.body.line("        }");
-            bindings.body.line("    }");
-            bindings.body.line("    if (!isOverriden) {");
-            bindings.body.line("        bindings.add(base);");
-            bindings.body.line("    }");
-            bindings.body.line("}");
+        for (String parentBinding : this.getBindingsOfAllSuperclasses()) {
+            if (!this.foundSubBindings.contains(parentBinding)) {
+                bindings.body.line("bindings.add(super.{}());", parentBinding);
+            }
         }
         bindings.body.line("return bindings;");
+    }
+
+    private List<String> getBindingsOfAllSuperclasses() {
+        List<String> names = new ArrayList<String>();
+        TypeMirror current = this.baseElement;
+        while (current != null) {
+            TypeElement currentElement = (TypeElement) this.generator.getProcessingEnv().getTypeUtils().asElement(current);
+            for (PropertyGenerator pg : this.getPropertyGenerators(currentElement)) {
+                if (pg.getPropertyName() != null) {
+                    names.add(pg.getPropertyName());
+                }
+            }
+            current = this.isOfTypeObjectOrNone(currentElement.getSuperclass()) ? null : currentElement.getSuperclass();
+        }
+        return names;
     }
 
     private void saveCode() {
@@ -161,6 +131,34 @@ public class ClassGenerator {
         } catch (IOException io) {
             this.getProcessingEnv().getMessager().printMessage(Kind.ERROR, io.getMessage());
         }
+    }
+
+    private List<PropertyGenerator> getPropertyGenerators(TypeElement type) {
+        List<PropertyGenerator> generators = new ArrayList<PropertyGenerator>();
+        for (Element enclosed : type.getEnclosedElements()) {
+            if (!enclosed.getModifiers().contains(Modifier.PUBLIC) || enclosed.getModifiers().contains(Modifier.STATIC)) {
+                continue;
+            }
+            if (enclosed.getKind().isField()) {
+                FieldPropertyGenerator fpg = new FieldPropertyGenerator(this.generator, this.bindingClass, enclosed);
+                if (fpg.shouldGenerate()) {
+                    generators.add(fpg);
+                    continue;
+                }
+            } else if (enclosed.getKind() == ElementKind.METHOD) {
+                MethodPropertyGenerator mpg = new MethodPropertyGenerator(this.generator, this.bindingClass, (ExecutableElement) enclosed);
+                if (mpg.shouldGenerate()) {
+                    generators.add(mpg);
+                    continue;
+                }
+                MethodCallableGenerator mcg = new MethodCallableGenerator(this.generator, this.bindingClass, (ExecutableElement) enclosed);
+                if (mcg.shouldGenerate()) {
+                    generators.add(mcg);
+                    continue;
+                }
+            }
+        }
+        return generators;
     }
 
     private boolean isOfTypeObjectOrNone(TypeMirror type) {
