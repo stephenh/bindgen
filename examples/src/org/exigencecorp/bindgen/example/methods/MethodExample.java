@@ -1,6 +1,9 @@
 package org.exigencecorp.bindgen.example.methods;
 
 import org.exigencecorp.bindgen.Bindable;
+import org.exigencecorp.bindgen.Binding;
+
+import bindgen.org.exigencecorp.bindgen.example.methods.MethodExampleBinding;
 
 @Bindable
 public class MethodExample {
@@ -54,5 +57,10 @@ public class MethodExample {
     // This method would be a property "new" which is a keyword
     public boolean isNew() {
         return false;
+    }
+
+    // Returning a binding to myself should cause recursion or anything--used to cause errors
+    public Binding<?> getBinding() {
+        return new MethodExampleBinding(this);
     }
 }

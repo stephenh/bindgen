@@ -51,6 +51,10 @@ public class MethodPropertyGenerator {
         ClassName propertyType = new ClassName(returnType);
         this.fixRawTypeIfNeeded(propertyType, propertyName);
 
+        if (propertyType.getWithoutGenericPart().endsWith("Binding")) {
+            return; // Skip methods that themselves return bindings
+        }
+
         TypeElement propertyTypeElement = this.getProcessingEnv().getElementUtils().getTypeElement(propertyType.getWithoutGenericPart());
         if (propertyTypeElement == null) {
             this.getProcessingEnv().getMessager().printMessage(
