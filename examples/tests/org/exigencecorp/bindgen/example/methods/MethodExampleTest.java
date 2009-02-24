@@ -2,6 +2,9 @@ package org.exigencecorp.bindgen.example.methods;
 
 import junit.framework.Assert;
 import junit.framework.TestCase;
+
+import org.exigencecorp.bindgen.Binding;
+
 import bindgen.org.exigencecorp.bindgen.example.methods.MethodExampleBinding;
 
 public class MethodExampleTest extends TestCase {
@@ -56,4 +59,19 @@ public class MethodExampleTest extends TestCase {
         MethodExampleBinding b = new MethodExampleBinding(e);
         Assert.assertEquals(false, b.isNew().get().booleanValue());
     }
+
+    public void testGetBindings() {
+        MethodExample e = new MethodExample("1", "name");
+        MethodExampleBinding b = new MethodExampleBinding(e);
+        Assert.assertEquals(6, b.getBindings().size());
+
+        boolean foundName = false;
+        for (Binding<?> sub : b.getBindings()) {
+            if (sub.getName().equals("name")) {
+                foundName = true;
+            }
+        }
+        Assert.assertTrue(foundName);
+    }
+
 }

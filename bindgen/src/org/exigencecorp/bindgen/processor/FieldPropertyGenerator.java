@@ -3,9 +3,9 @@ package org.exigencecorp.bindgen.processor;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
-import javax.tools.Diagnostic.Kind;
 
 import org.apache.commons.lang.StringUtils;
+import org.exigencecorp.bindgen.Requirements;
 import org.exigencecorp.gen.GClass;
 import org.exigencecorp.gen.GMethod;
 
@@ -14,49 +14,73 @@ public class FieldPropertyGenerator {
     private final BindingGenerator generator;
     private final GClass bindingClass;
     private final Element enclosed;
+    private final ClassName propertyType;
+    private final String propertyName;
+    private TypeElement propertyTypeElement;
 
     public FieldPropertyGenerator(BindingGenerator generator, GClass bindingClass, Element enclosed) {
         this.generator = generator;
         this.bindingClass = bindingClass;
         this.enclosed = enclosed;
+        this.propertyType = new ClassName(this.enclosed.asType());
+        this.propertyName = this.enclosed.getSimpleName().toString();
+    }
+
+    public boolean shouldGenerate() {
+        String fieldType = this.getProcessingEnv().getTypeUtils().erasure(this.enclosed.asType()).toString();
+        if (fieldType.endsWith("Binding")) {
+            return false;
+        }
+
+        if (this.shouldSkipAttribute(this.propertyName)) {
+            return false;
+        }
+
+        this.propertyTypeElement = this.getProcessingEnv().getElementUtils().getTypeElement(this.propertyType.getWithoutGenericPart());
+        if (this.propertyTypeElement == null) {
+            return false;
+        }
+
+        return true;
     }
 
     public void generate() {
-        String fieldName = this.enclosed.getSimpleName().toString();
-        ClassName propertyType = new ClassName(this.enclosed.asType());
-
-        TypeElement fieldTypeElement = this.getProcessingEnv().getElementUtils().getTypeElement(propertyType.getWithoutGenericPart());
-        if (fieldTypeElement == null) {
-            this.getProcessingEnv().getMessager().printMessage(
-                Kind.ERROR,
-                "No type element found for " + propertyType + " in " + this.bindingClass.getFullClassName() + "." + fieldName);
-            return;
-        }
-
-        this.generator.generate(fieldTypeElement, false);
-
-        this.bindingClass.getField(fieldName).type(propertyType.getBindingType());
-        GClass fieldClass = this.bindingClass.getInnerClass("My{}Binding", StringUtils.capitalize(fieldName)).notStatic();
-        fieldClass.baseClassName(propertyType.getBindingType());
+        this.bindingClass.getField(this.propertyName).type(this.propertyType.getBindingType());
+        GClass fieldClass = this.bindingClass.getInnerClass("My{}Binding", StringUtils.capitalize(this.propertyName)).notStatic();
+        fieldClass.baseClassName(this.propertyType.getBindingType());
 
         GMethod fieldClassName = fieldClass.getMethod("getName").returnType(String.class);
-        fieldClassName.body.line("return \"{}\";", fieldName);
+        fieldClassName.body.line("return \"{}\";", this.propertyName);
 
-        GMethod fieldClassGet = fieldClass.getMethod("get").returnType(propertyType.get());
-        fieldClassGet.body.line("return {}.this.get().{};", this.bindingClass.getSimpleClassNameWithoutGeneric(), fieldName);
+        GMethod fieldClassGet = fieldClass.getMethod("get").returnType(this.propertyType.get());
+        fieldClassGet.body.line("return {}.this.get().{};", this.bindingClass.getSimpleClassNameWithoutGeneric(), this.propertyName);
 
-        GMethod fieldClassSet = fieldClass.getMethod("set").argument(propertyType.get(), fieldName);
-        fieldClassSet.body.line("{}.this.get().{} = {};", this.bindingClass.getSimpleClassNameWithoutGeneric(), fieldName, fieldName);
+        GMethod fieldClassSet = fieldClass.getMethod("set").argument(this.propertyType.get(), this.propertyName);
+        fieldClassSet.body.line("{}.this.get().{} = {};", this.bindingClass.getSimpleClassNameWithoutGeneric(), this.propertyName, this.propertyName);
 
-        GMethod fieldGet = this.bindingClass.getMethod(fieldName).returnType(propertyType.getBindingType());
-        fieldGet.body.line("if (this.{} == null) {", fieldName);
-        fieldGet.body.line("    this.{} = new My{}Binding();", fieldName, StringUtils.capitalize(fieldName));
+        GMethod fieldGet = this.bindingClass.getMethod(this.propertyName).returnType(this.propertyType.getBindingType());
+        fieldGet.body.line("if (this.{} == null) {", this.propertyName);
+        fieldGet.body.line("    this.{} = new My{}Binding();", this.propertyName, StringUtils.capitalize(this.propertyName));
         fieldGet.body.line("}");
-        fieldGet.body.line("return this.{};", fieldName);
+        fieldGet.body.line("return this.{};", this.propertyName);
     }
 
     private ProcessingEnvironment getProcessingEnv() {
         return this.generator.getProcessingEnv();
     }
 
+    private boolean shouldSkipAttribute(String name) {
+        Requirements.skipAttributes.fulfills();
+        String configKey = "skipAttribute." + this.enclosed.getEnclosingElement().toString() + "." + name;
+        String configValue = this.generator.getProperties().getProperty(configKey);
+        return "true".equals(configValue);
+    }
+
+    public TypeElement getPropertyTypeElement() {
+        return this.propertyTypeElement;
+    }
+
+    public String getPropertyName() {
+        return this.propertyName;
+    }
 }

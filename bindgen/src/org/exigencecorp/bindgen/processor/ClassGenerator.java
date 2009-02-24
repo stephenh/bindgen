@@ -2,6 +2,7 @@ package org.exigencecorp.bindgen.processor;
 
 import java.io.IOException;
 import java.io.Writer;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.annotation.processing.ProcessingEnvironment;
@@ -10,15 +11,10 @@ import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
-import javax.lang.model.type.ExecutableType;
-import javax.lang.model.type.TypeMirror;
-import javax.lang.model.util.ElementFilter;
 import javax.tools.JavaFileObject;
 import javax.tools.Diagnostic.Kind;
 
-import org.apache.commons.lang.StringUtils;
 import org.exigencecorp.bindgen.Binding;
-import org.exigencecorp.bindgen.Requirements;
 import org.exigencecorp.gen.GClass;
 import org.exigencecorp.gen.GMethod;
 
@@ -27,6 +23,7 @@ public class ClassGenerator {
     private final BindingGenerator generator;
     private final TypeElement element;
     private final ClassName name;
+    private final List<String> foundSubBindings = new ArrayList<String>();
     private GClass bindingClass;
 
     public ClassGenerator(BindingGenerator generator, TypeElement element) {
@@ -41,6 +38,7 @@ public class ClassGenerator {
         this.addValueGetAndSet();
         this.addNameAndType();
         this.generateProperties();
+        this.addBindingsMethod();
         this.saveCode();
     }
 
@@ -87,131 +85,44 @@ public class ClassGenerator {
         if (!enclosed.getKind().isField()) {
             return;
         }
-
-        String fieldType = this.getProcessingEnv().getTypeUtils().erasure(enclosed.asType()).toString();
-        if (fieldType.endsWith("Binding")) {
-            return;
+        FieldPropertyGenerator g = new FieldPropertyGenerator(this.generator, this.bindingClass, enclosed);
+        if (g.shouldGenerate()) {
+            g.generate();
+            this.foundSubBindings.add(g.getPropertyName());
+            this.generator.generate(g.getPropertyTypeElement(), false);
         }
-
-        String fieldName = enclosed.getSimpleName().toString();
-        if (this.shouldSkipAttribute(fieldName)) {
-            return;
-        }
-
-        new FieldPropertyGenerator(this.generator, this.bindingClass, enclosed).generate();
     }
 
     private void generateMethodPropertyIfNeeded(Element enclosed) {
         if (enclosed.getKind() != ElementKind.METHOD) {
             return;
         }
-
-        String methodName = enclosed.getSimpleName().toString();
-
-        String propertyName = null;
-        for (String possible : new String[] { "get", "to", "has", "is" }) {
-            if (methodName.startsWith(possible)
-                && methodName.length() > possible.length() + 1
-                && methodName.substring(possible.length(), possible.length() + 1).matches("[A-Z]")) {
-                propertyName = StringUtils.uncapitalize(methodName.substring(possible.length()));
-                break;
-            }
+        MethodPropertyGenerator g = new MethodPropertyGenerator(this.generator, this.bindingClass, (ExecutableElement) enclosed);
+        if (g.shouldGenerate()) {
+            g.generate();
+            this.foundSubBindings.add(g.getPropertyName());
+            this.generator.generate(g.getPropertyTypeElement(), false);
         }
-        if (propertyName == null) {
-            return;
-        }
-
-        if (this.shouldSkipAttribute(propertyName)) {
-            return;
-        }
-
-        ExecutableType e = (ExecutableType) enclosed.asType();
-        boolean okay = e.getThrownTypes().size() == 0
-            && e.getParameterTypes().size() == 0
-            && !methodName.equals("getClass")
-            && !e.getReturnType().toString().endsWith("Binding");
-        if (!okay) {
-            return;
-        }
-
-        new MethodPropertyGenerator(this.generator, this.bindingClass, (ExecutableElement) enclosed).generate();
     }
 
     private void generateMethodCallableIfNeeded(Element enclosed) {
         if (enclosed.getKind() != ElementKind.METHOD) {
             return;
         }
-
-        ExecutableType method = (ExecutableType) enclosed.asType();
-        String methodName = enclosed.getSimpleName().toString();
-        if (methodName.equals("wait") || methodName.equals("notify") || methodName.equals("notifyAll")) {
-            return;
-        }
-
-        if (this.shouldSkipAttribute(methodName)) {
-            return;
-        }
-
-        for (String attempt : this.getBlockTypesToAttempt()) {
-            TypeElement attemptType = this.generator.getProcessingEnv().getElementUtils().getTypeElement(attempt);
-            if (attemptType == null) {
-                continue;
-            }
-            List<ExecutableElement> methods = ElementFilter.methodsIn(attemptType.getEnclosedElements());
-            if (methods.size() != 1) {
-                continue;
-            }
-            ExecutableElement methodToMatch = methods.get(0);
-            boolean returnMatches = this.doBlockReturnTypesMatch(method, methodToMatch);
-            boolean paramsMatch = this.doBlockParamsMatch(method, methodToMatch);
-            boolean throwsMatch = this.doBlockThrowsMatch(method, methodToMatch);
-            if (returnMatches && paramsMatch && throwsMatch) {
-                new MethodCallableGenerator(this.generator, this.bindingClass, (ExecutableElement) enclosed, attemptType, methodToMatch).generate();
-                return;
-            }
+        MethodCallableGenerator g = new MethodCallableGenerator(this.generator, this.bindingClass, (ExecutableElement) enclosed);
+        if (g.shouldGenerate()) {
+            g.generate();
         }
     }
 
-    private boolean doBlockReturnTypesMatch(ExecutableType method, ExecutableElement methodToMatch) {
-        return methodToMatch.getReturnType().equals(method.getReturnType());
-    }
-
-    private boolean doBlockParamsMatch(ExecutableType method, ExecutableElement methodToMatch) {
-        if (methodToMatch.getParameters().size() != method.getParameterTypes().size()) {
-            return false;
+    private void addBindingsMethod() {
+        this.bindingClass.addImports(List.class);
+        GMethod bindings = this.bindingClass.getMethod("getBindings").returnType("List<Binding<?>>");
+        bindings.body.line("List<Binding<?>> bindings = new java.util.ArrayList<Binding<?>>();");
+        for (String foundSubBinding : this.foundSubBindings) {
+            bindings.body.line("bindings.add(this.{}());", foundSubBinding);
         }
-        boolean allMatch = true;
-        for (int i = 0; i < methodToMatch.getParameters().size(); i++) {
-            if (!methodToMatch.getParameters().get(i).asType().equals(method.getParameterTypes().get(i))) {
-                allMatch = false;
-            }
-        }
-        return allMatch;
-    }
-
-    private boolean doBlockThrowsMatch(ExecutableType method, ExecutableElement methodToMatch) {
-        for (TypeMirror throwsType : method.getThrownTypes()) {
-            boolean matchesOne = false;
-            for (TypeMirror otherType : methodToMatch.getThrownTypes()) {
-                if (otherType.equals(throwsType)) {
-                    matchesOne = true;
-                }
-            }
-            if (!matchesOne) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    private String[] getBlockTypesToAttempt() {
-        String attempts = this.generator.getProperties().getProperty("blockTypes");
-        if (attempts == null) {
-            attempts = "java.lang.Runnable";
-        } else {
-            attempts += ",java.lang.Runnable";
-        }
-        return StringUtils.split(attempts, ",");
+        bindings.body.line("return bindings;");
     }
 
     private void saveCode() {
@@ -231,10 +142,4 @@ public class ClassGenerator {
         return this.generator.getProcessingEnv();
     }
 
-    private boolean shouldSkipAttribute(String name) {
-        Requirements.skipAttributes.fulfills();
-        String configKey = "skipAttribute." + this.element.toString() + "." + name;
-        String configValue = this.generator.getProperties().getProperty(configKey);
-        return "true".equals(configValue);
-    }
 }
