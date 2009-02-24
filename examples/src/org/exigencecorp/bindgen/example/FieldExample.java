@@ -21,6 +21,9 @@ public class FieldExample {
     @Deprecated
     public String[] skipped;
 
+    // we had been colliding on "value"
+    public int value;
+
     public FieldExample(String name) {
         this.name = name;
     }

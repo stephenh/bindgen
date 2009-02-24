@@ -67,13 +67,13 @@ public class ClassGenerator {
     }
 
     private void addValueGetAndSet() {
-        this.bindingClass.getField("value").type(this.name.get());
+        this.bindingClass.getField("_value").type(this.name.get());
 
         GMethod set = this.bindingClass.getMethod("set").argument(this.name.get(), "value");
-        set.body.line("this.value = value;");
+        set.body.line("this._value = value;");
 
         GMethod get = this.bindingClass.getMethod("get").returnType(this.name.get());
-        get.body.line("return this.value;");
+        get.body.line("return this._value;");
     }
 
     private void addNameAndType() {
