@@ -47,7 +47,7 @@ public class MethodPropertyGenerator {
         }
 
         ExecutableType e = (ExecutableType) this.enclosed.asType();
-        if (e.getThrownTypes().size() > 0 || e.getParameterTypes().size() > 0 || this.methodName.equals("getClass")) {
+        if (e.getThrownTypes().size() > 0 || e.getParameterTypes().size() > 0) {
             return false;
         }
 

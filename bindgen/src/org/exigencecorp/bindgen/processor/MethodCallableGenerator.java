@@ -33,10 +33,6 @@ public class MethodCallableGenerator {
     }
 
     public boolean shouldGenerate() {
-        if (this.methodName.equals("wait") || this.methodName.equals("notify") || this.methodName.equals("notifyAll")) {
-            return false;
-        }
-
         if (this.shouldSkipAttribute(this.methodName)) {
             return false;
         }
