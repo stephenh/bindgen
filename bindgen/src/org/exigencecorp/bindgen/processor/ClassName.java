@@ -55,14 +55,12 @@ public class ClassName {
         return this.fullClassNameWithGenerics;
     }
 
+    /** @return "com.app.Type<String, String>" if the type is "com.app.Type<String, String>" */
     public String toString() {
         return this.fullClassNameWithGenerics;
     }
 
-    public void appendGenericType(String type) {
-        this.fullClassNameWithGenerics += "<" + type + ">";
-    }
-
+    /** @return "Type" if the type is "com.app.Type<String, String>" */
     public String getSimpleName() {
         String p = this.getWithoutGenericPart();
         int lastDot = p.lastIndexOf('.');
@@ -73,6 +71,7 @@ public class ClassName {
         }
     }
 
+    /** @return "com.app" if the type is "com.app.Type<String, String>" */
     public String getPackageName() {
         String p = this.getWithoutGenericPart();
         int lastDot = p.lastIndexOf('.');
@@ -81,5 +80,9 @@ public class ClassName {
         } else {
             return p.substring(0, lastDot);
         }
+    }
+
+    public void appendGenericType(String type) {
+        this.fullClassNameWithGenerics += "<" + type + ">";
     }
 }
