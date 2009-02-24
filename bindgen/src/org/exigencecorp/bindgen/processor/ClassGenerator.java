@@ -52,7 +52,6 @@ public class ClassGenerator {
             ClassName baseClassName = new ClassName(this.baseElement);
             this.bindingClass.baseClassName(baseClassName.getBindingType());
             this.generator.generate((TypeElement) this.generator.getProcessingEnv().getTypeUtils().asElement(this.baseElement), false);
-            this.bindingClass.addImports(Binding.class);
         } else {
             this.bindingClass.implementsInterface(Binding.class.getName() + "<{}>", this.name.get());
         }
@@ -127,7 +126,7 @@ public class ClassGenerator {
     }
 
     private void addBindingsMethod() {
-        this.bindingClass.addImports(List.class);
+        this.bindingClass.addImports(Binding.class, List.class);
         GMethod bindings = this.bindingClass.getMethod("getBindings").returnType("List<Binding<?>>");
         bindings.body.line("List<Binding<?>> bindings = new java.util.ArrayList<Binding<?>>();");
         for (String foundSubBinding : this.foundSubBindings) {
