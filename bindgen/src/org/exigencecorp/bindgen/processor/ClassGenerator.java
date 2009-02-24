@@ -11,6 +11,8 @@ import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
+import javax.lang.model.type.TypeKind;
+import javax.lang.model.type.TypeMirror;
 import javax.tools.JavaFileObject;
 import javax.tools.Diagnostic.Kind;
 
@@ -22,6 +24,7 @@ public class ClassGenerator {
 
     private final BindingGenerator generator;
     private final TypeElement element;
+    private final TypeMirror baseElement;
     private final ClassName name;
     private final List<String> foundSubBindings = new ArrayList<String>();
     private GClass bindingClass;
@@ -30,6 +33,8 @@ public class ClassGenerator {
         this.generator = generator;
         this.element = element;
         this.name = new ClassName(element.asType());
+        this.baseElement = this.element.getSuperclass().toString().equals("java.lang.Object")
+            || this.element.getSuperclass().getKind() == TypeKind.NONE ? null : this.element.getSuperclass();
     }
 
     public void generate() {
@@ -44,7 +49,14 @@ public class ClassGenerator {
 
     private void initializeBindingClass() {
         this.bindingClass = new GClass(this.name.getBindingType());
-        this.bindingClass.implementsInterface(Binding.class.getName() + "<{}>", this.name.get());
+        if (this.baseElement != null) {
+            ClassName baseClassName = new ClassName(this.baseElement);
+            this.bindingClass.baseClassName(baseClassName.getBindingType());
+            this.generator.generate((TypeElement) this.generator.getProcessingEnv().getTypeUtils().asElement(this.baseElement), false);
+            this.bindingClass.addImports(Binding.class);
+        } else {
+            this.bindingClass.implementsInterface(Binding.class.getName() + "<{}>", this.name.get());
+        }
     }
 
     private void addConstructors() {
@@ -71,7 +83,7 @@ public class ClassGenerator {
     }
 
     private void generateProperties() {
-        for (Element enclosed : this.getProcessingEnv().getElementUtils().getAllMembers(this.element)) {
+        for (Element enclosed : this.element.getEnclosedElements()) {
             if (!enclosed.getModifiers().contains(Modifier.PUBLIC) || enclosed.getModifiers().contains(Modifier.STATIC)) {
                 continue;
             }
@@ -121,6 +133,21 @@ public class ClassGenerator {
         bindings.body.line("List<Binding<?>> bindings = new java.util.ArrayList<Binding<?>>();");
         for (String foundSubBinding : this.foundSubBindings) {
             bindings.body.line("bindings.add(this.{}());", foundSubBinding);
+        }
+        if (this.baseElement != null) {
+            // We currently don't have this type information at compile-time so hack it at runtime for now
+            bindings.body.line("for (Binding<?> base : super.getBindings()) {");
+            bindings.body.line("    boolean isOverriden = false;");
+            bindings.body.line("    for (Binding<?> existing : bindings) {");
+            bindings.body.line("        if (existing.getName().equals(base.getName())) {");
+            bindings.body.line("            isOverriden = true;");
+            bindings.body.line("            break;");
+            bindings.body.line("        }");
+            bindings.body.line("    }");
+            bindings.body.line("    if (!isOverriden) {");
+            bindings.body.line("        bindings.add(base);");
+            bindings.body.line("    }");
+            bindings.body.line("}");
         }
         bindings.body.line("return bindings;");
     }
