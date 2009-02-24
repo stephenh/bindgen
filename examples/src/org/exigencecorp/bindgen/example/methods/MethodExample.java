@@ -48,7 +48,7 @@ public class MethodExample {
         return false;
     }
 
-    // Putting the @deprecated here ensures a warning would show up if is "to" prefix got recognized
+    // Putting the @deprecated here ensures a warning would show up if this "to" prefix got recognized
     @Deprecated
     public boolean tobacco() {
         return false;
@@ -62,5 +62,11 @@ public class MethodExample {
     // Returning a binding to myself should cause recursion or anything--used to cause errors
     public Binding<?> getBinding() {
         return new MethodExampleBinding(this);
+    }
+
+    // Putting the @deprecated here ensures a warning would show up if this array was not skipped
+    @Deprecated
+    public String[] getStrings() {
+        return null;
     }
 }

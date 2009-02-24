@@ -14,6 +14,12 @@ public class FieldExample {
     // a read/write property with generics
     public List<String> list = new ArrayList<String>();
 
+    // a primitive property to show boxing works
+    public boolean good;
+
+    @Deprecated
+    public String[] skipped;
+
     public FieldExample(String name) {
         this.name = name;
     }

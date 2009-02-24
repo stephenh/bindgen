@@ -4,7 +4,6 @@ import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
-import javax.lang.model.type.ArrayType;
 import javax.lang.model.type.ExecutableType;
 import javax.lang.model.type.PrimitiveType;
 import javax.lang.model.type.TypeMirror;
@@ -52,17 +51,14 @@ public class MethodPropertyGenerator {
             return false;
         }
 
-        TypeMirror returnType = this.unboxIfNeeded(this.enclosed.getReturnType());
-        if (returnType instanceof ArrayType) {
-            return false; // Skip arrays for now
-        }
+        TypeMirror returnType = this.boxIfNeeded(this.enclosed.getReturnType());
 
         this.propertyType = new ClassName(returnType);
         if (this.propertyType.getWithoutGenericPart().endsWith("Binding")) {
             return false; // Skip methods that themselves return bindings
         }
 
-        this.propertyTypeElement = this.getProcessingEnv().getElementUtils().getTypeElement(this.propertyType.getWithoutGenericPart());
+        this.propertyTypeElement = (TypeElement) this.getProcessingEnv().getTypeUtils().asElement(returnType);
         if (this.propertyTypeElement == null) {
             return false;
         }
@@ -165,7 +161,7 @@ public class MethodPropertyGenerator {
         return propertyName;
     }
 
-    private TypeMirror unboxIfNeeded(TypeMirror returnType) {
+    private TypeMirror boxIfNeeded(TypeMirror returnType) {
         if (returnType instanceof PrimitiveType) {
             return this.generator.getProcessingEnv().getTypeUtils().boxedClass((PrimitiveType) returnType).asType();
         }

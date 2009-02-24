@@ -3,6 +3,8 @@ package org.exigencecorp.bindgen.processor;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
+import javax.lang.model.type.PrimitiveType;
+import javax.lang.model.type.TypeMirror;
 
 import org.apache.commons.lang.StringUtils;
 import org.exigencecorp.bindgen.Requirements;
@@ -22,13 +24,12 @@ public class FieldPropertyGenerator {
         this.generator = generator;
         this.bindingClass = bindingClass;
         this.enclosed = enclosed;
-        this.propertyType = new ClassName(this.enclosed.asType());
+        this.propertyType = new ClassName(this.boxIfNeeded(this.enclosed.asType()));
         this.propertyName = this.enclosed.getSimpleName().toString();
     }
 
     public boolean shouldGenerate() {
-        String fieldType = this.getProcessingEnv().getTypeUtils().erasure(this.enclosed.asType()).toString();
-        if (fieldType.endsWith("Binding")) {
+        if (this.propertyType.getWithoutGenericPart().endsWith("Binding")) {
             return false;
         }
 
@@ -36,7 +37,8 @@ public class FieldPropertyGenerator {
             return false;
         }
 
-        this.propertyTypeElement = this.getProcessingEnv().getElementUtils().getTypeElement(this.propertyType.getWithoutGenericPart());
+        TypeMirror fieldType = this.boxIfNeeded(this.enclosed.asType());
+        this.propertyTypeElement = (TypeElement) this.getProcessingEnv().getTypeUtils().asElement(fieldType);
         if (this.propertyTypeElement == null) {
             return false;
         }
@@ -82,5 +84,12 @@ public class FieldPropertyGenerator {
 
     public String getPropertyName() {
         return this.propertyName;
+    }
+
+    private TypeMirror boxIfNeeded(TypeMirror returnType) {
+        if (returnType instanceof PrimitiveType) {
+            return this.generator.getProcessingEnv().getTypeUtils().boxedClass((PrimitiveType) returnType).asType();
+        }
+        return returnType;
     }
 }

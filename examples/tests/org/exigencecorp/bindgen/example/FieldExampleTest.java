@@ -29,4 +29,13 @@ public class FieldExampleTest extends TestCase {
         Assert.assertSame(list, b.list().get());
     }
 
+    public void testPrimitive() {
+        FieldExample e = new FieldExample("name");
+        FieldExampleBinding b = new FieldExampleBinding(e);
+        Assert.assertFalse(b.good().get());
+
+        b.good().set(true);
+        Assert.assertTrue(e.good);
+    }
+
 }
