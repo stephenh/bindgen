@@ -33,8 +33,7 @@ public class ClassGenerator {
         this.generator = generator;
         this.element = element;
         this.name = new ClassName(element.asType());
-        this.baseElement = this.element.getSuperclass().toString().equals("java.lang.Object")
-            || this.element.getSuperclass().getKind() == TypeKind.NONE ? null : this.element.getSuperclass();
+        this.baseElement = this.isOfTypeObjectOrNone(this.element.getSuperclass()) ? null : this.element.getSuperclass();
     }
 
     public void generate() {
@@ -163,6 +162,10 @@ public class ClassGenerator {
         } catch (IOException io) {
             this.getProcessingEnv().getMessager().printMessage(Kind.ERROR, io.getMessage());
         }
+    }
+
+    private boolean isOfTypeObjectOrNone(TypeMirror type) {
+        return type.toString().equals("java.lang.Object") || type.getKind() == TypeKind.NONE;
     }
 
     private ProcessingEnvironment getProcessingEnv() {
