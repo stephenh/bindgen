@@ -17,6 +17,7 @@ public class FieldExample {
     // a primitive property to show boxing works
     public boolean good;
 
+    // add @Deprecated to show this is skipped--it would generate a warning if the binding got generated
     @Deprecated
     public String[] skipped;
 
