@@ -55,6 +55,10 @@ public class ClassGenerator {
         } else {
             this.bindingClass.implementsInterface(Binding.class.getName() + "<{}>", this.name.get());
         }
+
+        // this.bindingClass.addImports(Generated.class);
+        // SimpleDateFormat sdf = new SimpleDateFormat("dd MMM yyyy hh:mm");
+        // this.bindingClass.addAnnotation("@Generated(value = \"" + BindgenAnnotationProcessor.class.getName() + "\", date = \"" + sdf.format(new Date()) + "\")");
     }
 
     private void addConstructors() {
