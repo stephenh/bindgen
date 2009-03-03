@@ -67,13 +67,31 @@ public class ClassGenerator {
     }
 
     private void addValueGetAndSet() {
-        this.bindingClass.getField("_value").type(this.name.get());
+        if (this.baseElement == null) {
+            this.bindingClass.getField("_value").type(this.name.get()).setProtected();
+        }
 
         GMethod set = this.bindingClass.getMethod("set").argument(this.name.get(), "value");
         set.body.line("this._value = value;");
 
+        // The Binding<T> thing isn't quite working out--the set(Base) calls still need to
+        // go through set(Sub) so that the inner classes that override set(Sub) to bind
+        // back to actual fields and properties work for calls that end up wandering through
+        // the set(Base) methods
+        for (TypeMirror current = this.baseElement; current != null && !current.toString().equals("java.lang.Object");) {
+            TypeElement currentElement = (TypeElement) this.getProcessingEnv().getTypeUtils().asElement(current);
+            GMethod setOverride = this.bindingClass.getMethod("set({} value)", currentElement.toString(), "value");
+            setOverride.body.line("this.set(({}) value);", this.name.get());
+            // setOverride.addAnnotation("@Override");
+            current = currentElement.getSuperclass();
+        }
+
         GMethod get = this.bindingClass.getMethod("get").returnType(this.name.get());
-        get.body.line("return this._value;");
+        if (this.baseElement == null) {
+            get.body.line("return this._value;");
+        } else {
+            get.body.line("return ({}) this._value;", this.element.toString());
+        }
     }
 
     private void addNameAndType() {
