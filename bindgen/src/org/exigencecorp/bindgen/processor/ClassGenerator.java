@@ -152,13 +152,23 @@ public class ClassGenerator {
         try {
             JavaFileObject jfo = this.getProcessingEnv().getFiler().createSourceFile(//
                 this.bindingClass.getFullClassNameWithoutGeneric(),
-                this.element);
+                this.getSourceElements());
             Writer w = jfo.openWriter();
             w.write(this.bindingClass.toCode());
             w.close();
         } catch (IOException io) {
             this.getProcessingEnv().getMessager().printMessage(Kind.ERROR, io.getMessage());
         }
+    }
+
+    private Element[] getSourceElements() {
+        int i = 0;
+        Element[] sourceElements = new Element[this.getSuperElements().size() + 1];
+        sourceElements[i++] = this.element;
+        for (TypeElement superElement : this.getSuperElements()) {
+            sourceElements[i++] = superElement;
+        }
+        return sourceElements;
     }
 
     private List<PropertyGenerator> getPropertyGenerators(TypeElement type) {
