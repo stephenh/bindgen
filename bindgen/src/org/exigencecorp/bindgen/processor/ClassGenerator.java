@@ -78,12 +78,10 @@ public class ClassGenerator {
         // go through set(Sub) so that the inner classes that override set(Sub) to bind
         // back to actual fields and properties work for calls that end up wandering through
         // the set(Base) methods
-        for (TypeMirror current = this.baseElement; current != null && !current.toString().equals("java.lang.Object");) {
-            TypeElement currentElement = (TypeElement) this.getProcessingEnv().getTypeUtils().asElement(current);
+        for (TypeElement currentElement : this.getSuperElements()) {
             GMethod setOverride = this.bindingClass.getMethod("set({} value)", currentElement.toString(), "value");
             setOverride.body.line("this.set(({}) value);", this.name.get());
             // setOverride.addAnnotation("@Override");
-            current = currentElement.getSuperclass();
         }
 
         GMethod get = this.bindingClass.getMethod("get").returnType(this.name.get());
@@ -129,17 +127,25 @@ public class ClassGenerator {
 
     private List<String> getBindingsOfAllSuperclasses() {
         List<String> names = new ArrayList<String>();
-        TypeMirror current = this.baseElement;
-        while (current != null) {
-            TypeElement currentElement = (TypeElement) this.queue.getProcessingEnv().getTypeUtils().asElement(current);
+        for (TypeElement currentElement : this.getSuperElements()) {
             for (PropertyGenerator pg : this.getPropertyGenerators(currentElement)) {
                 if (pg.getPropertyName() != null) {
                     names.add(pg.getPropertyName());
                 }
             }
-            current = this.isOfTypeObjectOrNone(currentElement.getSuperclass()) ? null : currentElement.getSuperclass();
         }
         return names;
+    }
+
+    private List<TypeElement> getSuperElements() {
+        List<TypeElement> elements = new ArrayList<TypeElement>();
+        TypeMirror current = this.baseElement;
+        while (current != null && !this.isOfTypeObjectOrNone(current)) {
+            TypeElement currentElement = (TypeElement) this.getProcessingEnv().getTypeUtils().asElement(current);
+            elements.add(currentElement);
+            current = currentElement.getSuperclass();
+        }
+        return elements;
     }
 
     private void saveCode() {
