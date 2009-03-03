@@ -21,6 +21,7 @@
 			<fileset dir="bin/main" includes="**/Bindable.class"/>
 			<fileset dir="bin/main" includes="**/Binding.class"/>
 		</jar>
+		<copy file="bin/annotations.jar" todir="../examples/lib"/>
 	</target>
 
 	<target name="jar" depends="compile">
