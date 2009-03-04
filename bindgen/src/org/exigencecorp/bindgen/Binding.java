@@ -2,9 +2,10 @@ package org.exigencecorp.bindgen;
 
 import java.util.List;
 
-public interface Binding<T> {
-
-    String getName();
+/**
+ * Interface for a property (field or method) binding.
+ */
+public interface Binding<T> extends NamedBinding {
 
     List<Binding<?>> getBindings();
 

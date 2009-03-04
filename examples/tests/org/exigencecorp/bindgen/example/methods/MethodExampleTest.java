@@ -10,13 +10,13 @@ import bindgen.org.exigencecorp.bindgen.example.methods.MethodExampleBinding;
 public class MethodExampleTest extends TestCase {
 
     public void testReadWrite() {
-        MethodExample e = new MethodExample("1", "name");
+        MethodExample e = new MethodExample("1", "fred");
         MethodExampleBinding b = new MethodExampleBinding(e);
 
-        Assert.assertEquals("name", b.name().get());
+        Assert.assertEquals("fred", b.name().get());
 
-        b.name().set("name1");
-        Assert.assertEquals("name1", e.getName());
+        b.name().set("bob");
+        Assert.assertEquals("bob", e.getName());
     }
 
     public void testReadOnly() {

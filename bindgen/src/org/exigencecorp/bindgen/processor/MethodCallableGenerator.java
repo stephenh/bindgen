@@ -12,6 +12,7 @@ import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.ElementFilter;
 
 import org.apache.commons.lang.StringUtils;
+import org.exigencecorp.bindgen.NamedBinding;
 import org.exigencecorp.bindgen.Requirements;
 import org.exigencecorp.gen.GClass;
 import org.exigencecorp.gen.GMethod;
@@ -67,6 +68,7 @@ public class MethodCallableGenerator implements PropertyGenerator {
         this.bindingClass.getField(methodName).type(this.blockType.getQualifiedName().toString());
         GClass fieldClass = this.bindingClass.getInnerClass("My{}Binding", StringUtils.capitalize(methodName)).notStatic();
         fieldClass.implementsInterface(this.blockType.getQualifiedName().toString());
+        fieldClass.implementsInterface(NamedBinding.class);
 
         GMethod fieldClassRun = fieldClass.getMethod(this.blockMethod.getSimpleName().toString());
         fieldClassRun.returnType(this.blockMethod.getReturnType().toString());
@@ -88,6 +90,9 @@ public class MethodCallableGenerator implements PropertyGenerator {
         for (TypeMirror type : this.enclosed.getThrownTypes()) {
             fieldClassRun.addThrows(type.toString());
         }
+
+        GMethod fieldClassName = fieldClass.getMethod("getName").returnType(String.class);
+        fieldClassName.body.line("return \"{}\";", methodName);
 
         GMethod fieldGet = this.bindingClass.getMethod(methodName).returnType(this.blockType.getQualifiedName().toString());
         fieldGet.body.line("if (this.{} == null) {", methodName);
