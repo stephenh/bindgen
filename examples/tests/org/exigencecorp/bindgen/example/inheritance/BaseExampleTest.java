@@ -26,12 +26,11 @@ public class BaseExampleTest extends TestCase {
 
     public void testSubBindingsWithBase() {
         SubExampleBinding subb = new SubExampleBinding();
-        subb.set(new BaseExample());
         try {
-            subb.subOnly().get();
+            subb.set(new BaseExample());
             Assert.fail();
-        } catch (NullPointerException npe) {
-            // Weird--but it should not work, just expected a different exception, like ClassCastException
+        } catch (ClassCastException cce) {
+            // Okay
         }
     }
 
