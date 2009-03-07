@@ -25,11 +25,20 @@
 	</target>
 
 	<target name="jar" depends="compile">
-		<jar destfile="bin/bindgen.jar">
+		<!--
+		I'm not entirely sure using jarjar here is best practice. Eclipse
+		requires bindgen.jar to be just one jar, and bringing in exigence-util
+		without rewriting seemed likely to cause jar hell confusion. So we'll go
+		with this for now.
+		-->
+		<taskdef name="jarjar" classname="com.tonicsystems.jarjar.JarJarTask" classpath="lib/build/jarjar-1.0.jar"/>
+		<jarjar destfile="bin/bindgen.jar">
 			<fileset dir="bin/main" includes="**/*.class"/>
 			<zipfileset src="lib/main/exigence-utilities.jar" includes="org/exigencecorp/gen/**/*.class,org/exigencecorp/util/**/*.class"/>
 			<zipfileset dir="META-INF" includes="**/*" prefix="META-INF"/>
-		</jar>
+			<rule pattern="org.exigencecorp.gen.*" result="org.exigencecorp.bindgen.dependencies.gen.Bindgen@1"/>
+			<rule pattern="org.exigencecorp.util.*" result="org.exigencecorp.bindgen.dependencies.util.Bindgen@1"/>
+		</jarjar>
 		<zip destfile="bin/bindgen.zip">
 			<fileset dir="src" includes="**/*.java"/>
 		</zip>
