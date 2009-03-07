@@ -27,7 +27,7 @@
 	<target name="jar" depends="compile">
 		<jar destfile="bin/bindgen.jar">
 			<fileset dir="bin/main" includes="**/*.class"/>
-			<fileset dir="src" includes="**/*" excludes="**/*.class"/>
+			<zipfileset src="lib/main/exigence-utilities.jar" includes="org/exigencecorp/gen/**/*.class,org/exigencecorp/util/**/*.class"/>
 			<zipfileset dir="META-INF" includes="**/*" prefix="META-INF"/>
 		</jar>
 		<zip destfile="bin/bindgen.zip">

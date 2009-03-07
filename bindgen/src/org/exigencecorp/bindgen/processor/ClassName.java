@@ -5,7 +5,7 @@ import java.util.regex.Pattern;
 
 import javax.lang.model.type.TypeMirror;
 
-import org.apache.commons.lang.StringUtils;
+import org.exigencecorp.util.Inflector;
 
 public class ClassName {
 
@@ -44,7 +44,7 @@ public class ClassName {
         String bindingName = this.getWithoutGenericPart() + "Binding" + this.getGenericPart();
         Matcher m = p.matcher(bindingName);
         while (m.find()) {
-            bindingName = m.replaceFirst("." + StringUtils.uncapitalize(m.group(1)) + ".");
+            bindingName = m.replaceFirst("." + Inflector.uncapitalize(m.group(1)) + ".");
             m = p.matcher(bindingName);
         }
         return "bindgen." + bindingName;

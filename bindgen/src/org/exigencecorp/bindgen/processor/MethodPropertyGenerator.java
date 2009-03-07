@@ -8,18 +8,15 @@ import javax.lang.model.type.ExecutableType;
 import javax.lang.model.type.PrimitiveType;
 import javax.lang.model.type.TypeMirror;
 
-import org.apache.commons.lang.ArrayUtils;
-import org.apache.commons.lang.StringUtils;
 import org.exigencecorp.bindgen.Requirements;
 import org.exigencecorp.gen.GClass;
 import org.exigencecorp.gen.GMethod;
+import org.exigencecorp.util.Inflector;
 
 public class MethodPropertyGenerator implements PropertyGenerator {
 
-    private static final String[] javaKeywords = StringUtils
-        .split(
-            "abstract,continue,for,new,switch,assert,default,goto,package,synchronized,boolean,do,if,private,this,break,double,implements,protected,throw,byte,else,import,public,throws,case,enum,instanceof,return,transient,catch,extends,int,short,try,char,final,interface,static,void,class,finally,long,strictfp,volatile,const,float,native,super,while",
-            ",");
+    private static final String[] javaKeywords = "abstract,continue,for,new,switch,assert,default,goto,package,synchronized,boolean,do,if,private,this,break,double,implements,protected,throw,byte,else,import,public,throws,case,enum,instanceof,return,transient,catch,extends,int,short,try,char,final,interface,static,void,class,finally,long,strictfp,volatile,const,float,native,super,while"
+        .split(",");
     private final GenerationQueue queue;
     private final GClass bindingClass;
     private final ExecutableElement enclosed;
@@ -70,7 +67,7 @@ public class MethodPropertyGenerator implements PropertyGenerator {
         this.fixRawTypeIfNeeded(this.propertyType, this.propertyName);
 
         this.bindingClass.getField(this.propertyName).type(this.propertyType.getBindingType());
-        GClass fieldClass = this.bindingClass.getInnerClass("My{}Binding", StringUtils.capitalize(this.propertyName)).notStatic();
+        GClass fieldClass = this.bindingClass.getInnerClass("My{}Binding", Inflector.capitalize(this.propertyName)).notStatic();
         fieldClass.baseClassName(this.propertyType.getBindingType());
 
         GMethod fieldClassName = fieldClass.getMethod("getName").returnType(String.class);
@@ -86,7 +83,7 @@ public class MethodPropertyGenerator implements PropertyGenerator {
 
         GMethod fieldClassSet = fieldClass.getMethod("set").argument(this.propertyType.get(), this.propertyName);
         if (this.hasSetter()) {
-            fieldClassSet.body.line("{}.this.get().set{}({});", this.bindingClass.getSimpleClassNameWithoutGeneric(), StringUtils
+            fieldClassSet.body.line("{}.this.get().set{}({});", this.bindingClass.getSimpleClassNameWithoutGeneric(), Inflector
                 .capitalize(this.propertyName), this.propertyName);
         } else {
             fieldClassSet.body.line("throw new RuntimeException(this.getName() + \" is read only\");");
@@ -94,7 +91,7 @@ public class MethodPropertyGenerator implements PropertyGenerator {
 
         GMethod fieldGet = this.bindingClass.getMethod(this.propertyName).returnType(this.propertyType.getBindingType());
         fieldGet.body.line("if (this.{} == null) {", this.propertyName);
-        fieldGet.body.line("    this.{} = new My{}Binding();", this.propertyName, StringUtils.capitalize(this.propertyName));
+        fieldGet.body.line("    this.{} = new My{}Binding();", this.propertyName, Inflector.capitalize(this.propertyName));
         fieldGet.body.line("}");
         fieldGet.body.line("return this.{};", this.propertyName);
     }
@@ -105,7 +102,7 @@ public class MethodPropertyGenerator implements PropertyGenerator {
 
     private boolean hasSetter() {
         String methodName = this.enclosed.getSimpleName().toString();
-        String setterName = "set" + StringUtils.removeStart(methodName, this.getPrefix());
+        String setterName = "set" + methodName.substring(this.getPrefix().length());
         for (Element other : this.enclosed.getEnclosingElement().getEnclosedElements()) {
             if (other.getSimpleName().toString().equals(setterName)) {
                 ExecutableElement e = (ExecutableElement) other;
@@ -150,12 +147,19 @@ public class MethodPropertyGenerator implements PropertyGenerator {
             if (this.methodName.startsWith(possible)
                 && this.methodName.length() > possible.length() + 1
                 && this.methodName.substring(possible.length(), possible.length() + 1).matches("[A-Z]")) {
-                propertyName = StringUtils.uncapitalize(this.methodName.substring(possible.length()));
+                propertyName = Inflector.uncapitalize(this.methodName.substring(possible.length()));
                 break;
             }
         }
         // Ugly duplication from MethodPropertyGenerator
-        if (ArrayUtils.contains(MethodPropertyGenerator.javaKeywords, propertyName)) {
+        boolean isKeyword = false;
+        for (String keyword : javaKeywords) {
+            if (keyword.equals(propertyName)) {
+                isKeyword = true;
+                break;
+            }
+        }
+        if (isKeyword) {
             propertyName = this.methodName;
         }
         return propertyName;

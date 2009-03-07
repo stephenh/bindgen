@@ -6,10 +6,10 @@ import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.PrimitiveType;
 import javax.lang.model.type.TypeMirror;
 
-import org.apache.commons.lang.StringUtils;
 import org.exigencecorp.bindgen.Requirements;
 import org.exigencecorp.gen.GClass;
 import org.exigencecorp.gen.GMethod;
+import org.exigencecorp.util.Inflector;
 
 public class FieldPropertyGenerator implements PropertyGenerator {
 
@@ -48,7 +48,7 @@ public class FieldPropertyGenerator implements PropertyGenerator {
 
     public void generate() {
         this.bindingClass.getField(this.propertyName).type(this.propertyType.getBindingType());
-        GClass fieldClass = this.bindingClass.getInnerClass("My{}Binding", StringUtils.capitalize(this.propertyName)).notStatic();
+        GClass fieldClass = this.bindingClass.getInnerClass("My{}Binding", Inflector.capitalize(this.propertyName)).notStatic();
         fieldClass.baseClassName(this.propertyType.getBindingType());
 
         GMethod fieldClassName = fieldClass.getMethod("getName").returnType(String.class);
@@ -62,7 +62,7 @@ public class FieldPropertyGenerator implements PropertyGenerator {
 
         GMethod fieldGet = this.bindingClass.getMethod(this.propertyName).returnType(this.propertyType.getBindingType());
         fieldGet.body.line("if (this.{} == null) {", this.propertyName);
-        fieldGet.body.line("    this.{} = new My{}Binding();", this.propertyName, StringUtils.capitalize(this.propertyName));
+        fieldGet.body.line("    this.{} = new My{}Binding();", this.propertyName, Inflector.capitalize(this.propertyName));
         fieldGet.body.line("}");
         fieldGet.body.line("return this.{};", this.propertyName);
     }

@@ -1,6 +1,5 @@
 package org.exigencecorp.bindgen.processor;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.lang.model.element.ExecutableElement;
@@ -11,11 +10,11 @@ import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.ElementFilter;
 
-import org.apache.commons.lang.StringUtils;
 import org.exigencecorp.bindgen.NamedBinding;
 import org.exigencecorp.bindgen.Requirements;
 import org.exigencecorp.gen.GClass;
 import org.exigencecorp.gen.GMethod;
+import org.exigencecorp.util.Inflector;
 
 public class MethodCallableGenerator implements PropertyGenerator {
 
@@ -66,7 +65,7 @@ public class MethodCallableGenerator implements PropertyGenerator {
         String methodName = this.enclosed.getSimpleName().toString();
 
         this.bindingClass.getField(methodName).type(this.blockType.getQualifiedName().toString());
-        GClass fieldClass = this.bindingClass.getInnerClass("My{}Binding", StringUtils.capitalize(methodName)).notStatic();
+        GClass fieldClass = this.bindingClass.getInnerClass("My{}Binding", Inflector.capitalize(methodName)).notStatic();
         fieldClass.implementsInterface(this.blockType.getQualifiedName().toString());
         fieldClass.implementsInterface(NamedBinding.class);
 
@@ -75,11 +74,13 @@ public class MethodCallableGenerator implements PropertyGenerator {
 
         // Figure out whether we need a "return" or not
         String returnPrefix = this.blockMethod.getReturnType().getKind() == TypeKind.VOID ? "" : "return ";
-        List<String> argumentNames = new ArrayList<String>();
+        String arguments = "";
         for (VariableElement foo : this.blockMethod.getParameters()) {
-            argumentNames.add(foo.getSimpleName().toString());
+            arguments += foo.getSimpleName().toString() + ", ";
         }
-        String arguments = StringUtils.join(argumentNames, ", ");
+        if (arguments.length() > 0) {
+            arguments = arguments.substring(0, arguments.length() - 2); // remove last ", "
+        }
 
         fieldClassRun.body.line("{}{}.this.get().{}({});", returnPrefix, this.bindingClass.getSimpleClassNameWithoutGeneric(), methodName, arguments);
         // Add the parameters
@@ -96,7 +97,7 @@ public class MethodCallableGenerator implements PropertyGenerator {
 
         GMethod fieldGet = this.bindingClass.getMethod(methodName).returnType(this.blockType.getQualifiedName().toString());
         fieldGet.body.line("if (this.{} == null) {", methodName);
-        fieldGet.body.line("    this.{} = new My{}Binding();", methodName, StringUtils.capitalize(methodName));
+        fieldGet.body.line("    this.{} = new My{}Binding();", methodName, Inflector.capitalize(methodName));
         fieldGet.body.line("}");
         fieldGet.body.line("return this.{};", methodName);
     }
@@ -148,7 +149,7 @@ public class MethodCallableGenerator implements PropertyGenerator {
         } else {
             attempts += ",java.lang.Runnable";
         }
-        return StringUtils.split(attempts, ",");
+        return attempts.split(",");
     }
 
     private boolean shouldSkipAttribute(String name) {
