@@ -7,6 +7,8 @@ import java.util.List;
  */
 public interface Binding<T> extends NamedBinding {
 
+    Binding<?> getParentBinding();
+
     List<Binding<?>> getBindings();
 
     Class<?> getType();

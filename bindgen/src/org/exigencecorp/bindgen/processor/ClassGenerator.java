@@ -112,6 +112,10 @@ public class ClassGenerator {
 
     private void addBindingsMethod() {
         this.bindingClass.addImports(Binding.class, List.class);
+
+        GMethod parent = this.bindingClass.getMethod("getParentBinding").returnType("Binding<?>");
+        parent.body.line("return null;");
+
         GMethod bindings = this.bindingClass.getMethod("getBindings").returnType("List<Binding<?>>");
         bindings.body.line("List<Binding<?>> bindings = new java.util.ArrayList<Binding<?>>();");
         for (String foundSubBinding : this.foundSubBindings) {

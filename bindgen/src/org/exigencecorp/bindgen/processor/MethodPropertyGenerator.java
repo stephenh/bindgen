@@ -73,6 +73,9 @@ public class MethodPropertyGenerator implements PropertyGenerator {
         GMethod fieldClassName = fieldClass.getMethod("getName").returnType(String.class);
         fieldClassName.body.line("return \"{}\";", this.propertyName);
 
+        GMethod fieldClassGetParent = fieldClass.getMethod("getParentBinding").returnType("Binding<?>");
+        fieldClassGetParent.body.line("return {}.this;", this.bindingClass.getSimpleClassNameWithoutGeneric());
+
         GMethod fieldClassGet = fieldClass.getMethod("get").returnType(this.propertyType.get());
         fieldClassGet.body.line("return {}.this.get().{}();",//
             this.bindingClass.getSimpleClassNameWithoutGeneric(),
