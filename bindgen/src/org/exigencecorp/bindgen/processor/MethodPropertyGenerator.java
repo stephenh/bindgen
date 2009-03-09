@@ -8,7 +8,6 @@ import javax.lang.model.type.ExecutableType;
 import javax.lang.model.type.PrimitiveType;
 import javax.lang.model.type.TypeMirror;
 
-import org.exigencecorp.bindgen.Requirements;
 import org.exigencecorp.gen.GClass;
 import org.exigencecorp.gen.GMethod;
 import org.exigencecorp.util.Inflector;
@@ -125,7 +124,6 @@ public class MethodPropertyGenerator implements PropertyGenerator {
      *
      */
     private void fixRawTypeIfNeeded(ClassName propertyType, String propertyName) {
-        Requirements.fixRawTypesByAddingGenericHints.fulfills();
         String configKey = "fixRawType." + this.enclosed.getEnclosingElement().toString() + "." + propertyName;
         String configValue = this.queue.getProperties().getProperty(configKey);
         if ("".equals(propertyType.getGenericPart()) && configValue != null) {
@@ -176,7 +174,6 @@ public class MethodPropertyGenerator implements PropertyGenerator {
     }
 
     private boolean shouldSkipAttribute(String name) {
-        Requirements.skipAttributes.fulfills();
         String configKey = "skipAttribute." + this.enclosed.getEnclosingElement().toString() + "." + name;
         String configValue = this.queue.getProperties().getProperty(configKey);
         return "true".equals(configValue);
