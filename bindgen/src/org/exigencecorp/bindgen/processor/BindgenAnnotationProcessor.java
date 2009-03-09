@@ -41,6 +41,10 @@ public class BindgenAnnotationProcessor extends AbstractProcessor {
             }
         }
         this.queue.processQueue();
+        this.queue.updateBindKeywordFile();
+        if (roundEnv.processingOver()) {
+            this.queue.updateBindKeywordClass();
+        }
         return true;
     }
 

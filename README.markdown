@@ -50,19 +50,20 @@ This is a spike from a [Click][1]-like web framework I'm hacking around on:
         public Form form = new Form("Login");
         public String username = "blah";
         public String password;
-        private HomePageBinding bind = new HomePageBinding(this);
 
         @Override
         public void onInit() {
-            this.form.add(new TextField(this.bind.username()));
-            this.form.add(new TextField(this.bind.password()));
-            this.form.add(new SubmitField(this.bind.submit()));
+            HomePageBinding b = bind(this); // static import of BindKeyword.bind
+            this.form.add(new TextField(b.username()));
+            this.form.add(new TextField(b.password()));
+            this.form.add(new SubmitField(b.submit()));
         }
 
         public void submit() {
             // do stuff with this.username and this.password
         }
     }
+
 
 The `HomePageBinding` class is auto-generated because of the `@Bindable` annotation on the `HomePage` class.
 

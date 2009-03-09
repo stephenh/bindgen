@@ -1,8 +1,13 @@
 package org.exigencecorp.bindgen.processor;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.OutputStream;
+import java.io.Writer;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -10,8 +15,16 @@ import java.util.Set;
 
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.TypeElement;
+import javax.lang.model.type.DeclaredType;
 import javax.tools.FileObject;
+import javax.tools.JavaFileObject;
 import javax.tools.StandardLocation;
+import javax.tools.Diagnostic.Kind;
+
+import org.exigencecorp.gen.GClass;
+import org.exigencecorp.gen.GMethod;
+import org.exigencecorp.util.Copy;
+import org.exigencecorp.util.Join;
 
 public class GenerationQueue {
 
@@ -46,6 +59,7 @@ public class GenerationQueue {
 
     public void enqueueForcefully(TypeElement element) {
         this.queue.add(element);
+        this.written.add(element.toString());
     }
 
     public void enqueueIfNew(TypeElement element) {
@@ -58,6 +72,41 @@ public class GenerationQueue {
         while (this.queue.size() != 0) {
             TypeElement element = this.queue.remove(0);
             new ClassGenerator(this, element).generate();
+        }
+    }
+
+    public void updateBindKeywordFile() {
+        Set<String> all = this.readExistingBindKeywordFile();
+        all.addAll(this.written);
+        this.writeBindKeywordFile(all);
+    }
+
+    public void updateBindKeywordClass() {
+        Set<String> all = this.readExistingBindKeywordFile();
+        GClass bindClass = new GClass("bindgen.BindKeyword");
+        for (String className : all) {
+            DeclaredType t = (DeclaredType) this.processingEnv.getElementUtils().getTypeElement(className).asType();
+            String bindingType = new ClassName(className).getBindingType();
+            if (t.getTypeArguments().size() > 0) {
+                String generics = Join.commaSpace(t.getTypeArguments());
+                GMethod method = bindClass
+                    .getMethod("bind({}<{}> o)", className, generics)
+                    .returnType("{}<{}>", bindingType, generics)
+                    .typeParameters(generics)
+                    .setStatic();
+                method.body.line("return new {}<{}>(o);", bindingType, generics);
+            } else {
+                GMethod method = bindClass.getMethod("bind({} o)", className).returnType(bindingType).setStatic();
+                method.body.line("return new {}(o);", bindingType);
+            }
+        }
+        try {
+            JavaFileObject jfo = this.processingEnv.getFiler().createSourceFile(bindClass.getFullClassNameWithoutGeneric());
+            Writer w = jfo.openWriter();
+            w.write(bindClass.toCode());
+            w.close();
+        } catch (IOException io) {
+            this.processingEnv.getMessager().printMessage(Kind.ERROR, io.getMessage());
         }
     }
 
@@ -90,12 +139,47 @@ public class GenerationQueue {
                 return true; // exists already
             }
         } catch (IOException io) {
+            this.processingEnv.getMessager().printMessage(Kind.ERROR, io.getMessage());
         }
 
         // Store that we've now seen this element
         this.written.add(element.toString());
 
         return false;
+    }
+
+    private Set<String> readExistingBindKeywordFile() {
+        Set<String> all = new LinkedHashSet<String>();
+        try {
+            FileObject fo = this.processingEnv.getFiler().getResource(StandardLocation.SOURCE_OUTPUT, "bindgen", "BindKeyword.txt");
+            if (fo.getLastModified() > 0) {
+                String line;
+                BufferedReader input = new BufferedReader(fo.openReader(true));
+                while ((line = input.readLine()) != null) {
+                    all.add(line);
+                }
+                input.close();
+            }
+        } catch (IOException io) {
+            this.processingEnv.getMessager().printMessage(Kind.ERROR, io.getMessage());
+        }
+        return all;
+    }
+
+    private void writeBindKeywordFile(Set<String> all) {
+        try {
+            List<String> sorted = Copy.list(all);
+            Collections.sort(sorted);
+            FileObject fo = this.processingEnv.getFiler().createResource(StandardLocation.SOURCE_OUTPUT, "bindgen", "BindKeyword.txt");
+            OutputStream output = fo.openOutputStream();
+            for (String className : sorted) {
+                output.write(className.getBytes());
+                output.write("\n".getBytes());
+            }
+            output.close();
+        } catch (IOException io) {
+            this.processingEnv.getMessager().printMessage(Kind.ERROR, io.getMessage());
+        }
     }
 
     public Properties getProperties() {
