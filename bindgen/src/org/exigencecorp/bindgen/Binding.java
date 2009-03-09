@@ -15,6 +15,6 @@ public interface Binding<T> extends NamedBinding {
 
     Binding<?> getParentBinding();
 
-    List<Binding<?>> getBindings();
+    List<Binding<?>> getChildBindings();
 
 }

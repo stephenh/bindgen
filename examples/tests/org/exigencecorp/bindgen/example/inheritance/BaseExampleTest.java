@@ -15,7 +15,7 @@ public class BaseExampleTest extends TestCase {
         Assert.assertEquals("foo", sub.name);
         Assert.assertEquals("bar", sub.subOnly);
         // 3 == base description, sub name, sub subOnly
-        Assert.assertEquals(3, subb.getBindings().size());
+        Assert.assertEquals(3, subb.getChildBindings().size());
     }
 
     public void testSubBindingsWithRealSub() {

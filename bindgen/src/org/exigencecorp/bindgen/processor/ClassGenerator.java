@@ -116,17 +116,17 @@ public class ClassGenerator {
         GMethod parent = this.bindingClass.getMethod("getParentBinding").returnType("Binding<?>");
         parent.body.line("return null;");
 
-        GMethod bindings = this.bindingClass.getMethod("getBindings").returnType("List<Binding<?>>");
-        bindings.body.line("List<Binding<?>> bindings = new java.util.ArrayList<Binding<?>>();");
+        GMethod children = this.bindingClass.getMethod("getChildBindings").returnType("List<Binding<?>>");
+        children.body.line("List<Binding<?>> bindings = new java.util.ArrayList<Binding<?>>();");
         for (String foundSubBinding : this.foundSubBindings) {
-            bindings.body.line("bindings.add(this.{}());", foundSubBinding);
+            children.body.line("bindings.add(this.{}());", foundSubBinding);
         }
         for (String parentBinding : this.getBindingsOfAllSuperclasses()) {
             if (!this.foundSubBindings.contains(parentBinding)) {
-                bindings.body.line("bindings.add(super.{}());", parentBinding);
+                children.body.line("bindings.add(super.{}());", parentBinding);
             }
         }
-        bindings.body.line("return bindings;");
+        children.body.line("return bindings;");
     }
 
     private List<String> getBindingsOfAllSuperclasses() {
