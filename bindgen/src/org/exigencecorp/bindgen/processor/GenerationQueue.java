@@ -2,6 +2,7 @@ package org.exigencecorp.bindgen.processor;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.Writer;
 import java.util.ArrayList;
@@ -16,6 +17,8 @@ import java.util.Set;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.DeclaredType;
+import javax.lang.model.type.PrimitiveType;
+import javax.lang.model.type.TypeMirror;
 import javax.tools.FileObject;
 import javax.tools.JavaFileObject;
 import javax.tools.StandardLocation;
@@ -30,8 +33,11 @@ public class GenerationQueue {
 
     private final ProcessingEnvironment processingEnv;
     private final Properties properties = new Properties();
+    // From what I can tell, both Eclipse and javac will use the same processor across all of the rounds, so this should be cumulative
     private final Set<String> written = new HashSet<String>();
     private final List<TypeElement> queue = new ArrayList<TypeElement>();
+    private final boolean log;
+    private final boolean skipExistingBindingCheck;
 
     public GenerationQueue(ProcessingEnvironment processingEnv) {
         this.processingEnv = processingEnv;
@@ -55,6 +61,9 @@ public class GenerationQueue {
         for (Map.Entry<String, String> entry : processingEnv.getOptions().entrySet()) {
             this.properties.put(entry.getKey(), entry.getValue());
         }
+
+        this.log = "true".equals(this.properties.get("bindgen.log"));
+        this.skipExistingBindingCheck = "true".equals(processingEnv.getOptions().get("skipExistingBindingCheck"));
     }
 
     public void enqueueForcefully(TypeElement element) {
@@ -75,16 +84,12 @@ public class GenerationQueue {
         }
     }
 
-    public void updateBindKeywordFile() {
-        Set<String> all = this.readExistingBindKeywordFile();
-        all.addAll(this.written);
-        this.writeBindKeywordFile(all);
-    }
-
     public void updateBindKeywordClass() {
-        Set<String> all = this.readExistingBindKeywordFile();
+        Set<String> keywords = this.readExistingBindKeywordFile();
+        keywords.addAll(this.written);
+
         GClass bindClass = new GClass("bindgen.BindKeyword");
-        for (String className : all) {
+        for (String className : keywords) {
             DeclaredType t = (DeclaredType) this.processingEnv.getElementUtils().getTypeElement(className).asType();
             String bindingType = new ClassName(className).getBindingType();
             if (t.getTypeArguments().size() > 0) {
@@ -100,6 +105,7 @@ public class GenerationQueue {
                 method.body.line("return new {}(o);", bindingType);
             }
         }
+
         try {
             JavaFileObject jfo = this.processingEnv.getFiler().createSourceFile(bindClass.getFullClassNameWithoutGeneric());
             Writer w = jfo.openWriter();
@@ -108,6 +114,8 @@ public class GenerationQueue {
         } catch (IOException io) {
             this.processingEnv.getMessager().printMessage(Kind.ERROR, io.getMessage());
         }
+
+        this.writeBindKeywordFile(keywords);
     }
 
     public ProcessingEnvironment getProcessingEnv() {
@@ -129,17 +137,19 @@ public class GenerationQueue {
         // If we haven't seen it this round, see if we've already output awhile ago, in which
         // case we can skip it. If we really needed to do this one again, Eclipse would have
         // deleted our last output and this check wouldn't find anything.
-        try {
-            ClassName bindingClassName = new ClassName(new ClassName(element.asType()).getBindingType());
-            FileObject fo = this.getProcessingEnv().getFiler().getResource(
-                StandardLocation.SOURCE_OUTPUT,
-                bindingClassName.getPackageName(),
-                bindingClassName.getSimpleName() + ".java");
-            if (fo.getLastModified() > 0) {
-                return true; // exists already
+        if (!this.skipExistingBindingCheck) {
+            try {
+                ClassName bindingClassName = new ClassName(new ClassName(element.asType()).getBindingType());
+                FileObject fo = this.getProcessingEnv().getFiler().getResource(
+                    StandardLocation.SOURCE_OUTPUT,
+                    bindingClassName.getPackageName(),
+                    bindingClassName.getSimpleName() + ".java");
+                if (fo.getLastModified() > 0) {
+                    return true; // exists already
+                }
+            } catch (IOException io) {
+                this.processingEnv.getMessager().printMessage(Kind.ERROR, io.getMessage());
             }
-        } catch (IOException io) {
-            this.processingEnv.getMessager().printMessage(Kind.ERROR, io.getMessage());
         }
 
         // Store that we've now seen this element
@@ -149,26 +159,31 @@ public class GenerationQueue {
     }
 
     private Set<String> readExistingBindKeywordFile() {
-        Set<String> all = new LinkedHashSet<String>();
+        Set<String> cache = new LinkedHashSet<String>();
         try {
+            this.log("READING BindKeyword.txt");
             FileObject fo = this.processingEnv.getFiler().getResource(StandardLocation.SOURCE_OUTPUT, "bindgen", "BindKeyword.txt");
             if (fo.getLastModified() > 0) {
                 String line;
-                BufferedReader input = new BufferedReader(fo.openReader(true));
+                BufferedReader input = new BufferedReader(new InputStreamReader(fo.openInputStream()));
                 while ((line = input.readLine()) != null) {
-                    all.add(line);
+                    cache.add(line);
                 }
                 input.close();
+                this.log("WAS THERE");
+            } else {
+                this.log("NOT THERE");
             }
         } catch (IOException io) {
             this.processingEnv.getMessager().printMessage(Kind.ERROR, io.getMessage());
         }
-        return all;
+        return cache;
     }
 
-    private void writeBindKeywordFile(Set<String> all) {
+    private void writeBindKeywordFile(Set<String> keywords) {
         try {
-            List<String> sorted = Copy.list(all);
+            this.log("WRITING BindKeyword.txt");
+            List<String> sorted = Copy.list(keywords);
             Collections.sort(sorted);
             FileObject fo = this.processingEnv.getFiler().createResource(StandardLocation.SOURCE_OUTPUT, "bindgen", "BindKeyword.txt");
             OutputStream output = fo.openOutputStream();
@@ -182,8 +197,29 @@ public class GenerationQueue {
         }
     }
 
+    public TypeMirror boxIfNeededOrNull(TypeMirror returnType) {
+        if (returnType instanceof PrimitiveType) {
+            // double check--Eclipse worked fine but javac is letting non-primitive types in here
+            if (returnType.toString().indexOf('.') == -1) {
+                try {
+                    return this.getProcessingEnv().getTypeUtils().boxedClass((PrimitiveType) returnType).asType();
+                } catch (NullPointerException npe) {
+                    this.log("boxedClass failed for " + returnType);
+                    return null; // bug in javac
+                }
+            }
+        }
+        return returnType;
+    }
+
     public Properties getProperties() {
         return this.properties;
+    }
+
+    public void log(String message) {
+        if (this.log) {
+            System.out.println(message + " in " + this);
+        }
     }
 
 }

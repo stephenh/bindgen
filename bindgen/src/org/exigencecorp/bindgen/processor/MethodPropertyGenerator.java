@@ -5,7 +5,6 @@ import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.ExecutableType;
-import javax.lang.model.type.PrimitiveType;
 import javax.lang.model.type.TypeMirror;
 
 import org.exigencecorp.gen.GClass;
@@ -47,7 +46,10 @@ public class MethodPropertyGenerator implements PropertyGenerator {
             return false;
         }
 
-        TypeMirror returnType = this.boxIfNeeded(this.enclosed.getReturnType());
+        TypeMirror returnType = this.queue.boxIfNeededOrNull(this.enclosed.getReturnType());
+        if (returnType == null) {
+            return false; // Skip methods we (javac) could not box appropriately
+        }
 
         this.propertyType = new ClassName(returnType);
         if (this.propertyType.getWithoutGenericPart().endsWith("Binding")) {
@@ -164,13 +166,6 @@ public class MethodPropertyGenerator implements PropertyGenerator {
             propertyName = this.methodName;
         }
         return propertyName;
-    }
-
-    private TypeMirror boxIfNeeded(TypeMirror returnType) {
-        if (returnType instanceof PrimitiveType) {
-            return this.queue.getProcessingEnv().getTypeUtils().boxedClass((PrimitiveType) returnType).asType();
-        }
-        return returnType;
     }
 
     private boolean shouldSkipAttribute(String name) {

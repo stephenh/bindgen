@@ -146,8 +146,12 @@ public class ClassGenerator {
         TypeMirror current = this.baseElement;
         while (current != null && !this.isOfTypeObjectOrNone(current)) {
             TypeElement currentElement = (TypeElement) this.getProcessingEnv().getTypeUtils().asElement(current);
-            elements.add(currentElement);
-            current = currentElement.getSuperclass();
+            if (currentElement != null) { // javac started returning null, not sure why as Eclipse had not done that
+                elements.add(currentElement);
+                current = currentElement.getSuperclass();
+            } else {
+                current = null;
+            }
         }
         return elements;
     }
@@ -160,6 +164,7 @@ public class ClassGenerator {
             Writer w = jfo.openWriter();
             w.write(this.bindingClass.toCode());
             w.close();
+            this.queue.log("Saved " + this.bindingClass.getFullClassNameWithoutGeneric());
         } catch (IOException io) {
             this.getProcessingEnv().getMessager().printMessage(Kind.ERROR, io.getMessage());
         }
