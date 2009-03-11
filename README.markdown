@@ -79,6 +79,7 @@ Gotchas
 * Eclipse: Annotating packages as `@Bindable` does not work until 3.5-M5
 * Eclipse: Clean builds cause compile errors if your `Foo` class references its own `FooBinding` (see [263985][3]) *and* you declare `FooBinding` as a field/method return--for now declaring `FooBinding` inside a method as a local variable works fine
 * IntelliJ: Does not support annotation processors (from what I can tell)
+* `javac`: Does not properly re-use already-generated classes, so pass `-AskipExistingBindingCheck=true` to re-generate all of the binding classes each time
 
 [3]: https://bugs.eclipse.org/bugs/show_bug.cgi?id=263985
 
@@ -86,6 +87,6 @@ Todo
 ====
 
 * Support extension methods, e.g. StringBinding could have extra methods like `length()`, `substring()`, etc., ideally configurable
-
 * Optional null-safe get/set, e.g. `eb.employer().name()` with a null `employer` could have `get()` return `null` and not NPE and `set()` could create a `new Employer()` to then call `setName()` on to again avoid the NPE
+* Document options, `fixRawTypes`, `bindgen.log`, etc.
 
