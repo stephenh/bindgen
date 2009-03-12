@@ -22,7 +22,12 @@ public class FieldPropertyGenerator implements PropertyGenerator {
         this.queue = queue;
         this.bindingClass = bindingClass;
         this.enclosed = enclosed;
-        this.propertyType = new ClassName(this.queue.boxIfNeededOrNull(this.enclosed.asType()));
+        TypeMirror boxed = this.queue.boxIfNeededOrNull(this.enclosed.asType());
+        if (boxed != null) {
+            this.propertyType = new ClassName(boxed);
+        } else {
+            this.propertyType = null;
+        }
         this.propertyName = this.enclosed.getSimpleName().toString();
     }
 

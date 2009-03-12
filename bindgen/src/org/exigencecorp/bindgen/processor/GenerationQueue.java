@@ -59,7 +59,8 @@ public class GenerationQueue {
     }
 
     public void enqueueIfNew(TypeElement element) {
-        if (!this.shouldIgnore(element)) {
+        // javac is lovely and was passing in nulls
+        if (element != null && !this.shouldIgnore(element)) {
             this.queue.add(element);
         }
     }
