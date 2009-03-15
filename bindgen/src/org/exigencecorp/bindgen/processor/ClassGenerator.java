@@ -16,9 +16,10 @@ import javax.lang.model.type.TypeMirror;
 import javax.tools.JavaFileObject;
 import javax.tools.Diagnostic.Kind;
 
+import joist.sourcegen.GClass;
+import joist.sourcegen.GMethod;
+
 import org.exigencecorp.bindgen.Binding;
-import org.exigencecorp.gen.GClass;
-import org.exigencecorp.gen.GMethod;
 
 public class ClassGenerator {
 

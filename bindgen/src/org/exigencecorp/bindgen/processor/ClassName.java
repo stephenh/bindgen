@@ -5,7 +5,7 @@ import java.util.regex.Pattern;
 
 import javax.lang.model.type.TypeMirror;
 
-import org.exigencecorp.util.Inflector;
+import joist.util.Inflector;
 
 public class ClassName {
 

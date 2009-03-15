@@ -10,10 +10,11 @@ import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.ElementFilter;
 
+import joist.sourcegen.GClass;
+import joist.sourcegen.GMethod;
+import joist.util.Inflector;
+
 import org.exigencecorp.bindgen.NamedBinding;
-import org.exigencecorp.gen.GClass;
-import org.exigencecorp.gen.GMethod;
-import org.exigencecorp.util.Inflector;
 
 public class MethodCallableGenerator implements PropertyGenerator {
 

@@ -5,9 +5,9 @@ import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeMirror;
 
-import org.exigencecorp.gen.GClass;
-import org.exigencecorp.gen.GMethod;
-import org.exigencecorp.util.Inflector;
+import joist.sourcegen.GClass;
+import joist.sourcegen.GMethod;
+import joist.util.Inflector;
 
 public class FieldPropertyGenerator implements PropertyGenerator {
 

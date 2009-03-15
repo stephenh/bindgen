@@ -11,16 +11,17 @@ import java.util.List;
 import java.util.Set;
 
 import javax.annotation.processing.ProcessingEnvironment;
+import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.DeclaredType;
 import javax.tools.FileObject;
 import javax.tools.JavaFileObject;
 import javax.tools.StandardLocation;
 import javax.tools.Diagnostic.Kind;
 
-import org.exigencecorp.gen.GClass;
-import org.exigencecorp.gen.GMethod;
-import org.exigencecorp.util.Copy;
-import org.exigencecorp.util.Join;
+import joist.sourcegen.GClass;
+import joist.sourcegen.GMethod;
+import joist.util.Copy;
+import joist.util.Join;
 
 public class BindKeywordGenerator {
 
@@ -42,7 +43,12 @@ public class BindKeywordGenerator {
 
     private void addBindMethods() {
         for (String className : this.classNames) {
-            DeclaredType t = (DeclaredType) this.getProcessingEnv().getElementUtils().getTypeElement(className).asType();
+            TypeElement e = this.getProcessingEnv().getElementUtils().getTypeElement(className);
+            if (e == null) {
+                this.queue.log("TypeElement not found for " + className);
+                continue;
+            }
+            DeclaredType t = (DeclaredType) e.asType();
             String bindingType = new ClassName(className).getBindingType();
             if (t.getTypeArguments().size() > 0) {
                 String generics = Join.commaSpace(t.getTypeArguments());
