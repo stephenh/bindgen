@@ -5,7 +5,7 @@
 		<delete dir="bin"/>
 	</target>
 
-	<target name="compile">
+	<target name="compile" depends="ivy.retrieve">
 		<mkdir dir="bin/main"/>
 		<javac srcdir="src" destdir="bin/main" debug="true" nowarn="yes" source="1.6" target="1.6" encoding="utf8">
 			<classpath>
