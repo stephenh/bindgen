@@ -64,7 +64,7 @@
 
 	<target name="ivy.publish" depends="ivy.load" description="--> publish bindgen">
 		<ivy:resolve log="download-only"/>
-		<ivy:publish resolver="local" conf="main,source" forcedeliver="true" overwrite="true">
+		<ivy:publish resolver="local" conf="master,sources" forcedeliver="true" overwrite="true">
 			<artifacts pattern="bin/[type]s/[artifact].[ext]"/>
 		</ivy:publish>
 	</target>
