@@ -9,6 +9,6 @@
 		<artifact name="bindgen" type="source" ext="jar" conf="sources"/>
 	</publications>
 	<dependencies>
-    <dependency org="joist" name="util" rev="SNAPSHOT" conf="master->main"/>
+		<dependency org="joist" name="util" rev="SNAPSHOT" conf="master->main"/>
 	</dependencies>
 </ivy-module>
