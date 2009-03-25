@@ -80,8 +80,13 @@ public class ClassGenerator {
         // back to actual fields and properties work for calls that end up wandering through
         // the set(Base) methods
         for (TypeElement currentElement : this.getSuperElements()) {
-            GMethod setOverride = this.bindingClass.getMethod("set({} value)", currentElement.toString(), "value");
+            GMethod setOverride = this.bindingClass.getMethod("set({} value)", new ClassName(currentElement.asType()).getWithoutGenericPart());
             setOverride.body.line("this.set(({}) value);", this.name.get());
+            if (!"".equals(this.name.getGenericPart())) {
+                // Causes NPEs in Eclipse
+                // this.bindingClass.addAnnotation("@SuppressWarnings(\"unchecked\")");
+            }
+            // Causes NPEs in Eclipse
             // setOverride.addAnnotation("@Override");
         }
 
