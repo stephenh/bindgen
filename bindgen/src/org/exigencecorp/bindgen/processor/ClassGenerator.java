@@ -89,7 +89,7 @@ public class ClassGenerator {
         if (this.baseElement == null) {
             get.body.line("return this._value;");
         } else {
-            get.body.line("return ({}) this._value;", this.element.toString());
+            get.body.line("return ({}) this._value;", this.name.get());
         }
     }
 
