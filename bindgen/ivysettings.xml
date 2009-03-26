@@ -1,7 +1,11 @@
 <ivysettings>
-	<settings defaultResolver="local"/>
+	<settings defaultResolver="build"/>
 	<include url="${ivy.default.settings.dir}/ivysettings-local.xml"/>
 	<resolvers>
+		<filesystem name="build">
+			<artifact pattern="${ivy.settings.dir}/lib/build/[artifact]-[revision].[ext]" />
+		</filesystem>
+
 		<ssh name="joist-upload" user="root" host="repo.joist.ws" publishPermissions="0644">
 			<ivy pattern="/var/joist.repo/[organisation]/[module]/[revision]/[type]s/[artifact].[ext]" />
 			<artifact pattern="/var/joist.repo/[organisation]/[module]/[revision]/[type]s/[artifact].[ext]" />
