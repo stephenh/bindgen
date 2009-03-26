@@ -1,5 +1,5 @@
 <ivy-module version="2.0">
-	<info organisation="exigencecorp" module="bindgen" revision="SNAPSHOT"/>
+	<info organisation="exigencecorp" module="bindgen"/>
 	<configurations>
 		<conf name="master"/>
 		<conf name="sources"/>
@@ -9,6 +9,9 @@
 		<artifact name="bindgen" type="source" ext="jar" conf="sources"/>
 	</publications>
 	<dependencies>
-		<dependency org="joist" name="util" rev="SNAPSHOT" conf="master->main"/>
+		<!-- We use jarjar to inline our dependencies, so we keep them in the private build conf.
+		<dependency org="joist" name="joist.util" rev="0.1-0cccb84" conf="build"/>
+		<dependency org="jarjar" name="jarjar" rev="1.0" conf="build"/>
+		-->
 	</dependencies>
 </ivy-module>
