@@ -30,7 +30,7 @@
 
 	<target name="ivy.publish-joist" depends="jar,ivy.load" description="publish bindgen jar/source to joist.ws">
 		<ivy:resolve/>
-		<ivy:publish resolver="joist-upload" conf="master,sources" status="stable">
+		<ivy:publish resolver="joist-upload" conf="master,sources" status="release" forcedeliver="true">
 			<artifacts pattern="bin/[type]s/[artifact].[ext]"/>
 		</ivy:publish>
 	</target>
