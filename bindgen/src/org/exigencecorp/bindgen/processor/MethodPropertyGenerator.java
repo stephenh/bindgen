@@ -4,6 +4,7 @@ import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
+import javax.lang.model.element.TypeParameterElement;
 import javax.lang.model.type.ExecutableType;
 import javax.lang.model.type.TypeMirror;
 
@@ -22,6 +23,7 @@ public class MethodPropertyGenerator implements PropertyGenerator {
     private String propertyName;
     private ClassName propertyType;
     private TypeElement propertyTypeElement;
+    private TypeParameterElement propertyGenericElement;
     private boolean isFixingRawType = false;
 
     public MethodPropertyGenerator(GenerationQueue queue, GClass bindingClass, ExecutableElement enclosed) {
@@ -56,8 +58,14 @@ public class MethodPropertyGenerator implements PropertyGenerator {
             return false; // Skip methods that themselves return bindings
         }
 
-        this.propertyTypeElement = (TypeElement) this.getProcessingEnv().getTypeUtils().asElement(returnType);
-        if (this.propertyTypeElement == null) {
+        Element returnTypeAsElement = this.getProcessingEnv().getTypeUtils().asElement(returnType);
+        if (returnTypeAsElement instanceof TypeParameterElement) {
+            this.propertyGenericElement = (TypeParameterElement) returnTypeAsElement;
+            this.propertyTypeElement = this.getProcessingEnv().getElementUtils().getTypeElement("java.lang.Object");
+            this.propertyType = new ClassName("java.lang.Object");
+        } else if (returnTypeAsElement instanceof TypeElement) {
+            this.propertyTypeElement = (TypeElement) returnTypeAsElement;
+        } else {
             return false;
         }
 
@@ -87,8 +95,18 @@ public class MethodPropertyGenerator implements PropertyGenerator {
 
         GMethod fieldClassSet = fieldClass.getMethod("set").argument(this.propertyType.get(), this.propertyName);
         if (this.hasSetter()) {
-            fieldClassSet.body.line("{}.this.get().set{}({});", this.bindingClass.getSimpleClassNameWithoutGeneric(), Inflector
-                .capitalize(this.propertyName), this.propertyName);
+            if (this.propertyGenericElement != null) {
+                fieldClassSet.body.line("{}.this.get().set{}(({}) {});",//
+                    this.bindingClass.getSimpleClassNameWithoutGeneric(),
+                    Inflector.capitalize(this.propertyName),
+                    this.propertyGenericElement.toString(),
+                    this.propertyName);
+            } else {
+                fieldClassSet.body.line("{}.this.get().set{}({});",//
+                    this.bindingClass.getSimpleClassNameWithoutGeneric(),
+                    Inflector.capitalize(this.propertyName),
+                    this.propertyName);
+            }
         } else {
             fieldClassSet.body.line("throw new RuntimeException(this.getName() + \" is read only\");");
         }

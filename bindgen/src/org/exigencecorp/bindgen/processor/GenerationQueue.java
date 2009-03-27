@@ -43,6 +43,9 @@ public class GenerationQueue {
         this.properties.put("skipAttribute.javax.servlet.http.HttpServletRequest.requestedSessionIdFromUrl", "true");
         this.properties.put("skipAttribute.javax.servlet.ServletContext.servletNames", "true");
         this.properties.put("skipAttribute.javax.servlet.ServletContext.servlets", "true");
+        this.properties.put("skipAttribute.java.lang.Object.getClass", "true");
+        this.properties.put("skipAttribute.java.lang.Object.notify", "true");
+        this.properties.put("skipAttribute.java.lang.Object.notifyAll", "true");
 
         // Now get the user-defined properties
         for (Map.Entry<String, String> entry : processingEnv.getOptions().entrySet()) {

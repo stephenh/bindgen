@@ -3,6 +3,7 @@ package org.exigencecorp.bindgen.processor;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
+import javax.lang.model.element.TypeParameterElement;
 import javax.lang.model.type.TypeMirror;
 
 import joist.sourcegen.GClass;
@@ -14,9 +15,10 @@ public class FieldPropertyGenerator implements PropertyGenerator {
     private final GenerationQueue queue;
     private final GClass bindingClass;
     private final Element enclosed;
-    private final ClassName propertyType;
     private final String propertyName;
+    private ClassName propertyType;
     private TypeElement propertyTypeElement;
+    private TypeParameterElement propertyGenericElement;
 
     public FieldPropertyGenerator(GenerationQueue queue, GClass bindingClass, Element enclosed) {
         this.queue = queue;
@@ -45,8 +47,14 @@ public class FieldPropertyGenerator implements PropertyGenerator {
             return false; // Skip methods we (javac) could not box appropriately
         }
 
-        this.propertyTypeElement = (TypeElement) this.getProcessingEnv().getTypeUtils().asElement(fieldType);
-        if (this.propertyTypeElement == null) {
+        Element fieldTypeAsElement = this.getProcessingEnv().getTypeUtils().asElement(fieldType);
+        if (fieldTypeAsElement instanceof TypeParameterElement) {
+            this.propertyGenericElement = (TypeParameterElement) fieldTypeAsElement;
+            this.propertyTypeElement = this.getProcessingEnv().getElementUtils().getTypeElement("java.lang.Object");
+            this.propertyType = new ClassName("java.lang.Object");
+        } else if (fieldTypeAsElement instanceof TypeElement) {
+            this.propertyTypeElement = (TypeElement) fieldTypeAsElement;
+        } else {
             return false;
         }
 
@@ -68,7 +76,21 @@ public class FieldPropertyGenerator implements PropertyGenerator {
         fieldClassGet.body.line("return {}.this.get().{};", this.bindingClass.getSimpleClassNameWithoutGeneric(), this.propertyName);
 
         GMethod fieldClassSet = fieldClass.getMethod("set").argument(this.propertyType.get(), this.propertyName);
-        fieldClassSet.body.line("{}.this.get().{} = {};", this.bindingClass.getSimpleClassNameWithoutGeneric(), this.propertyName, this.propertyName);
+        if (this.propertyGenericElement != null) {
+            // Add SuppressWarnings when Eclipse gets fixed
+            fieldClassSet.body.line(
+                "{}.this.get().{} = ({}) {};",
+                this.bindingClass.getSimpleClassNameWithoutGeneric(),
+                this.propertyName,
+                this.propertyGenericElement.toString(),
+                this.propertyName);
+        } else {
+            fieldClassSet.body.line(
+                "{}.this.get().{} = {};",
+                this.bindingClass.getSimpleClassNameWithoutGeneric(),
+                this.propertyName,
+                this.propertyName);
+        }
 
         GMethod fieldGet = this.bindingClass.getMethod(this.propertyName).returnType(this.propertyType.getBindingType());
         fieldGet.body.line("if (this.{} == null) {", this.propertyName);
