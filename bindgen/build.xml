@@ -28,12 +28,12 @@
 	without rewriting seemed likely to cause jar hell confusion. So we'll go
 	with this for now.
 	-->
-	<target name="jar" depends="compile" description="jar bin/main/ into bin/jars/bindgen.jar and bin/sources/bindgen.jar">
+	<target name="jar" depends="compile,ivy.retrieve" description="jar bin/main/ into bin/jars/bindgen.jar and bin/sources/bindgen.jar">
 		<taskdef name="jarjar" classname="com.tonicsystems.jarjar.JarJarTask" classpath="lib/build/jarjar-1.0.jar"/>
 		<mkdir dir="bin/jars"/>
 		<jarjar destfile="bin/jars/bindgen.jar">
 			<fileset dir="bin/main" includes="**/*.class"/>
-			<zipfileset src="bin/master.lib/joist.util.jar" includes="joist/sourcegen/**/*.class,joist/util/**/*.class"/>
+			<zipfileset src="bin/lib/build/joist.util.jar" includes="joist/sourcegen/**/*.class,joist/util/**/*.class"/>
 			<zipfileset dir="META-INF" includes="**/*" prefix="META-INF"/>
 			<rule pattern="joist.sourcegen.*" result="org.exigencecorp.bindgen.dependencies.sourcegen.Bindgen@1"/>
 			<rule pattern="joist.util.*" result="org.exigencecorp.bindgen.dependencies.util.Bindgen@1"/>

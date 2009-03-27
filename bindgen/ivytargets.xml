@@ -21,6 +21,11 @@
 		<taskdef resource="org/apache/ivy/ant/antlib.xml" uri="antlib:org.apache.ivy.ant" classpath="${ivy.home}/${ivy.jar.name};${ivy.home}/${jsch.jar.name}"/>
 	</target>
 
+	<target name="ivy.retrieve" depends="ivy.load" description="downloads jars for the project">
+		<ivy:resolve/>
+		<ivy:retrieve pattern="bin/lib/[conf]/[artifact].[ext]" conf="*" type="jar"/>
+	</target>
+
 	<target name="ivy.publish-local" depends="jar,ivy.load" description="publish bindgen jar/source to ~/ivy2/local/">
 		<ivy:resolve/>
 		<ivy:publish resolver="local" conf="master,sources" forcedeliver="true" overwrite="true">
@@ -28,7 +33,7 @@
 		</ivy:publish>
 	</target>
 
-	<target name="ivy.publish-joist" depends="jar,ivy.load" description="publish bindgen jar/source to joist.ws">
+	<target name="ivy.publish-joist" depends="jar,ivy.retrieve" description="publish bindgen jar/source to joist.ws">
 		<ivy:resolve/>
 		<ivy:publish resolver="joist-upload" conf="master,sources" status="release" forcedeliver="true">
 			<artifacts pattern="bin/[type]s/[artifact].[ext]"/>
