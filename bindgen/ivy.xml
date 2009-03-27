@@ -10,7 +10,7 @@
 		<artifact name="bindgen" type="source" ext="jar" conf="sources"/>
 	</publications>
 	<dependencies>
-		<dependency org="joist" name="joist.util" rev="0.1-0cccb84" conf="build->*"/>
+		<dependency org="joist" name="joist.util" rev="0.1-f746a4a" conf="build->*"/>
 		<dependency org="jarjar" name="jarjar" rev="1.0" conf="build->*"/>
 	</dependencies>
 </ivy-module>
