@@ -24,6 +24,10 @@ public class FieldExample {
     // we had been colliding on "value"
     public int value;
 
+    // and colliding on "set"
+    public boolean set;
+    public boolean get;
+
     public FieldExample(String name) {
         this.name = name;
     }

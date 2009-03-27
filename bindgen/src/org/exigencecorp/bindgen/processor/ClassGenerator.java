@@ -72,7 +72,7 @@ public class ClassGenerator {
             this.bindingClass.getField("_value").type(this.name.get()).setProtected();
         }
 
-        GMethod set = this.bindingClass.getMethod("set").argument(this.name.get(), "value");
+        GMethod set = this.bindingClass.getMethod("set({} value)", this.name.get());
         set.body.line("this._value = value;");
 
         // The Binding<T> thing isn't quite working out--the set(Base) calls still need to
@@ -90,7 +90,7 @@ public class ClassGenerator {
             // setOverride.addAnnotation("@Override");
         }
 
-        GMethod get = this.bindingClass.getMethod("get").returnType(this.name.get());
+        GMethod get = this.bindingClass.getMethod("get()").returnType(this.name.get());
         if (this.baseElement == null) {
             get.body.line("return this._value;");
         } else {

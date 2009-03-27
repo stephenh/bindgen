@@ -14,6 +14,9 @@ public class MethodExample {
     private String name;
     // a boolean property
     private boolean good;
+    // Had been colliding on set
+    private boolean set;
+    private boolean get;
 
     public MethodExample(String id, String name) {
         this.id = id;
@@ -68,5 +71,21 @@ public class MethodExample {
     @Deprecated
     public String[] getStrings() {
         return null;
+    }
+
+    public boolean isSet() {
+        return this.set;
+    }
+
+    public void setSet(boolean set) {
+        this.set = set;
+    }
+
+    public boolean isGet() {
+        return this.get;
+    }
+
+    public void setGet(boolean get) {
+        this.get = get;
     }
 }
