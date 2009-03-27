@@ -38,7 +38,7 @@ public class FieldPropertyGenerator implements PropertyGenerator {
             return false;
         }
 
-        if (this.shouldSkipAttribute(this.propertyName)) {
+        if (this.shouldSkipAttribute(this.propertyName) || "get".equals(this.propertyName)) {
             return false;
         }
 
@@ -92,7 +92,7 @@ public class FieldPropertyGenerator implements PropertyGenerator {
                 this.propertyName);
         }
 
-        GMethod fieldGet = this.bindingClass.getMethod(this.propertyName).returnType(this.propertyType.getBindingType());
+        GMethod fieldGet = this.bindingClass.getMethod(this.propertyName + "()").returnType(this.propertyType.getBindingType());
         fieldGet.body.line("if (this.{} == null) {", this.propertyName);
         fieldGet.body.line("    this.{} = new My{}Binding();", this.propertyName, Inflector.capitalize(this.propertyName));
         fieldGet.body.line("}");

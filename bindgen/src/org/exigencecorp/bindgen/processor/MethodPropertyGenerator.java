@@ -14,6 +14,7 @@ import joist.util.Inflector;
 
 public class MethodPropertyGenerator implements PropertyGenerator {
 
+    public static final String[] existingBindingMethods = "get,set".split(",");
     private static final String[] javaKeywords = "abstract,continue,for,new,switch,assert,default,goto,package,synchronized,boolean,do,if,private,this,break,double,implements,protected,throw,byte,else,import,public,throws,case,enum,instanceof,return,transient,catch,extends,int,short,try,char,final,interface,static,void,class,finally,long,strictfp,volatile,const,float,native,super,while"
         .split(",");
     private final GenerationQueue queue;
@@ -39,7 +40,7 @@ public class MethodPropertyGenerator implements PropertyGenerator {
             return false;
         }
 
-        if (this.shouldSkipAttribute(this.propertyName)) {
+        if (this.shouldSkipAttribute(this.propertyName) || "get".equals(this.propertyName)) {
             return false;
         }
 
@@ -93,7 +94,7 @@ public class MethodPropertyGenerator implements PropertyGenerator {
             fieldClassGet.addAnnotation("@SuppressWarnings(\"unchecked\")");
         }
 
-        GMethod fieldClassSet = fieldClass.getMethod("set").argument(this.propertyType.get(), this.propertyName);
+        GMethod fieldClassSet = fieldClass.getMethod("set({} {})", this.propertyType.get(), this.propertyName);
         if (this.hasSetter()) {
             if (this.propertyGenericElement != null) {
                 fieldClassSet.body.line("{}.this.get().set{}(({}) {});",//
@@ -102,16 +103,16 @@ public class MethodPropertyGenerator implements PropertyGenerator {
                     this.propertyGenericElement.toString(),
                     this.propertyName);
             } else {
-                fieldClassSet.body.line("{}.this.get().set{}({});",//
+                fieldClassSet.body.line("{}.this.get().{}({});",//
                     this.bindingClass.getSimpleClassNameWithoutGeneric(),
-                    Inflector.capitalize(this.propertyName),
+                    this.getSetterName(),
                     this.propertyName);
             }
         } else {
             fieldClassSet.body.line("throw new RuntimeException(this.getName() + \" is read only\");");
         }
 
-        GMethod fieldGet = this.bindingClass.getMethod(this.propertyName).returnType(this.propertyType.getBindingType());
+        GMethod fieldGet = this.bindingClass.getMethod(this.propertyName + "()").returnType(this.propertyType.getBindingType());
         fieldGet.body.line("if (this.{} == null) {", this.propertyName);
         fieldGet.body.line("    this.{} = new My{}Binding();", this.propertyName, Inflector.capitalize(this.propertyName));
         fieldGet.body.line("}");
@@ -123,8 +124,7 @@ public class MethodPropertyGenerator implements PropertyGenerator {
     }
 
     private boolean hasSetter() {
-        String methodName = this.enclosed.getSimpleName().toString();
-        String setterName = "set" + methodName.substring(this.getPrefix().length());
+        String setterName = this.getSetterName();
         for (Element other : this.enclosed.getEnclosingElement().getEnclosedElements()) {
             if (other.getSimpleName().toString().equals(setterName)) {
                 ExecutableElement e = (ExecutableElement) other;
@@ -132,6 +132,11 @@ public class MethodPropertyGenerator implements PropertyGenerator {
             }
         }
         return false;
+    }
+
+    private String getSetterName() {
+        String methodName = this.enclosed.getSimpleName().toString();
+        return "set" + methodName.substring(this.getPrefix().length());
     }
 
     /** Add generic suffixes to avoid warnings in bindings for pre-1.5 APIs.
@@ -180,7 +185,7 @@ public class MethodPropertyGenerator implements PropertyGenerator {
                 break;
             }
         }
-        if (isKeyword) {
+        if (isKeyword || "get".equals(propertyName)) {
             propertyName = this.methodName;
         }
         return propertyName;
