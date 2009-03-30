@@ -97,9 +97,9 @@ public class MethodPropertyGenerator implements PropertyGenerator {
         GMethod fieldClassSet = fieldClass.getMethod("set({} {})", this.propertyType.get(), this.propertyName);
         if (this.hasSetter()) {
             if (this.propertyGenericElement != null) {
-                fieldClassSet.body.line("{}.this.get().set{}(({}) {});",//
+                fieldClassSet.body.line("{}.this.get().{}(({}) {});",//
                     this.bindingClass.getSimpleClassNameWithoutGeneric(),
-                    Inflector.capitalize(this.propertyName),
+                    this.getSetterName(),
                     this.propertyGenericElement.toString(),
                     this.propertyName);
             } else {
