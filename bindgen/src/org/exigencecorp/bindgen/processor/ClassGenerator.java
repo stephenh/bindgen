@@ -11,6 +11,7 @@ import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
+import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 import javax.tools.JavaFileObject;
@@ -48,7 +49,16 @@ public class ClassGenerator {
     }
 
     private void initializeBindingClass() {
-        this.bindingClass = new GClass(this.name.getBindingType());
+        // Put together bindingClassName, along with the generics and any bounds on them
+        ClassName bindingTypeName = new ClassName(this.name.getBindingType());
+        String bindingClassName = bindingTypeName.getWithoutGenericPart();
+        DeclaredType dt = (DeclaredType) this.element.asType();
+        if (dt.getTypeArguments().size() > 0) {
+            TypeVars tv = new TypeVars(dt);
+            bindingClassName += "<" + tv.genericsWithBounds + ">";
+        }
+        this.bindingClass = new GClass(bindingClassName);
+
         if (this.baseElement != null) {
             ClassName baseClassName = new ClassName(this.baseElement);
             this.bindingClass.baseClassName(baseClassName.getBindingType());
