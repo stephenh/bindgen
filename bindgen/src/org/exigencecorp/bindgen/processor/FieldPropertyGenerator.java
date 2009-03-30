@@ -1,5 +1,7 @@
 package org.exigencecorp.bindgen.processor;
 
+import java.lang.reflect.Modifier;
+
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
@@ -19,6 +21,7 @@ public class FieldPropertyGenerator implements PropertyGenerator {
     private ClassName propertyType;
     private TypeElement propertyTypeElement;
     private TypeParameterElement propertyGenericElement;
+    private boolean isFinal = false;
 
     public FieldPropertyGenerator(GenerationQueue queue, GClass bindingClass, Element enclosed) {
         this.queue = queue;
@@ -31,6 +34,7 @@ public class FieldPropertyGenerator implements PropertyGenerator {
             this.propertyType = null;
         }
         this.propertyName = this.enclosed.getSimpleName().toString();
+        this.detectFinal();
     }
 
     public boolean shouldGenerate() {
@@ -76,7 +80,7 @@ public class FieldPropertyGenerator implements PropertyGenerator {
         fieldClassGet.body.line("return {}.this.get().{};", this.bindingClass.getSimpleClassNameWithoutGeneric(), this.propertyName);
 
         GMethod fieldClassSet = fieldClass.getMethod("set").argument(this.propertyType.get(), this.propertyName);
-        if (this.propertyGenericElement != null) {
+        if (!this.isFinal && this.propertyGenericElement != null) {
             // Add SuppressWarnings when Eclipse gets fixed
             fieldClassSet.body.line(
                 "{}.this.get().{} = ({}) {};",
@@ -84,12 +88,14 @@ public class FieldPropertyGenerator implements PropertyGenerator {
                 this.propertyName,
                 this.propertyGenericElement.toString(),
                 this.propertyName);
-        } else {
+        } else if (!this.isFinal) {
             fieldClassSet.body.line(
                 "{}.this.get().{} = {};",
                 this.bindingClass.getSimpleClassNameWithoutGeneric(),
                 this.propertyName,
                 this.propertyName);
+        } else {
+            fieldClassSet.body.line("throw new RuntimeException(this.getName() + \" is read only\");");
         }
 
         GMethod fieldGet = this.bindingClass.getMethod(this.propertyName + "()").returnType(this.propertyType.getBindingType());
@@ -115,6 +121,27 @@ public class FieldPropertyGenerator implements PropertyGenerator {
 
     public String getPropertyName() {
         return this.propertyName;
+    }
+
+    private void detectFinal() {
+        try {
+            // Eclipse has a _binding.modifiers field we can tell if this field is final
+            Object modifiers = FieldWalker.walk(this.enclosed, "_binding", "modifiers");
+            if ((((Integer) modifiers).intValue() & Modifier.FINAL) != 0) {
+                this.isFinal = true;
+            }
+        } catch (Exception e) {
+            // final detection failed
+        }
+        try {
+            // javac has a flags_field field
+            Object flags = FieldWalker.walk(this.enclosed, "data", "val$env", "tree", "mods", "flags");
+            if ((((Long) flags).intValue() & Modifier.FINAL) != 0) {
+                this.isFinal = true;
+            }
+        } catch (Exception e) {
+            // final detection failed
+        }
     }
 
 }

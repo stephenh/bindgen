@@ -28,6 +28,9 @@ public class FieldExample {
     public boolean set;
     public boolean get;
 
+    // a final field
+    public final String finalField = "1";
+
     public FieldExample(String name) {
         this.name = name;
     }
