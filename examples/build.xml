@@ -1,0 +1,26 @@
+<project name="bindgen.examples">
+
+	<path id="classpath">
+		<fileset dir="lib" includes="**/*.jar"/>
+		<fileset dir="../bindgen/bin/lib/build" includes="**/*.jar"/>
+		<pathelement location="../bindgen/bin/eclipse"/>
+	</path>
+
+	<target name="clean">
+		<delete dir="bin"/>
+	</target>
+
+	<target name="compile">
+		<mkdir dir="bin/main"/>
+		<mkdir dir="bin/apt-javac"/>
+		<javac destdir="bin/main" classpathref="classpath" debug="true" nowarn="yes" source="1.6" target="1.6" encoding="utf8">
+			<src path="src"/>
+			<compilerarg value="-s"/>
+			<compilerarg value="bin/apt-javac"/>
+			<compilerarg value="-processor"/>
+			<compilerarg value="org.exigencecorp.bindgen.processor.BindgenAnnotationProcessor"/>
+			<compilerarg value="-Abindgen.skipExistingBindingCheck=true"/> <!-- for javac -->
+			<compilerarg value="-XprintRounds"/>
+		</javac>
+	</target>
+</project>
