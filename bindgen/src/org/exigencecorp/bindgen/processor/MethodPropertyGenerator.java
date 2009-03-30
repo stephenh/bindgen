@@ -60,8 +60,10 @@ public class MethodPropertyGenerator implements PropertyGenerator {
         }
 
         Element returnTypeAsElement = this.getProcessingEnv().getTypeUtils().asElement(returnType);
+        // if (returnTypeAsElement instanceof TypeParameterElement && !returnType.toString().equals(returnTypeAsElement.toString()) && true == false) {
         if (returnTypeAsElement instanceof TypeParameterElement) {
             this.propertyGenericElement = (TypeParameterElement) returnTypeAsElement;
+            this.propertyGenericElement.getGenericElement();
             this.propertyTypeElement = this.getProcessingEnv().getElementUtils().getTypeElement("java.lang.Object");
             this.propertyType = new ClassName("java.lang.Object");
         } else if (returnTypeAsElement instanceof TypeElement) {

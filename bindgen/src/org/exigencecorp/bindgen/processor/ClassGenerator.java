@@ -20,6 +20,7 @@ import javax.tools.Diagnostic.Kind;
 import joist.sourcegen.GClass;
 import joist.sourcegen.GMethod;
 
+import org.exigencecorp.bindgen.AbstractBinding;
 import org.exigencecorp.bindgen.Binding;
 
 public class ClassGenerator {
@@ -60,11 +61,10 @@ public class ClassGenerator {
         this.bindingClass = new GClass(bindingClassName);
 
         if (this.baseElement != null) {
-            ClassName baseClassName = new ClassName(this.baseElement);
-            this.bindingClass.baseClassName(baseClassName.getBindingType());
+            this.bindingClass.baseClassName(new ClassName(this.baseElement).getBindingType());
             this.queue.enqueueIfNew((TypeElement) this.queue.getProcessingEnv().getTypeUtils().asElement(this.baseElement));
         } else {
-            this.bindingClass.implementsInterface(Binding.class.getName() + "<{}>", this.name.get());
+            this.bindingClass.baseClassName("{}<{}>", AbstractBinding.class.getName(), this.name.get());
         }
 
         // this.bindingClass.addImports(Generated.class);
@@ -78,17 +78,22 @@ public class ClassGenerator {
     }
 
     private void addValueGetAndSet() {
-        if (this.baseElement == null) {
-            this.bindingClass.getField("_value").type(this.name.get()).setProtected();
-        }
-
-        GMethod set = this.bindingClass.getMethod("set({} value)", this.name.get());
-        set.body.line("this._value = value;");
-
         // The Binding<T> thing isn't quite working out--the set(Base) calls still need to
         // go through set(Sub) so that the inner classes that override set(Sub) to bind
         // back to actual fields and properties work for calls that end up wandering through
         // the set(Base) methods
+        if (this.baseElement == null) {
+            return;
+        }
+
+        // Add @Override
+        GMethod get = this.bindingClass.getMethod("get()").returnType(this.name.get());
+        get.body.line("return ({}) this._value;", this.name.get());
+
+        // Add @Override
+        GMethod set = this.bindingClass.getMethod("set({} value)", this.name.get());
+        set.body.line("this._value = value;");
+
         for (TypeElement currentElement : this.getSuperElements()) {
             GMethod setOverride = this.bindingClass.getMethod("set({} value)", new ClassName(currentElement.asType()).getWithoutGenericPart());
             setOverride.body.line("this.set(({}) value);", this.name.get());
@@ -98,13 +103,6 @@ public class ClassGenerator {
             }
             // Causes NPEs in Eclipse
             // setOverride.addAnnotation("@Override");
-        }
-
-        GMethod get = this.bindingClass.getMethod("get()").returnType(this.name.get());
-        if (this.baseElement == null) {
-            get.body.line("return this._value;");
-        } else {
-            get.body.line("return ({}) this._value;", this.name.get());
         }
     }
 
