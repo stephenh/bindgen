@@ -79,15 +79,14 @@ public class GenerationQueue {
         new BindKeywordGenerator(this).generate(this.written);
     }
 
-    public TypeMirror boxIfNeededOrNull(TypeMirror returnType) {
+    public TypeMirror boxIfNeeded(TypeMirror returnType) {
         if (returnType instanceof PrimitiveType) {
             // double check--Eclipse worked fine but javac is letting non-primitive types in here
             if (returnType.toString().indexOf('.') == -1) {
                 try {
                     return this.getProcessingEnv().getTypeUtils().boxedClass((PrimitiveType) returnType).asType();
                 } catch (NullPointerException npe) {
-                    this.log("boxedClass failed for " + returnType);
-                    return null; // bug in javac
+                    return returnType; // it is probably a type parameter, e.g. T
                 }
             }
         }

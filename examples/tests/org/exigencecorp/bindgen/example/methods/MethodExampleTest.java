@@ -63,7 +63,7 @@ public class MethodExampleTest extends TestCase {
     public void testGetBindings() {
         MethodExample e = new MethodExample("1", "name");
         MethodExampleBinding b = new MethodExampleBinding(e);
-        Assert.assertEquals(6, b.getChildBindings().size());
+        Assert.assertEquals(8, b.getChildBindings().size());
 
         boolean foundName = false;
         for (Binding<?> sub : b.getChildBindings()) {
