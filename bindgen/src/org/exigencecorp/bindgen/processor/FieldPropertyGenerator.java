@@ -6,11 +6,14 @@ import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.TypeParameterElement;
+import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
 
 import joist.sourcegen.GClass;
 import joist.sourcegen.GMethod;
 import joist.util.Inflector;
+
+import org.exigencecorp.bindgen.AbstractBinding;
 
 public class FieldPropertyGenerator implements PropertyGenerator {
 
@@ -27,18 +30,13 @@ public class FieldPropertyGenerator implements PropertyGenerator {
         this.queue = queue;
         this.bindingClass = bindingClass;
         this.enclosed = enclosed;
-        TypeMirror boxed = this.queue.boxIfNeededOrNull(this.enclosed.asType());
-        if (boxed != null) {
-            this.propertyType = new ClassName(boxed);
-        } else {
-            this.propertyType = null;
-        }
+        this.propertyType = new ClassName(this.queue.boxIfNeeded(this.enclosed.asType()));
         this.propertyName = this.enclosed.getSimpleName().toString();
         this.detectFinal();
     }
 
     public boolean shouldGenerate() {
-        if (this.propertyType == null || this.propertyType.getWithoutGenericPart().endsWith("Binding")) {
+        if (this.propertyType.getWithoutGenericPart().endsWith("Binding")) {
             return false;
         }
 
@@ -46,17 +44,23 @@ public class FieldPropertyGenerator implements PropertyGenerator {
             return false;
         }
 
-        TypeMirror fieldType = this.queue.boxIfNeededOrNull(this.enclosed.asType());
+        TypeMirror fieldType = this.queue.boxIfNeeded(this.enclosed.asType());
         if (fieldType == null) {
             return false; // Skip methods we (javac) could not box appropriately
         }
 
         Element fieldTypeAsElement = this.getProcessingEnv().getTypeUtils().asElement(fieldType);
-        // if (fieldTypeAsElement instanceof TypeParameterElement && !fieldType.toString().equals(fieldTypeAsElement.toString())) {
         if (fieldTypeAsElement instanceof TypeParameterElement) {
-            this.propertyGenericElement = (TypeParameterElement) fieldTypeAsElement;
-            this.propertyTypeElement = this.getProcessingEnv().getElementUtils().getTypeElement("java.lang.Object");
-            this.propertyType = new ClassName("java.lang.Object");
+            // javac goes in here even when this is not really a TypeParameterElement, which I thought meant it was always generic
+            if (this.isReallyATypeParameter(fieldTypeAsElement)) {
+                this.propertyGenericElement = (TypeParameterElement) fieldTypeAsElement;
+                this.propertyType = new ClassName(this.propertyGenericElement.toString());
+                this.propertyTypeElement = null;
+            } else {
+                // recover the non-parameter element for javac
+                this.propertyTypeElement = this.getProcessingEnv().getElementUtils().getTypeElement(fieldTypeAsElement.toString());
+                this.propertyType = new ClassName(fieldType.toString());
+            }
         } else if (fieldTypeAsElement instanceof TypeElement) {
             this.propertyTypeElement = (TypeElement) fieldTypeAsElement;
         } else {
@@ -66,10 +70,27 @@ public class FieldPropertyGenerator implements PropertyGenerator {
         return true;
     }
 
+    private boolean isReallyATypeParameter(Element e) {
+        DeclaredType parent = (DeclaredType) this.enclosed.getEnclosingElement().asType();
+        for (TypeMirror m : parent.getTypeArguments()) {
+            if (e.toString().equals(m.toString())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     public void generate() {
-        this.bindingClass.getField(this.propertyName).type(this.propertyType.getBindingType());
-        GClass fieldClass = this.bindingClass.getInnerClass("My{}Binding", Inflector.capitalize(this.propertyName)).notStatic();
-        fieldClass.baseClassName(this.propertyType.getBindingType());
+        String innerClassBindingName = "My" + Inflector.capitalize(this.propertyName) + "Binding";
+        this.bindingClass.getField(this.propertyName).type(innerClassBindingName);
+
+        GClass fieldClass = this.bindingClass.getInnerClass(innerClassBindingName).notStatic();
+        if (this.propertyGenericElement != null) {
+            fieldClass.baseClassName("{}<{}>", AbstractBinding.class.getName(), this.propertyGenericElement);
+            fieldClass.getMethod("getType").returnType("Class<?>").body.line("return null;");
+        } else {
+            fieldClass.baseClassName(this.propertyType.getBindingType());
+        }
 
         GMethod fieldClassName = fieldClass.getMethod("getName").returnType(String.class);
         fieldClassName.body.line("return \"{}\";", this.propertyName);
@@ -81,15 +102,7 @@ public class FieldPropertyGenerator implements PropertyGenerator {
         fieldClassGet.body.line("return {}.this.get().{};", this.bindingClass.getSimpleClassNameWithoutGeneric(), this.propertyName);
 
         GMethod fieldClassSet = fieldClass.getMethod("set").argument(this.propertyType.get(), this.propertyName);
-        if (!this.isFinal && this.propertyGenericElement != null) {
-            // Add SuppressWarnings when Eclipse gets fixed
-            fieldClassSet.body.line(
-                "{}.this.get().{} = ({}) {};",
-                this.bindingClass.getSimpleClassNameWithoutGeneric(),
-                this.propertyName,
-                this.propertyGenericElement.toString(),
-                this.propertyName);
-        } else if (!this.isFinal) {
+        if (!this.isFinal) {
             fieldClassSet.body.line(
                 "{}.this.get().{} = {};",
                 this.bindingClass.getSimpleClassNameWithoutGeneric(),
@@ -99,7 +112,12 @@ public class FieldPropertyGenerator implements PropertyGenerator {
             fieldClassSet.body.line("throw new RuntimeException(this.getName() + \" is read only\");");
         }
 
-        GMethod fieldGet = this.bindingClass.getMethod(this.propertyName + "()").returnType(this.propertyType.getBindingType());
+        GMethod fieldGet = this.bindingClass.getMethod(this.propertyName + "()");
+        if (this.propertyGenericElement != null) {
+            fieldGet.returnType(innerClassBindingName);
+        } else {
+            fieldGet.returnType(this.propertyType.getBindingType());
+        }
         fieldGet.body.line("if (this.{} == null) {", this.propertyName);
         fieldGet.body.line("    this.{} = new My{}Binding();", this.propertyName, Inflector.capitalize(this.propertyName));
         fieldGet.body.line("}");
