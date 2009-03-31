@@ -7,7 +7,8 @@
 	</path>
 
 	<target name="clean">
-		<delete dir="bin"/>
+		<delete dir="bin/main"/>
+		<delete dir="bin/apt-javac"/>
 	</target>
 
 	<target name="compile">
@@ -15,12 +16,29 @@
 		<mkdir dir="bin/apt-javac"/>
 		<javac destdir="bin/main" classpathref="classpath" debug="true" nowarn="yes" source="1.6" target="1.6" encoding="utf8">
 			<src path="src"/>
+			<src path="tests"/>
 			<compilerarg value="-s"/>
 			<compilerarg value="bin/apt-javac"/>
 			<compilerarg value="-processor"/>
 			<compilerarg value="org.exigencecorp.bindgen.processor.BindgenAnnotationProcessor"/>
 			<compilerarg value="-Abindgen.skipExistingBindingCheck=true"/> <!-- for javac -->
+			<compilerarg value="-AblockTypes=org.exigencecorp.bindgen.example.blocks.TransactionBlock"/>
 			<compilerarg value="-XprintRounds"/>
 		</javac>
 	</target>
+
+	<target name="tests">
+		<mkdir dir="bin/results"/>
+		<junit printsummary="on" showoutput="yes" fork="yes" forkmode="once">
+			<classpath>
+				<path refid="classpath"/>
+				<pathelement path="bin/main"/>
+			</classpath>
+			<formatter type="xml"/>
+			<batchtest todir="bin/results">
+				<fileset dir="tests" includes="**/*Test.java" excludes="**/Abstract*.java"/>
+			</batchtest>
+		</junit>
+	</target>
+
 </project>
