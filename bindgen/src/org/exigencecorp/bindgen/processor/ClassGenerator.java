@@ -86,23 +86,23 @@ public class ClassGenerator {
             return;
         }
 
-        // Add @Override
         GMethod get = this.bindingClass.getMethod("get()").returnType(this.name.get());
+        // get.addAnnotation("@Override");
         get.body.line("return ({}) this._value;", this.name.get());
+        if (this.name.hasGenerics()) {
+            get.addAnnotation("@SuppressWarnings(\"unchecked\")");
+        }
 
-        // Add @Override
         GMethod set = this.bindingClass.getMethod("set({} value)", this.name.get());
         set.body.line("this._value = value;");
 
         for (TypeElement currentElement : this.getSuperElements()) {
             GMethod setOverride = this.bindingClass.getMethod("set({} value)", new ClassName(currentElement.asType()).getWithoutGenericPart());
-            setOverride.body.line("this.set(({}) value);", this.name.get());
-            if (!"".equals(this.name.getGenericPart())) {
-                // Causes NPEs in Eclipse
-                // this.bindingClass.addAnnotation("@SuppressWarnings(\"unchecked\")");
-            }
-            // Causes NPEs in Eclipse
             // setOverride.addAnnotation("@Override");
+            setOverride.body.line("this.set(({}) value);", this.name.get());
+            if (this.name.hasGenerics()) {
+                setOverride.addAnnotation("@SuppressWarnings(\"unchecked\")");
+            }
         }
     }
 

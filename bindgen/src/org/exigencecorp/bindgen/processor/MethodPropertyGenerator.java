@@ -101,6 +101,9 @@ public class MethodPropertyGenerator implements PropertyGenerator {
             fieldClass.getMethod("getType").returnType("Class<?>").body.line("return null;");
         } else {
             fieldClass.baseClassName(this.propertyType.getBindingType());
+            if (this.propertyType.hasWildcards()) {
+                fieldClass.addAnnotation("@SuppressWarnings(\"unchecked\")");
+            }
         }
 
         GMethod fieldClassName = fieldClass.getMethod("getName").returnType(String.class);
@@ -115,7 +118,8 @@ public class MethodPropertyGenerator implements PropertyGenerator {
             fieldClassGet.addAnnotation("@SuppressWarnings(\"unchecked\")");
         }
 
-        GMethod fieldClassSet = fieldClass.getMethod("set({} {})", this.propertyType.get(), this.propertyName);
+        String setType = this.propertyType.hasWildcards() ? this.propertyType.getWithoutGenericPart() : this.propertyType.get();
+        GMethod fieldClassSet = fieldClass.getMethod("set({} {})", setType, this.propertyName);
         if (this.hasSetter()) {
             fieldClassSet.body.line("{}.this.get().{}({});",//
                 this.bindingClass.getSimpleClassNameWithoutGeneric(),
@@ -130,6 +134,9 @@ public class MethodPropertyGenerator implements PropertyGenerator {
             fieldGet.returnType(innerClassBindingName);
         } else {
             fieldGet.returnType(this.propertyType.getBindingType());
+            if (this.propertyType.hasWildcards()) {
+                fieldGet.addAnnotation("@SuppressWarnings(\"unchecked\")");
+            }
         }
         fieldGet.body.line("if (this.{} == null) {", this.propertyName);
         fieldGet.body.line("    this.{} = new {}();", this.propertyName, innerClassBindingName);
@@ -146,7 +153,7 @@ public class MethodPropertyGenerator implements PropertyGenerator {
         for (Element other : this.enclosed.getEnclosingElement().getEnclosedElements()) {
             if (other.getSimpleName().toString().equals(setterName)) {
                 ExecutableElement e = (ExecutableElement) other;
-                return e.getThrownTypes().size() == 0; // only true if no throws
+                return e.getParameters().size() == 1 && e.getThrownTypes().size() == 0; // only true if no throws
             }
         }
         return false;
