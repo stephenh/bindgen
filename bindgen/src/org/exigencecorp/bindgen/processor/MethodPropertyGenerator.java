@@ -146,7 +146,7 @@ public class MethodPropertyGenerator implements PropertyGenerator {
         for (Element other : this.enclosed.getEnclosingElement().getEnclosedElements()) {
             if (other.getSimpleName().toString().equals(setterName)) {
                 ExecutableElement e = (ExecutableElement) other;
-                return e.getThrownTypes().size() == 0; // only true if no throws
+                return e.getParameters().size() == 1 && e.getThrownTypes().size() == 0; // only true if no throws
             }
         }
         return false;
