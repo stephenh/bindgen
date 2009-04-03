@@ -90,6 +90,9 @@ public class FieldPropertyGenerator implements PropertyGenerator {
             fieldClass.getMethod("getType").returnType("Class<?>").body.line("return null;");
         } else {
             fieldClass.baseClassName(this.propertyType.getBindingType());
+            if (this.propertyType.hasWildcards()) {
+                fieldClass.addAnnotation("@SuppressWarnings(\"unchecked\")");
+            }
         }
 
         GMethod fieldClassName = fieldClass.getMethod("getName").returnType(String.class);
@@ -117,6 +120,9 @@ public class FieldPropertyGenerator implements PropertyGenerator {
             fieldGet.returnType(innerClassBindingName);
         } else {
             fieldGet.returnType(this.propertyType.getBindingType());
+            if (this.propertyType.hasWildcards()) {
+                fieldGet.addAnnotation("@SuppressWarnings(\"unchecked\")");
+            }
         }
         fieldGet.body.line("if (this.{} == null) {", this.propertyName);
         fieldGet.body.line("    this.{} = new My{}Binding();", this.propertyName, Inflector.capitalize(this.propertyName));

@@ -41,13 +41,24 @@ public class ClassName {
     /** @return binding type, e.g. bindgen.java.lang.StringBinding, bindgen.app.EmployeeBinding */
     public String getBindingType() {
         // Watch for package.Foo.Inner -> package.foo.Inner
-        String bindingName = this.getWithoutGenericPart() + "Binding" + this.getGenericPart();
+        String bindingName = this.getWithoutGenericPart() + "Binding";
+        if (this.hasGenerics() && !this.hasWildcards()) {
+            bindingName += this.getGenericPart();
+        }
         Matcher m = p.matcher(bindingName);
         while (m.find()) {
             bindingName = m.replaceFirst("." + Inflector.uncapitalize(m.group(1)) + ".");
             m = p.matcher(bindingName);
         }
         return "bindgen." + bindingName;
+    }
+
+    public boolean hasGenerics() {
+        return this.getGenericPart().length() > 0;
+    }
+
+    public boolean hasWildcards() {
+        return this.getGenericPart().indexOf('?') > -1;
     }
 
     /** @return "com.app.Type<String, String>" if the type is "com.app.Type<String, String>" */
