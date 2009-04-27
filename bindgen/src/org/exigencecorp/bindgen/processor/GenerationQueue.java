@@ -25,6 +25,7 @@ public class GenerationQueue {
     private final List<TypeElement> queue = new ArrayList<TypeElement>();
     private final boolean log;
     private final boolean skipExistingBindingCheck;
+    private final boolean skipBindKeyword;
 
     public GenerationQueue(ProcessingEnvironment processingEnv) {
         this.processingEnv = processingEnv;
@@ -54,6 +55,7 @@ public class GenerationQueue {
 
         this.log = "true".equals(this.properties.get("bindgen.log"));
         this.skipExistingBindingCheck = "true".equals(processingEnv.getOptions().get("bindgen.skipExistingBindingCheck"));
+        this.skipBindKeyword = "true".equals(processingEnv.getOptions().get("bindgen.skipBindKeyword"));
     }
 
     public void enqueueForcefully(TypeElement element) {
@@ -76,6 +78,9 @@ public class GenerationQueue {
     }
 
     public void updateBindKeywordClass() {
+        if (this.skipBindKeyword) {
+            return;
+        }
         new BindKeywordGenerator(this).generate(this.written);
     }
 
