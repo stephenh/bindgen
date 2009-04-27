@@ -2,9 +2,12 @@ package org.exigencecorp.bindgen.processor;
 
 import java.io.IOException;
 import java.io.Writer;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
+import javax.annotation.Generated;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
@@ -67,9 +70,13 @@ public class ClassGenerator {
             this.bindingClass.baseClassName("{}<{}>", AbstractBinding.class.getName(), this.name.get());
         }
 
-        // this.bindingClass.addImports(Generated.class);
-        // SimpleDateFormat sdf = new SimpleDateFormat("dd MMM yyyy hh:mm");
-        // this.bindingClass.addAnnotation("@Generated(value = \"" + BindgenAnnotationProcessor.class.getName() + "\", date = \"" + sdf.format(new Date()) + "\")");
+        this.bindingClass.addImports(Generated.class);
+        SimpleDateFormat sdf = new SimpleDateFormat("dd MMM yyyy hh:mm");
+        this.bindingClass.addAnnotation("@Generated(value = \""
+            + BindgenAnnotationProcessor.class.getName()
+            + "\", date = \""
+            + sdf.format(new Date())
+            + "\")");
     }
 
     private void addConstructors() {
@@ -87,7 +94,7 @@ public class ClassGenerator {
         }
 
         GMethod get = this.bindingClass.getMethod("get()").returnType(this.name.get());
-        // get.addAnnotation("@Override");
+        get.addAnnotation("@Override");
         get.body.line("return ({}) this._value;", this.name.get());
         if (this.name.hasGenerics()) {
             get.addAnnotation("@SuppressWarnings(\"unchecked\")");
@@ -98,7 +105,7 @@ public class ClassGenerator {
 
         for (TypeElement currentElement : this.getSuperElements()) {
             GMethod setOverride = this.bindingClass.getMethod("set({} value)", new ClassName(currentElement.asType()).getWithoutGenericPart());
-            // setOverride.addAnnotation("@Override");
+            setOverride.addAnnotation("@Override");
             setOverride.body.line("this.set(({}) value);", this.name.get());
             if (this.name.hasGenerics()) {
                 setOverride.addAnnotation("@SuppressWarnings(\"unchecked\")");
