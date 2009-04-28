@@ -3,6 +3,7 @@ package org.exigencecorp.bindgen.processor;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
+import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.TypeParameterElement;
 import javax.lang.model.type.DeclaredType;
@@ -151,7 +152,7 @@ public class MethodPropertyGenerator implements PropertyGenerator {
     private boolean hasSetter() {
         String setterName = this.getSetterName();
         for (Element other : this.enclosed.getEnclosingElement().getEnclosedElements()) {
-            if (other.getSimpleName().toString().equals(setterName)) {
+            if (other.getSimpleName().toString().equals(setterName) && other.getModifiers().contains(Modifier.PUBLIC)) {
                 ExecutableElement e = (ExecutableElement) other;
                 return e.getParameters().size() == 1 && e.getThrownTypes().size() == 0; // only true if no throws
             }
