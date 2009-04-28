@@ -107,7 +107,7 @@ public class ClassGenerator {
             GMethod setOverride = this.bindingClass.getMethod("set({} value)", new ClassName(currentElement.asType()).getWithoutGenericPart());
             setOverride.addAnnotation("@Override");
             setOverride.body.line("this.set(({}) value);", this.name.get());
-            if (this.name.hasGenerics()) {
+            if (this.name.hasGenerics() || new ClassName(currentElement.asType()).hasGenerics()) {
                 setOverride.addAnnotation("@SuppressWarnings(\"unchecked\")");
             }
         }
