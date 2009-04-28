@@ -88,4 +88,13 @@ public class MethodExample {
     public void setGet(boolean get) {
         this.get = get;
     }
+
+    public Boolean getReadOnlyButSetterIsNotPublic() {
+        return true;
+    }
+
+    // This used to cause a compile error in the binding
+    protected void setReadOnlyButSetterIsNotPublic(Boolean b) {
+    }
+
 }

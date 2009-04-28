@@ -1,7 +1,5 @@
 package org.exigencecorp.bindgen.processor;
 
-import java.lang.reflect.Modifier;
-
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
@@ -32,7 +30,7 @@ public class FieldPropertyGenerator implements PropertyGenerator {
         this.enclosed = enclosed;
         this.propertyType = new ClassName(this.queue.boxIfNeeded(this.enclosed.asType()));
         this.propertyName = this.enclosed.getSimpleName().toString();
-        this.detectFinal();
+        this.isFinal = this.enclosed.getModifiers().contains(javax.lang.model.element.Modifier.FINAL);
     }
 
     public boolean shouldGenerate() {
@@ -146,27 +144,6 @@ public class FieldPropertyGenerator implements PropertyGenerator {
 
     public String getPropertyName() {
         return this.propertyName;
-    }
-
-    private void detectFinal() {
-        try {
-            // Eclipse has a _binding.modifiers field we can tell if this field is final
-            Object modifiers = FieldWalker.walk(this.enclosed, "_binding", "modifiers");
-            if ((((Integer) modifiers).intValue() & Modifier.FINAL) != 0) {
-                this.isFinal = true;
-            }
-        } catch (Exception e) {
-            // final detection failed
-        }
-        try {
-            // javac has a flags_field field
-            Object flags = FieldWalker.walk(this.enclosed, "data", "val$env", "tree", "mods", "flags");
-            if ((((Long) flags).intValue() & Modifier.FINAL) != 0) {
-                this.isFinal = true;
-            }
-        } catch (Exception e) {
-            // final detection failed
-        }
     }
 
 }
