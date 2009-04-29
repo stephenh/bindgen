@@ -65,7 +65,10 @@ public class ClassGenerator {
 
         if (this.baseElement != null) {
             this.bindingClass.baseClassName(new ClassName(this.baseElement).getBindingType());
-            this.queue.enqueueIfNew((TypeElement) this.queue.getProcessingEnv().getTypeUtils().asElement(this.baseElement));
+            // We do this forcefully because if there was an un-annotated base class that was
+            // changed, it is not directly reported as changed like its annotated sub class,
+            // but we still want to walk up and generate it or else it won't exist (Eclipse actively deletes it)
+            this.queue.enqueueForcefully((TypeElement) this.queue.getProcessingEnv().getTypeUtils().asElement(this.baseElement));
         } else {
             this.bindingClass.baseClassName("{}<{}>", AbstractBinding.class.getName(), this.name.get());
         }
