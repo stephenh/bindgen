@@ -97,7 +97,16 @@ public class ClassGenerator {
         get.addAnnotation("@Override");
         get.body.line("return ({}) this._value;", this.name.get());
         if (this.name.hasGenerics()) {
-            get.addAnnotation("@SuppressWarnings(\"unchecked\")");
+            // The SuppressWarnings is not needed if our type parameters are the same as our parents...I think, see the inheritance2 example
+            boolean same = this.element.getTypeParameters().size() == this.getSuperElements().get(0).getTypeParameters().size();
+            for (int i = 0; i < this.element.getTypeParameters().size() && same; i++) {
+                String one = this.element.getTypeParameters().get(i).toString();
+                String two = this.getSuperElements().get(0).getTypeParameters().get(i).toString();
+                same = one.equals(two);
+            }
+            if (!same) {
+                get.addAnnotation("@SuppressWarnings(\"unchecked\")");
+            }
         }
 
         GMethod set = this.bindingClass.getMethod("set({} value)", this.name.get());
