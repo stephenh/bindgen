@@ -59,8 +59,11 @@ public class GenerationQueue {
     }
 
     public void enqueueForcefully(TypeElement element) {
-        this.queue.add(element);
-        this.written.add(element.toString());
+        // Even when done forcefully, we can only touch elements once/round
+        if (!this.written.contains(element.toString())) {
+            this.queue.add(element);
+            this.written.add(element.toString());
+        }
     }
 
     public void enqueueIfNew(TypeElement element) {
