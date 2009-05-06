@@ -22,6 +22,7 @@ import javax.tools.Diagnostic.Kind;
 
 import joist.sourcegen.GClass;
 import joist.sourcegen.GMethod;
+import joist.util.Make;
 
 import org.exigencecorp.bindgen.AbstractBinding;
 import org.exigencecorp.bindgen.Binding;
@@ -45,7 +46,6 @@ public class ClassGenerator {
     public void generate() {
         this.initializeBindingClass();
         this.addConstructors();
-        this.addValueGetAndSet();
         this.addNameAndType();
         this.generateProperties();
         this.addBindingsMethod();
@@ -61,19 +61,11 @@ public class ClassGenerator {
             TypeVars tv = new TypeVars(dt);
             bindingClassName += "<" + tv.genericsWithBounds + ">";
         }
+
         this.bindingClass = new GClass(bindingClassName);
-
-        if (this.baseElement != null) {
-            this.bindingClass.baseClassName(new ClassName(this.baseElement).getBindingType());
-            // We do this forcefully because if there was an un-annotated base class that was
-            // changed, it is not directly reported as changed like its annotated sub class,
-            // but we still want to walk up and generate it or else it won't exist (Eclipse actively deletes it)
-            this.queue.enqueueForcefully((TypeElement) this.queue.getProcessingEnv().getTypeUtils().asElement(this.baseElement));
-        } else {
-            this.bindingClass.baseClassName("{}<{}>", AbstractBinding.class.getName(), this.name.get());
-        }
-
+        this.bindingClass.baseClassName("{}<{}>", AbstractBinding.class.getName(), this.name.get());
         this.bindingClass.addImports(Generated.class);
+
         SimpleDateFormat sdf = new SimpleDateFormat("dd MMM yyyy hh:mm");
         this.bindingClass.addAnnotation("@Generated(value = \""
             + BindgenAnnotationProcessor.class.getName()
@@ -87,44 +79,6 @@ public class ClassGenerator {
         this.bindingClass.getConstructor(this.name.get() + " value").body.line("this.set(value);");
     }
 
-    private void addValueGetAndSet() {
-        // The Binding<T> thing isn't quite working out--the set(Base) calls still need to
-        // go through set(Sub) so that the inner classes that override set(Sub) to bind
-        // back to actual fields and properties work for calls that end up wandering through
-        // the set(Base) methods
-        if (this.baseElement == null) {
-            return;
-        }
-
-        GMethod get = this.bindingClass.getMethod("get()").returnType(this.name.get());
-        get.addAnnotation("@Override");
-        get.body.line("return ({}) this._value;", this.name.get());
-        if (this.name.hasGenerics()) {
-            // The SuppressWarnings is not needed if our type parameters are the same as our parents...I think, see the inheritance2 example
-            boolean same = this.element.getTypeParameters().size() == this.getSuperElements().get(0).getTypeParameters().size();
-            for (int i = 0; i < this.element.getTypeParameters().size() && same; i++) {
-                String one = this.element.getTypeParameters().get(i).toString();
-                String two = this.getSuperElements().get(0).getTypeParameters().get(i).toString();
-                same = one.equals(two);
-            }
-            if (!same) {
-                get.addAnnotation("@SuppressWarnings(\"unchecked\")");
-            }
-        }
-
-        GMethod set = this.bindingClass.getMethod("set({} value)", this.name.get());
-        set.body.line("this._value = value;");
-
-        for (TypeElement currentElement : this.getSuperElements()) {
-            GMethod setOverride = this.bindingClass.getMethod("set({} value)", new ClassName(currentElement.asType()).getWithoutGenericPart());
-            setOverride.addAnnotation("@Override");
-            setOverride.body.line("this.set(({}) value);", this.name.get());
-            if (this.name.hasGenerics() || new ClassName(currentElement.asType()).hasGenerics()) {
-                setOverride.addAnnotation("@SuppressWarnings(\"unchecked\")");
-            }
-        }
-    }
-
     private void addNameAndType() {
         GMethod name = this.bindingClass.getMethod("getName").returnType(String.class);
         name.body.line("return \"\";");
@@ -134,44 +88,30 @@ public class ClassGenerator {
     }
 
     private void generateProperties() {
-        for (PropertyGenerator pg : this.getPropertyGenerators(this.element)) {
-            pg.generate();
-            if (pg.getPropertyName() != null) {
-                this.foundSubBindings.add(pg.getPropertyName());
-                this.queue.enqueueIfNew(pg.getPropertyTypeElement());
+        List<String> done = new ArrayList<String>();
+        for (TypeElement e : Make.list(this.element).with(this.getSuperElements())) {
+            for (PropertyGenerator pg : this.getPropertyGenerators(e)) {
+                if (done.contains(pg.getPropertyName())) {
+                    continue; // in case a parent class has the same name as a child class
+                }
+                pg.generate();
+                done.add(pg.getPropertyName());
+                if (pg.getPropertyTypeElement() != null) {
+                    this.foundSubBindings.add(pg.getPropertyName());
+                    this.queue.enqueueIfNew(pg.getPropertyTypeElement());
+                }
             }
         }
     }
 
     private void addBindingsMethod() {
         this.bindingClass.addImports(Binding.class, List.class);
-
-        GMethod parent = this.bindingClass.getMethod("getParentBinding").returnType("Binding<?>");
-        parent.body.line("return null;");
-
         GMethod children = this.bindingClass.getMethod("getChildBindings").returnType("List<Binding<?>>");
         children.body.line("List<Binding<?>> bindings = new java.util.ArrayList<Binding<?>>();");
         for (String foundSubBinding : this.foundSubBindings) {
             children.body.line("bindings.add(this.{}());", foundSubBinding);
         }
-        for (String parentBinding : this.getBindingsOfAllSuperclasses()) {
-            if (!this.foundSubBindings.contains(parentBinding)) {
-                children.body.line("bindings.add(super.{}());", parentBinding);
-            }
-        }
         children.body.line("return bindings;");
-    }
-
-    private List<String> getBindingsOfAllSuperclasses() {
-        List<String> names = new ArrayList<String>();
-        for (TypeElement currentElement : this.getSuperElements()) {
-            for (PropertyGenerator pg : this.getPropertyGenerators(currentElement)) {
-                if (pg.getPropertyName() != null) {
-                    names.add(pg.getPropertyName());
-                }
-            }
-        }
-        return names;
     }
 
     private List<TypeElement> getSuperElements() {
