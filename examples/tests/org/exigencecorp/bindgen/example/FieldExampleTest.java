@@ -4,6 +4,9 @@ import java.util.List;
 
 import junit.framework.Assert;
 import junit.framework.TestCase;
+
+import org.exigencecorp.bindgen.ContainerBinding;
+
 import bindgen.org.exigencecorp.bindgen.example.FieldExampleBinding;
 
 public class FieldExampleTest extends TestCase {
@@ -27,6 +30,7 @@ public class FieldExampleTest extends TestCase {
 
         Assert.assertEquals("foo", e.list.get(0));
         Assert.assertSame(list, b.list().get());
+        Assert.assertEquals(String.class, ((ContainerBinding) b.list()).getContainedType());
     }
 
     public void testPrimitive() {

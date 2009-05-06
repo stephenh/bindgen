@@ -29,6 +29,12 @@ public class ClassName {
         return "";
     }
 
+    /** @return "String, String" if the type is "com.app.Type<String, String>" or "" if no generics */
+    public String getGenericPartWithoutBrackets() {
+        String type = this.getGenericPart();
+        return type.substring(1, type.length() - 1);
+    }
+
     /** @return "com.app.Type" if the type is "com.app.Type<String, String>" */
     public String getWithoutGenericPart() {
         int firstBracket = this.fullClassNameWithGenerics.indexOf("<");

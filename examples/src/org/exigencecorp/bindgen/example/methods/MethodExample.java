@@ -1,5 +1,7 @@
 package org.exigencecorp.bindgen.example.methods;
 
+import java.util.List;
+
 import org.exigencecorp.bindgen.Bindable;
 import org.exigencecorp.bindgen.Binding;
 
@@ -17,6 +19,8 @@ public class MethodExample {
     // Had been colliding on set
     private boolean set;
     private boolean get;
+    private List<String> list;
+    private List<?> unknown; // Was causing errors with ContainerBinding
 
     public MethodExample(String id, String name) {
         this.id = id;
@@ -95,6 +99,14 @@ public class MethodExample {
 
     // This used to cause a compile error in the binding
     protected void setReadOnlyButSetterIsNotPublic(Boolean b) {
+    }
+
+    public List<String> getList() {
+        return this.list;
+    }
+
+    public List<?> getUnknown() {
+        return this.unknown;
     }
 
 }

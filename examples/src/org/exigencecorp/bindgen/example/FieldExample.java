@@ -14,6 +14,9 @@ public class FieldExample {
     // a read/write property with generics
     public List<String> list = new ArrayList<String>();
 
+    // a read/writer property with wildcards, had been causing errors with ContainerBinding
+    public List<?> unknown;
+
     // a primitive property to show boxing works
     public boolean good;
 
