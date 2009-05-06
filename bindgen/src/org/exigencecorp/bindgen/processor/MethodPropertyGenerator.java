@@ -45,7 +45,7 @@ public class MethodPropertyGenerator implements PropertyGenerator {
             return false;
         }
 
-        if (this.shouldSkipAttribute(this.propertyName) || "get".equals(this.propertyName)) {
+        if (this.shouldSkipAttribute(this.propertyName) || "get".equals(this.propertyName) || "declaringClass".equals(this.propertyName)) {
             return false;
         }
 
