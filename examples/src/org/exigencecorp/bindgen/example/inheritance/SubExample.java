@@ -14,4 +14,9 @@ public class SubExample extends BaseExample {
         return new SubExampleBinding(this);
     }
 
+    @Override
+    public void go() {
+        this.name = "insub";
+    }
+
 }

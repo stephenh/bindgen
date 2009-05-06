@@ -9,6 +9,8 @@ public class GenericsThreeExample<T> {
 
     private List<String> strings;
     private List<T> things;
+    // Caused errors with ContainerBinding because of T
+    public List<T> list;
 
     public List<T> getThings() {
         return this.things;

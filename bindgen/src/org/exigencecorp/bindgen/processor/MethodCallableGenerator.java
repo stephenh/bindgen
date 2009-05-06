@@ -103,7 +103,7 @@ public class MethodCallableGenerator implements PropertyGenerator {
     }
 
     public String getPropertyName() {
-        return null;
+        return this.methodName;
     }
 
     public TypeElement getPropertyTypeElement() {

@@ -12,6 +12,7 @@ import joist.sourcegen.GMethod;
 import joist.util.Inflector;
 
 import org.exigencecorp.bindgen.AbstractBinding;
+import org.exigencecorp.bindgen.ContainerBinding;
 
 public class FieldPropertyGenerator implements PropertyGenerator {
 
@@ -126,6 +127,27 @@ public class FieldPropertyGenerator implements PropertyGenerator {
         fieldGet.body.line("    this.{} = new My{}Binding();", this.propertyName, Inflector.capitalize(this.propertyName));
         fieldGet.body.line("}");
         fieldGet.body.line("return this.{};", this.propertyName);
+
+        if ("java.util.List".equals(this.propertyType.getWithoutGenericPart()) || "java.util.Set".equals(this.propertyType.getWithoutGenericPart())) {
+            String contained = this.propertyType.getGenericPartWithoutBrackets();
+            if (!this.matchesTypeParameterOfParent(contained)) {
+                fieldClass.implementsInterface(ContainerBinding.class);
+                GMethod containedType = fieldClass.getMethod("getContainedType").returnType("Class<?>");
+                containedType.body.line("return {}.class;", contained);
+            }
+        }
+    }
+
+    private boolean matchesTypeParameterOfParent(String type) {
+        if (this.propertyType.hasWildcards()) {
+            return true;
+        }
+        for (TypeParameterElement e : ((TypeElement) this.enclosed.getEnclosingElement()).getTypeParameters()) {
+            if (e.toString().equals(type)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private ProcessingEnvironment getProcessingEnv() {
