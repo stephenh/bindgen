@@ -24,6 +24,7 @@ public class FieldPropertyGenerator implements PropertyGenerator {
     private TypeElement propertyTypeElement;
     private TypeParameterElement propertyGenericElement;
     private boolean isFinal = false;
+    private GClass innerClass;
 
     public FieldPropertyGenerator(GenerationQueue queue, GClass bindingClass, Element enclosed) {
         this.queue = queue;
@@ -69,6 +70,19 @@ public class FieldPropertyGenerator implements PropertyGenerator {
         return true;
     }
 
+    public void generate() {
+        this.addOuterClassGet();
+        this.addOuterClassBindingField();
+        this.addInnerClass();
+        this.addInnerClassGetName();
+        this.addInnerClassGetParent();
+        this.addInnerClassGet();
+        this.addInnerClassGetWithRoot();
+        this.addInnerClassSet();
+        this.addInnerClassSetWithRoot();
+        this.addInnerClassGetContainedTypeIfNeeded();
+    }
+
     private boolean isReallyATypeParameter(Element e) {
         DeclaredType parent = (DeclaredType) this.enclosed.getEnclosingElement().asType();
         for (TypeMirror m : parent.getTypeArguments()) {
@@ -79,59 +93,18 @@ public class FieldPropertyGenerator implements PropertyGenerator {
         return false;
     }
 
-    public void generate() {
-        String innerClassBindingName = "My" + Inflector.capitalize(this.propertyName) + "Binding";
-        this.bindingClass.getField(this.propertyName).type(innerClassBindingName);
+    private String getInnerClassName() {
+        return "My" + Inflector.capitalize(this.propertyName) + "Binding";
+    }
 
-        GClass fieldClass = this.bindingClass.getInnerClass(innerClassBindingName).notStatic();
-        if (this.propertyGenericElement != null) {
-            fieldClass.baseClassName("{}<{}>", AbstractBinding.class.getName(), this.propertyGenericElement);
-            fieldClass.getMethod("getType").returnType("Class<?>").body.line("return null;");
-        } else {
-            fieldClass.baseClassName(this.propertyType.getBindingType());
-            if (this.propertyType.hasWildcards()) {
-                fieldClass.addAnnotation("@SuppressWarnings(\"unchecked\")");
-            }
-        }
+    private void addOuterClassBindingField() {
+        this.bindingClass.getField(this.propertyName).type(this.getInnerClassName());
+    }
 
-        GMethod fieldClassName = fieldClass.getMethod("getName").returnType(String.class);
-        fieldClassName.body.line("return \"{}\";", this.propertyName);
-
-        GMethod fieldClassGetParent = fieldClass.getMethod("getParentBinding").returnType("Binding<?>");
-        fieldClassGetParent.body.line("return {}.this;", this.bindingClass.getSimpleClassNameWithoutGeneric());
-
-        GMethod fieldClassGet = fieldClass.getMethod("get").returnType(this.propertyType.get());
-        fieldClassGet.body.line("return {}.this.get().{};", this.bindingClass.getSimpleClassNameWithoutGeneric(), this.propertyName);
-
-        GMethod fieldClassGetWithRoot = fieldClass.getMethod("getWithRoot").argument("Object", "root").returnType(this.propertyType.get());
-        fieldClassGetWithRoot.body.line(
-            "return {}.this.getWithRoot(root).{};",
-            this.bindingClass.getSimpleClassNameWithoutGeneric(),
-            this.propertyName);
-
-        GMethod fieldClassSet = fieldClass.getMethod("set").argument(this.propertyType.get(), this.propertyName);
-
-        GMethod fieldClassSetWithRoot = fieldClass.getMethod("setWithRoot(Object root, {} {})", this.propertyType.get(), this.propertyName);
-
-        if (!this.isFinal) {
-            fieldClassSet.body.line(
-                "{}.this.get().{} = {};",
-                this.bindingClass.getSimpleClassNameWithoutGeneric(),
-                this.propertyName,
-                this.propertyName);
-            fieldClassSetWithRoot.body.line(
-                "{}.this.getWithRoot(root).{} = {};",
-                this.bindingClass.getSimpleClassNameWithoutGeneric(),
-                this.propertyName,
-                this.propertyName);
-        } else {
-            fieldClassSet.body.line("throw new RuntimeException(this.getName() + \" is read only\");");
-            fieldClassSetWithRoot.body.line("throw new RuntimeException(this.getName() + \" is read only\");");
-        }
-
+    private void addOuterClassGet() {
         GMethod fieldGet = this.bindingClass.getMethod(this.propertyName + "()");
         if (this.propertyGenericElement != null) {
-            fieldGet.returnType(innerClassBindingName);
+            fieldGet.returnType(this.getInnerClassName());
         } else {
             fieldGet.returnType(this.propertyType.getBindingType());
             if (this.propertyType.hasWildcards()) {
@@ -142,12 +115,77 @@ public class FieldPropertyGenerator implements PropertyGenerator {
         fieldGet.body.line("    this.{} = new My{}Binding();", this.propertyName, Inflector.capitalize(this.propertyName));
         fieldGet.body.line("}");
         fieldGet.body.line("return this.{};", this.propertyName);
+    }
 
+    private void addInnerClass() {
+        this.innerClass = this.bindingClass.getInnerClass(this.getInnerClassName()).notStatic();
+        if (this.propertyGenericElement != null) {
+            this.innerClass.baseClassName("{}<{}>", AbstractBinding.class.getName(), this.propertyGenericElement);
+            this.innerClass.getMethod("getType").returnType("Class<?>").body.line("return null;");
+        } else {
+            this.innerClass.baseClassName(this.propertyType.getBindingType());
+            if (this.propertyType.hasWildcards()) {
+                this.innerClass.addAnnotation("@SuppressWarnings(\"unchecked\")");
+            }
+        }
+    }
+
+    private void addInnerClassGetName() {
+        GMethod fieldClassName = this.innerClass.getMethod("getName").returnType(String.class);
+        fieldClassName.body.line("return \"{}\";", this.propertyName);
+    }
+
+    private void addInnerClassGetParent() {
+        GMethod fieldClassGetParent = this.innerClass.getMethod("getParentBinding").returnType("Binding<?>");
+        fieldClassGetParent.body.line("return {}.this;", this.bindingClass.getSimpleClassNameWithoutGeneric());
+    }
+
+    private void addInnerClassGet() {
+        GMethod fieldClassGet = this.innerClass.getMethod("get").returnType(this.propertyType.get());
+        fieldClassGet.body.line("return {}.this.get().{};", this.bindingClass.getSimpleClassNameWithoutGeneric(), this.propertyName);
+        fieldClassGet.addAnnotation("@Override");
+    }
+
+    private void addInnerClassGetWithRoot() {
+        GMethod fieldClassGetWithRoot = this.innerClass.getMethod("getWithRoot").argument("Object", "root").returnType(this.propertyType.get());
+        fieldClassGetWithRoot.body.line(
+            "return {}.this.getWithRoot(root).{};",
+            this.bindingClass.getSimpleClassNameWithoutGeneric(),
+            this.propertyName);
+    }
+
+    private void addInnerClassSet() {
+        GMethod fieldClassSet = this.innerClass.getMethod("set").argument(this.propertyType.get(), this.propertyName);
+        if (!this.isFinal) {
+            fieldClassSet.body.line(
+                "{}.this.get().{} = {};",
+                this.bindingClass.getSimpleClassNameWithoutGeneric(),
+                this.propertyName,
+                this.propertyName);
+        } else {
+            fieldClassSet.body.line("throw new RuntimeException(this.getName() + \" is read only\");");
+        }
+    }
+
+    private void addInnerClassSetWithRoot() {
+        GMethod fieldClassSetWithRoot = this.innerClass.getMethod("setWithRoot(Object root, {} {})", this.propertyType.get(), this.propertyName);
+        if (!this.isFinal) {
+            fieldClassSetWithRoot.body.line(
+                "{}.this.getWithRoot(root).{} = {};",
+                this.bindingClass.getSimpleClassNameWithoutGeneric(),
+                this.propertyName,
+                this.propertyName);
+        } else {
+            fieldClassSetWithRoot.body.line("throw new RuntimeException(this.getName() + \" is read only\");");
+        }
+    }
+
+    private void addInnerClassGetContainedTypeIfNeeded() {
         if ("java.util.List".equals(this.propertyType.getWithoutGenericPart()) || "java.util.Set".equals(this.propertyType.getWithoutGenericPart())) {
             String contained = this.propertyType.getGenericPartWithoutBrackets();
             if (!this.matchesTypeParameterOfParent(contained)) {
-                fieldClass.implementsInterface(ContainerBinding.class);
-                GMethod containedType = fieldClass.getMethod("getContainedType").returnType("Class<?>");
+                this.innerClass.implementsInterface(ContainerBinding.class);
+                GMethod containedType = this.innerClass.getMethod("getContainedType").returnType("Class<?>");
                 containedType.body.line("return {}.class;", contained);
             }
         }
