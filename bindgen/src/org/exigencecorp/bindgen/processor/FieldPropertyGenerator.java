@@ -103,15 +103,30 @@ public class FieldPropertyGenerator implements PropertyGenerator {
         GMethod fieldClassGet = fieldClass.getMethod("get").returnType(this.propertyType.get());
         fieldClassGet.body.line("return {}.this.get().{};", this.bindingClass.getSimpleClassNameWithoutGeneric(), this.propertyName);
 
+        GMethod fieldClassGetWithRoot = fieldClass.getMethod("getWithRoot").argument("Object", "root").returnType(this.propertyType.get());
+        fieldClassGetWithRoot.body.line(
+            "return {}.this.getWithRoot(root).{};",
+            this.bindingClass.getSimpleClassNameWithoutGeneric(),
+            this.propertyName);
+
         GMethod fieldClassSet = fieldClass.getMethod("set").argument(this.propertyType.get(), this.propertyName);
+
+        GMethod fieldClassSetWithRoot = fieldClass.getMethod("setWithRoot(Object root, {} {})", this.propertyType.get(), this.propertyName);
+
         if (!this.isFinal) {
             fieldClassSet.body.line(
                 "{}.this.get().{} = {};",
                 this.bindingClass.getSimpleClassNameWithoutGeneric(),
                 this.propertyName,
                 this.propertyName);
+            fieldClassSetWithRoot.body.line(
+                "{}.this.getWithRoot(root).{} = {};",
+                this.bindingClass.getSimpleClassNameWithoutGeneric(),
+                this.propertyName,
+                this.propertyName);
         } else {
             fieldClassSet.body.line("throw new RuntimeException(this.getName() + \" is read only\");");
+            fieldClassSetWithRoot.body.line("throw new RuntimeException(this.getName() + \" is read only\");");
         }
 
         GMethod fieldGet = this.bindingClass.getMethod(this.propertyName + "()");

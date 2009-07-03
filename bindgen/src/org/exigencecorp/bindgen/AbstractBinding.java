@@ -18,6 +18,16 @@ public abstract class AbstractBinding<T> implements Binding<T> {
     }
 
     @Override
+    public T getWithRoot(Object root) {
+        return (T) root;
+    }
+
+    @Override
+    public void setWithRoot(Object root, T value) {
+        throw new RuntimeException("Should be overridden by a field/method-specific binding.");
+    }
+
+    @Override
     public List<Binding<?>> getChildBindings() {
         return new ArrayList<Binding<?>>();
     }

@@ -120,15 +120,33 @@ public class MethodPropertyGenerator implements PropertyGenerator {
             fieldClassGet.addAnnotation("@SuppressWarnings(\"unchecked\")");
         }
 
+        GMethod fieldClassGetWithRoot = fieldClass.getMethod("getWithRoot").argument("Object", "root").returnType(this.propertyType.get());
+        fieldClassGetWithRoot.body.line(
+            "return {}.this.getWithRoot(root).{}();",
+            this.bindingClass.getSimpleClassNameWithoutGeneric(),
+            this.methodName);
+        if (this.isFixingRawType) {
+            fieldClassGetWithRoot.addAnnotation("@SuppressWarnings(\"unchecked\")");
+        }
+
         String setType = this.propertyType.hasWildcards() ? this.propertyType.getWithoutGenericPart() : this.propertyType.get();
+
         GMethod fieldClassSet = fieldClass.getMethod("set({} {})", setType, this.propertyName);
+
+        GMethod fieldClassSetWithRoot = fieldClass.getMethod("setWithRoot(Object root, {} {})", setType, this.propertyName);
+
         if (this.hasSetter()) {
             fieldClassSet.body.line("{}.this.get().{}({});",//
                 this.bindingClass.getSimpleClassNameWithoutGeneric(),
                 this.getSetterName(),
                 this.propertyName);
+            fieldClassSetWithRoot.body.line("{}.this.getWithRoot(root).{}({});",//
+                this.bindingClass.getSimpleClassNameWithoutGeneric(),
+                this.getSetterName(),
+                this.propertyName);
         } else {
             fieldClassSet.body.line("throw new RuntimeException(this.getName() + \" is read only\");");
+            fieldClassSetWithRoot.body.line("throw new RuntimeException(this.getName() + \" is read only\");");
         }
 
         GMethod fieldGet = this.bindingClass.getMethod(this.propertyName + "()");
