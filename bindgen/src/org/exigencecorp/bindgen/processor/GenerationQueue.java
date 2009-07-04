@@ -60,17 +60,20 @@ public class GenerationQueue {
 
     public void enqueueForcefully(TypeElement element) {
         // Even when done forcefully, we can only touch elements once/round
-        if (!this.written.contains(element.toString())) {
-            this.queue.add(element);
-            this.written.add(element.toString());
+        if (this.hasAlreadyBeenWrittenByThisRound(element)) {
+            return;
         }
+        this.enqueue(element);
     }
 
     public void enqueueIfNew(TypeElement element) {
-        // javac is lovely and was passing in nulls
-        if (element != null && !this.shouldIgnore(element)) {
-            this.queue.add(element);
+        if (element == null) {
+            return; // javac is lovely and was passing in nulls
         }
+        if (this.hasAlreadyBeenWrittenByThisRound(element) || this.hasAlreadyBeenWrittenByAPreviousRound(element)) {
+            return;
+        }
+        this.enqueue(element);
     }
 
     public void processQueue() {
@@ -114,38 +117,38 @@ public class GenerationQueue {
         return this.processingEnv;
     }
 
-    private boolean shouldIgnore(TypeElement element) {
-        // We recursively walk into bindings, so first check our in-memory set of what we've
-        // seen so far this round. Eclipse resets our processor every time, so this only has
-        // things from this round. -- By "round" here, I think I mean compile-cycle, so
-        // technically multiple, successive rounds.
-        if (this.written.contains(element.toString())) {
-            return true;
-        }
-
-        // If we haven't seen it this round, see if we've already output awhile ago, in which
-        // case we can skip it. If we really needed to do this one again, Eclipse would have
-        // deleted our last output and this check wouldn't find anything. But this does not
-        // work for javac, so we don't do it if told not to. Would be nice to auto-detect javac.
-        if (!this.skipExistingBindingCheck) {
-            try {
-                ClassName bindingClassName = new ClassName(new ClassName(element.asType()).getBindingType());
-                FileObject fo = this.getProcessingEnv().getFiler().getResource(
-                    StandardLocation.SOURCE_OUTPUT,
-                    bindingClassName.getPackageName(),
-                    bindingClassName.getSimpleName() + ".java");
-                if (fo.getLastModified() > 0) {
-                    return true; // exists already
-                }
-            } catch (IOException io) {
-                this.processingEnv.getMessager().printMessage(Kind.ERROR, io.getMessage());
-            }
-        }
-
-        // Store that we've now seen this element
+    private void enqueue(TypeElement element) {
+        this.queue.add(element);
         this.written.add(element.toString());
+    }
 
-        return false;
+    // We recursively walk into bindings, so first check our in-memory set of what we've
+    // seen so far this round. Eclipse resets our processor every time, so this only has
+    // things from this round. -- By "round" here, I think I mean compile-cycle, so
+    // technically multiple, successive rounds.
+    private boolean hasAlreadyBeenWrittenByThisRound(TypeElement element) {
+        return this.written.contains(element.toString());
+    }
+
+    // If we haven't seen it this round, see if we've already output awhile ago, in which
+    // case we can skip it. If we really needed to do this one again, Eclipse would have
+    // deleted our last output and this check wouldn't find anything. But this does not
+    // work for javac, so we don't do it if told not to. Would be nice to auto-detect javac.
+    private boolean hasAlreadyBeenWrittenByAPreviousRound(TypeElement element) {
+        if (this.skipExistingBindingCheck) {
+            return false;
+        }
+        try {
+            ClassName bindingClassName = new ClassName(new ClassName(element.asType()).getBindingType());
+            FileObject fo = this.getProcessingEnv().getFiler().getResource(
+                StandardLocation.SOURCE_OUTPUT,
+                bindingClassName.getPackageName(),
+                bindingClassName.getSimpleName() + ".java");
+            return fo.getLastModified() > 0; // exists already
+        } catch (IOException io) {
+            this.processingEnv.getMessager().printMessage(Kind.ERROR, io.getMessage());
+            return false;
+        }
     }
 
 }
