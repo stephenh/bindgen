@@ -48,10 +48,10 @@ public class BindgenAnnotationProcessor extends AbstractProcessor {
     }
 
     /**
-     *Updating the Keyword class on the official processingOver() round did not
-    * work in Eclipse, but we seem to get an "empty" round before the "over"
-    * round, so detect that and update the keyword class there.
-    */
+     * Updating the Keyword class on the official processingOver() round did not
+     * work in Eclipse, but we seem to get an "empty" round before the official
+     * "over" round, so detect that and update the keyword class there.
+     */
     private void updateKeywordClassIfLastRound(RoundEnvironment roundEnv) {
         boolean emptyRound = roundEnv.getElementsAnnotatedWith(Bindable.class).size() == 0;
         if (emptyRound && !this.hasUpdatedKeywordClass) {
