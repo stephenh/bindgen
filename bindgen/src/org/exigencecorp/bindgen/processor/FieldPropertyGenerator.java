@@ -131,23 +131,26 @@ public class FieldPropertyGenerator implements PropertyGenerator {
     }
 
     private void addInnerClassGetName() {
-        GMethod fieldClassName = this.innerClass.getMethod("getName").returnType(String.class);
+        GMethod fieldClassName = this.innerClass.getMethod("getName").returnType(String.class).addAnnotation("@Override");
         fieldClassName.body.line("return \"{}\";", this.propertyName);
     }
 
     private void addInnerClassGetParent() {
-        GMethod fieldClassGetParent = this.innerClass.getMethod("getParentBinding").returnType("Binding<?>");
+        GMethod fieldClassGetParent = this.innerClass.getMethod("getParentBinding").returnType("Binding<?>").addAnnotation("@Override");
         fieldClassGetParent.body.line("return {}.this;", this.bindingClass.getSimpleClassNameWithoutGeneric());
     }
 
     private void addInnerClassGet() {
-        GMethod fieldClassGet = this.innerClass.getMethod("get").returnType(this.propertyType.get());
+        GMethod fieldClassGet = this.innerClass.getMethod("get").returnType(this.propertyType.get()).addAnnotation("@Override");
         fieldClassGet.body.line("return {}.this.get().{};", this.bindingClass.getSimpleClassNameWithoutGeneric(), this.propertyName);
-        fieldClassGet.addAnnotation("@Override");
     }
 
     private void addInnerClassGetWithRoot() {
-        GMethod fieldClassGetWithRoot = this.innerClass.getMethod("getWithRoot").argument("Object", "root").returnType(this.propertyType.get());
+        GMethod fieldClassGetWithRoot = this.innerClass
+            .getMethod("getWithRoot")
+            .argument("Object", "root")
+            .returnType(this.propertyType.get())
+            .addAnnotation("@Override");
         fieldClassGetWithRoot.body.line(
             "return {}.this.getWithRoot(root).{};",
             this.bindingClass.getSimpleClassNameWithoutGeneric(),
@@ -185,7 +188,7 @@ public class FieldPropertyGenerator implements PropertyGenerator {
             String contained = this.propertyType.getGenericPartWithoutBrackets();
             if (!this.matchesTypeParameterOfParent(contained)) {
                 this.innerClass.implementsInterface(ContainerBinding.class);
-                GMethod containedType = this.innerClass.getMethod("getContainedType").returnType("Class<?>");
+                GMethod containedType = this.innerClass.getMethod("getContainedType").returnType("Class<?>").addAnnotation("@Override");
                 containedType.body.line("return {}.class;", contained);
             }
         }

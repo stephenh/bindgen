@@ -112,6 +112,7 @@ public class MethodPropertyGenerator implements PropertyGenerator {
 
     private String getSetType() {
         return this.propertyType.hasWildcards() ? this.propertyType.getWithoutGenericPart() : this.propertyType.get();
+        // return this.propertyType.get();
     }
 
     private void addOuterClassGet() {
@@ -148,17 +149,17 @@ public class MethodPropertyGenerator implements PropertyGenerator {
     }
 
     private void addInnerClassGetName() {
-        GMethod fieldClassName = this.innerClass.getMethod("getName").returnType(String.class);
+        GMethod fieldClassName = this.innerClass.getMethod("getName").returnType(String.class).addAnnotation("@Override");
         fieldClassName.body.line("return \"{}\";", this.propertyName);
     }
 
     private void addInnerClassParent() {
-        GMethod fieldClassGetParent = this.innerClass.getMethod("getParentBinding").returnType("Binding<?>");
+        GMethod fieldClassGetParent = this.innerClass.getMethod("getParentBinding").returnType("Binding<?>").addAnnotation("@Override");
         fieldClassGetParent.body.line("return {}.this;", this.bindingClass.getSimpleClassNameWithoutGeneric());
     }
 
     private void addInnerClassGet() {
-        GMethod fieldClassGet = this.innerClass.getMethod("get").returnType(this.propertyType.get());
+        GMethod fieldClassGet = this.innerClass.getMethod("get").returnType(this.propertyType.get()).addAnnotation("@Override");
         fieldClassGet.body.line("return {}.this.get().{}();", this.bindingClass.getSimpleClassNameWithoutGeneric(), this.methodName);
         if (this.isFixingRawType) {
             fieldClassGet.addAnnotation("@SuppressWarnings(\"unchecked\")");
@@ -166,7 +167,11 @@ public class MethodPropertyGenerator implements PropertyGenerator {
     }
 
     private void addInnerClassGetWithRoot() {
-        GMethod fieldClassGetWithRoot = this.innerClass.getMethod("getWithRoot").argument("Object", "root").returnType(this.propertyType.get());
+        GMethod fieldClassGetWithRoot = this.innerClass
+            .getMethod("getWithRoot")
+            .argument("Object", "root")
+            .returnType(this.propertyType.get())
+            .addAnnotation("@Override");
         fieldClassGetWithRoot.body.line(
             "return {}.this.getWithRoot(root).{}();",
             this.bindingClass.getSimpleClassNameWithoutGeneric(),
@@ -177,7 +182,7 @@ public class MethodPropertyGenerator implements PropertyGenerator {
     }
 
     private void addInnerClassSet() {
-        GMethod fieldClassSet = this.innerClass.getMethod("set({} {})", this.getSetType(), this.propertyName);
+        GMethod fieldClassSet = this.innerClass.getMethod("set({} {})", this.getSetType(), this.propertyName); // .addAnnotation("@Override");
         if (this.hasSetter()) {
             fieldClassSet.body.line("{}.this.get().{}({});",//
                 this.bindingClass.getSimpleClassNameWithoutGeneric(),
@@ -190,6 +195,7 @@ public class MethodPropertyGenerator implements PropertyGenerator {
 
     private void addInnerClassSetWithRoot() {
         GMethod fieldClassSetWithRoot = this.innerClass.getMethod("setWithRoot(Object root, {} {})", this.getSetType(), this.propertyName);
+        // .addAnnotation("@Override");
         if (this.hasSetter()) {
             fieldClassSetWithRoot.body.line("{}.this.getWithRoot(root).{}({});",//
                 this.bindingClass.getSimpleClassNameWithoutGeneric(),
@@ -205,7 +211,7 @@ public class MethodPropertyGenerator implements PropertyGenerator {
             String contained = this.propertyType.getGenericPartWithoutBrackets();
             if (!this.matchesTypeParameterOfParent(contained)) {
                 this.innerClass.implementsInterface(ContainerBinding.class);
-                GMethod containedType = this.innerClass.getMethod("getContainedType").returnType("Class<?>");
+                GMethod containedType = this.innerClass.getMethod("getContainedType").returnType("Class<?>").addAnnotation("@Override");
                 containedType.body.line("return {}.class;", contained);
             }
         }
