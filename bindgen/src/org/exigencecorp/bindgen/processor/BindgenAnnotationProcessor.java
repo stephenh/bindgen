@@ -31,7 +31,6 @@ public class BindgenAnnotationProcessor extends AbstractProcessor {
 
     @Override
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
-        boolean emptyRound = true;
         for (Element element : roundEnv.getElementsAnnotatedWith(Bindable.class)) {
             if (element instanceof PackageElement) {
                 for (Element nested : ((PackageElement) element).getEnclosedElements()) {
@@ -42,17 +41,23 @@ public class BindgenAnnotationProcessor extends AbstractProcessor {
             } else {
                 this.processingEnv.getMessager().printMessage(Kind.WARNING, "Unhandled element " + element);
             }
-            emptyRound = false;
         }
         this.queue.processQueue();
+        this.updateKeywordClassIfLastRound(roundEnv);
+        return true;
+    }
+
+    /**
+     *Updating the Keyword class on the official processingOver() round did not
+    * work in Eclipse, but we seem to get an "empty" round before the "over"
+    * round, so detect that and update the keyword class there.
+    */
+    private void updateKeywordClassIfLastRound(RoundEnvironment roundEnv) {
+        boolean emptyRound = roundEnv.getElementsAnnotatedWith(Bindable.class).size() == 0;
         if (emptyRound && !this.hasUpdatedKeywordClass) {
-            // Updating the Keyword class on the official processingOver() round did not
-            // work in Eclipse, but we seem to get an "empty" round before the "over"
-            // round, so detect that and update the keyword class there.
             this.queue.updateBindKeywordClass();
             this.hasUpdatedKeywordClass = true;
         }
-        return true;
     }
 
 }
