@@ -75,8 +75,7 @@ public class GenerationQueue {
 
     public void processQueue() {
         while (this.queue.size() != 0) {
-            TypeElement element = this.queue.remove(0);
-            new ClassGenerator(this, element).generate();
+            new ClassGenerator(this, this.queue.remove(0)).generate();
         }
     }
 
