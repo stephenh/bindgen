@@ -115,10 +115,6 @@ public class GenerationQueue {
     }
 
     private boolean shouldIgnore(TypeElement element) {
-        if (element.getQualifiedName().toString().endsWith("Binding")) {
-            return true;
-        }
-
         // We recursively walk into bindings, so first check our in-memory set of what we've
         // seen so far this round. Eclipse resets our processor every time, so this only has
         // things from this round. -- By "round" here, I think I mean compile-cycle, so
