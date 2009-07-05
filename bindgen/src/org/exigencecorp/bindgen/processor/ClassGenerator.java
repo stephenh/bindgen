@@ -84,12 +84,12 @@ public class ClassGenerator {
     }
 
     private void addGetName() {
-        GMethod name = this.bindingClass.getMethod("getName").returnType(String.class);
+        GMethod name = this.bindingClass.getMethod("getName").returnType(String.class).addAnnotation("@Override");
         name.body.line("return \"\";");
     }
 
     private void addGetType() {
-        GMethod type = this.bindingClass.getMethod("getType").returnType("Class<?>");
+        GMethod type = this.bindingClass.getMethod("getType").returnType("Class<?>").addAnnotation("@Override");
         type.body.line("return {}.class;", this.element.getSimpleName());
     }
 
@@ -129,7 +129,7 @@ public class ClassGenerator {
 
     private void addBindingsMethod() {
         this.bindingClass.addImports(Binding.class, List.class);
-        GMethod children = this.bindingClass.getMethod("getChildBindings").returnType("List<Binding<?>>");
+        GMethod children = this.bindingClass.getMethod("getChildBindings").returnType("List<Binding<?>>").addAnnotation("@Override");
         children.body.line("List<Binding<?>> bindings = new java.util.ArrayList<Binding<?>>();");
         for (String foundSubBinding : this.foundSubBindings) {
             children.body.line("bindings.add(this.{}());", foundSubBinding);
