@@ -48,7 +48,8 @@ public class ClassGenerator {
         this.initializeBindingClass();
         this.addGeneratedTimestamp();
         this.addConstructors();
-        this.addNameAndType();
+        this.addGetName();
+        this.addGetType();
         this.generateProperties();
         this.addBindingsMethod();
         this.saveCode();
@@ -82,10 +83,12 @@ public class ClassGenerator {
         this.bindingClass.getConstructor(this.name.get() + " value").body.line("this.set(value);");
     }
 
-    private void addNameAndType() {
+    private void addGetName() {
         GMethod name = this.bindingClass.getMethod("getName").returnType(String.class);
         name.body.line("return \"\";");
+    }
 
+    private void addGetType() {
         GMethod type = this.bindingClass.getMethod("getType").returnType("Class<?>");
         type.body.line("return {}.class;", this.element.getSimpleName());
     }
