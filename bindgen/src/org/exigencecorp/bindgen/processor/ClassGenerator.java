@@ -45,6 +45,7 @@ public class ClassGenerator {
 
     public void generate() {
         this.initializeBindingClass();
+        this.addGeneratedTimestamp();
         this.addConstructors();
         this.addNameAndType();
         this.generateProperties();
@@ -65,13 +66,12 @@ public class ClassGenerator {
         this.bindingClass = new GClass(bindingClassName);
         this.bindingClass.baseClassName("{}<{}>", AbstractBinding.class.getName(), this.name.get());
         this.bindingClass.addImports(Generated.class);
+    }
 
-        SimpleDateFormat sdf = new SimpleDateFormat("dd MMM yyyy hh:mm");
-        this.bindingClass.addAnnotation("@Generated(value = \""
-            + BindgenAnnotationProcessor.class.getName()
-            + "\", date = \""
-            + sdf.format(new Date())
-            + "\")");
+    private void addGeneratedTimestamp() {
+        String value = BindgenAnnotationProcessor.class.getName();
+        String date = new SimpleDateFormat("dd MMM yyyy hh:mm").format(new Date());
+        this.bindingClass.addAnnotation("@Generated(value = \"" + value + "\", date = \"" + date + "\")");
     }
 
     private void addConstructors() {
