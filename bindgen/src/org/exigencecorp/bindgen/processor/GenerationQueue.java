@@ -29,33 +29,11 @@ public class GenerationQueue {
 
     public GenerationQueue(ProcessingEnvironment processingEnv) {
         this.processingEnv = processingEnv;
-
-        // Default properties--this is ugly, but I could not get a bindgen.properties to be found on the classpath
-        this.properties.put("fixRawType.javax.servlet.ServletConfig.initParameterNames", "String");
-        this.properties.put("fixRawType.javax.servlet.ServletContext.attributeNames", "String");
-        this.properties.put("fixRawType.javax.servlet.ServletContext.initParameterNames", "String");
-        this.properties.put("fixRawType.javax.servlet.ServletRequest.attributeNames", "String");
-        this.properties.put("fixRawType.javax.servlet.ServletRequest.parameterNames", "String");
-        this.properties.put("fixRawType.javax.servlet.ServletRequest.locales", "Locale");
-        this.properties.put("fixRawType.javax.servlet.ServletRequest.parameterMap", "String, String[]");
-        this.properties.put("fixRawType.javax.servlet.http.HttpServletRequest.headerNames", "String");
-        this.properties.put("fixRawType.javax.servlet.http.HttpSession.attributeNames", "String");
-        this.properties.put("skipAttribute.javax.servlet.http.HttpSession.sessionContext", "true");
-        this.properties.put("skipAttribute.javax.servlet.http.HttpServletRequest.requestedSessionIdFromUrl", "true");
-        this.properties.put("skipAttribute.javax.servlet.ServletContext.servletNames", "true");
-        this.properties.put("skipAttribute.javax.servlet.ServletContext.servlets", "true");
-        this.properties.put("skipAttribute.java.lang.Object.getClass", "true");
-        this.properties.put("skipAttribute.java.lang.Object.notify", "true");
-        this.properties.put("skipAttribute.java.lang.Object.notifyAll", "true");
-
-        // Now get the user-defined properties
-        for (Map.Entry<String, String> entry : processingEnv.getOptions().entrySet()) {
-            this.properties.put(entry.getKey(), entry.getValue());
-        }
-
+        this.addDefaultProperties();
+        this.addProcessingEnvProperties();
         this.log = "true".equals(this.properties.get("bindgen.log"));
-        this.skipExistingBindingCheck = "true".equals(processingEnv.getOptions().get("bindgen.skipExistingBindingCheck"));
-        this.skipBindKeyword = "true".equals(processingEnv.getOptions().get("bindgen.skipBindKeyword"));
+        this.skipExistingBindingCheck = "true".equals(this.processingEnv.getOptions().get("bindgen.skipExistingBindingCheck"));
+        this.skipBindKeyword = "true".equals(this.processingEnv.getOptions().get("bindgen.skipBindKeyword"));
     }
 
     public void enqueueForcefully(TypeElement element) {
@@ -148,6 +126,33 @@ public class GenerationQueue {
         } catch (IOException io) {
             this.processingEnv.getMessager().printMessage(Kind.ERROR, io.getMessage());
             return false;
+        }
+    }
+
+    // Default properties--this is ugly, but I could not get a bindgen.properties to be found on the classpath
+    private void addDefaultProperties() {
+        this.properties.put("fixRawType.javax.servlet.ServletConfig.initParameterNames", "String");
+        this.properties.put("fixRawType.javax.servlet.ServletContext.attributeNames", "String");
+        this.properties.put("fixRawType.javax.servlet.ServletContext.initParameterNames", "String");
+        this.properties.put("fixRawType.javax.servlet.ServletRequest.attributeNames", "String");
+        this.properties.put("fixRawType.javax.servlet.ServletRequest.parameterNames", "String");
+        this.properties.put("fixRawType.javax.servlet.ServletRequest.locales", "Locale");
+        this.properties.put("fixRawType.javax.servlet.ServletRequest.parameterMap", "String, String[]");
+        this.properties.put("fixRawType.javax.servlet.http.HttpServletRequest.headerNames", "String");
+        this.properties.put("fixRawType.javax.servlet.http.HttpSession.attributeNames", "String");
+        this.properties.put("skipAttribute.javax.servlet.http.HttpSession.sessionContext", "true");
+        this.properties.put("skipAttribute.javax.servlet.http.HttpServletRequest.requestedSessionIdFromUrl", "true");
+        this.properties.put("skipAttribute.javax.servlet.ServletContext.servletNames", "true");
+        this.properties.put("skipAttribute.javax.servlet.ServletContext.servlets", "true");
+        this.properties.put("skipAttribute.java.lang.Object.getClass", "true");
+        this.properties.put("skipAttribute.java.lang.Object.notify", "true");
+        this.properties.put("skipAttribute.java.lang.Object.notifyAll", "true");
+    }
+
+    // Now get the user-defined properties
+    private void addProcessingEnvProperties() {
+        for (Map.Entry<String, String> entry : this.processingEnv.getOptions().entrySet()) {
+            this.properties.put(entry.getKey(), entry.getValue());
         }
     }
 
