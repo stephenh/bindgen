@@ -31,9 +31,9 @@ public class GenerationQueue {
         this.processingEnv = processingEnv;
         this.addDefaultProperties();
         this.addProcessingEnvProperties();
-        this.log = "true".equals(this.properties.get("bindgen.log"));
-        this.skipExistingBindingCheck = "true".equals(this.properties.get("bindgen.skipExistingBindingCheck"));
-        this.skipBindKeyword = "true".equals(this.properties.get("bindgen.skipBindKeyword"));
+        this.log = this.isEnabled("bindgen.log");
+        this.skipExistingBindingCheck = this.isEnabled("bindgen.skipExistingBindingCheck");
+        this.skipBindKeyword = this.isEnabled("bindgen.skipBindKeyword");
     }
 
     public void enqueueForcefully(TypeElement element) {
@@ -154,6 +154,10 @@ public class GenerationQueue {
         for (Map.Entry<String, String> entry : this.processingEnv.getOptions().entrySet()) {
             this.properties.put(entry.getKey(), entry.getValue());
         }
+    }
+
+    private boolean isEnabled(String property) {
+        return "true".equals(this.properties.get(property));
     }
 
 }
