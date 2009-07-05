@@ -34,6 +34,7 @@ public class ClassGenerator {
     private final TypeMirror baseElement;
     private final ClassName name;
     private final List<String> foundSubBindings = new ArrayList<String>();
+    private final List<String> done = new ArrayList<String>();
     private GClass bindingClass;
 
     public ClassGenerator(GenerationQueue queue, TypeElement element) {
@@ -90,20 +91,37 @@ public class ClassGenerator {
     }
 
     private void generateProperties() {
-        List<String> done = new ArrayList<String>();
         for (TypeElement e : Make.list(this.element).with(this.getSuperElements())) {
-            for (PropertyGenerator pg : this.getPropertyGenerators(e)) {
-                if (done.contains(pg.getPropertyName())) {
-                    continue; // in case a parent class has the same field/method name as a child class
-                }
-                pg.generate();
-                done.add(pg.getPropertyName());
-                if (!pg.isCallable()) {
-                    this.foundSubBindings.add(pg.getPropertyName());
-                    this.queue.enqueueIfNew(pg.getPropertyTypeElement());
-                }
-            }
+            this.generatePropertiesForType(e);
         }
+    }
+
+    private void generatePropertiesForType(TypeElement element) {
+        for (PropertyGenerator pg : this.getPropertyGenerators(element)) {
+            if (this.doneAlreadyContainsPropertyFromSubClass(pg)) {
+                continue;
+            }
+            pg.generate();
+            this.markDone(pg);
+            this.enqueuePropertyTypeIfNeeded(pg);
+        }
+    }
+
+    // in case a parent class has the same field/method name as a child class
+    private boolean doneAlreadyContainsPropertyFromSubClass(PropertyGenerator pg) {
+        return this.done.contains(pg.getPropertyName());
+    }
+
+    private void markDone(PropertyGenerator pg) {
+        this.done.add(pg.getPropertyName());
+    }
+
+    private void enqueuePropertyTypeIfNeeded(PropertyGenerator pg) {
+        if (pg.isCallable()) {
+            return;
+        }
+        this.foundSubBindings.add(pg.getPropertyName());
+        this.queue.enqueueIfNew(pg.getPropertyTypeElement());
     }
 
     private void addBindingsMethod() {
