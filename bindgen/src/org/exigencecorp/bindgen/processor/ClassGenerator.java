@@ -94,7 +94,7 @@ public class ClassGenerator {
         for (TypeElement e : Make.list(this.element).with(this.getSuperElements())) {
             for (PropertyGenerator pg : this.getPropertyGenerators(e)) {
                 if (done.contains(pg.getPropertyName())) {
-                    continue; // in case a parent class has the same name as a child class
+                    continue; // in case a parent class has the same field/method name as a child class
                 }
                 pg.generate();
                 done.add(pg.getPropertyName());
