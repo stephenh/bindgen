@@ -35,6 +35,11 @@ public class FieldPropertyGenerator implements PropertyGenerator {
         this.isFinal = this.enclosed.getModifiers().contains(javax.lang.model.element.Modifier.FINAL);
     }
 
+    @Override
+    public boolean isCallable() {
+        return false;
+    }
+
     public boolean shouldGenerate() {
         if (this.propertyType.getWithoutGenericPart().endsWith("Binding")) {
             return false;

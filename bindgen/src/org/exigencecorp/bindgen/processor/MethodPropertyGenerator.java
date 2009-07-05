@@ -40,6 +40,11 @@ public class MethodPropertyGenerator implements PropertyGenerator {
         this.methodName = this.enclosed.getSimpleName().toString();
     }
 
+    @Override
+    public boolean isCallable() {
+        return false;
+    }
+
     public boolean shouldGenerate() {
         this.propertyName = this.guessPropertyNameOrNull();
         if (this.propertyName == null) {

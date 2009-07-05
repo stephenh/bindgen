@@ -10,6 +10,8 @@ public interface PropertyGenerator {
 
     boolean shouldGenerate();
 
+    boolean isCallable();
+
     void generate();
 
 }

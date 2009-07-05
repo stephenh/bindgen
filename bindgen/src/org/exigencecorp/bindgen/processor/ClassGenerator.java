@@ -98,7 +98,7 @@ public class ClassGenerator {
                 }
                 pg.generate();
                 done.add(pg.getPropertyName());
-                if (pg.getPropertyTypeElement() != null) {
+                if (!pg.isCallable()) {
                     this.foundSubBindings.add(pg.getPropertyName());
                     this.queue.enqueueIfNew(pg.getPropertyTypeElement());
                 }

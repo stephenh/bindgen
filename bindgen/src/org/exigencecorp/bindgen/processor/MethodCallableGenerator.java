@@ -32,6 +32,11 @@ public class MethodCallableGenerator implements PropertyGenerator {
         this.methodName = this.enclosed.getSimpleName().toString();
     }
 
+    @Override
+    public boolean isCallable() {
+        return true;
+    }
+
     public boolean shouldGenerate() {
         if (this.shouldSkipAttribute(this.methodName)) {
             return false;
