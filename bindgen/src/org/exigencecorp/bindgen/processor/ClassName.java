@@ -9,7 +9,7 @@ import joist.util.Inflector;
 
 public class ClassName {
 
-    private static final Pattern p = Pattern.compile("\\.([A-Z]\\w+)\\.");
+    private static final Pattern outerClassName = Pattern.compile("\\.([A-Z]\\w+)\\.");
     private String fullClassNameWithGenerics;
 
     public ClassName(TypeMirror type) {
@@ -46,15 +46,15 @@ public class ClassName {
 
     /** @return binding type, e.g. bindgen.java.lang.StringBinding, bindgen.app.EmployeeBinding */
     public String getBindingType() {
-        // Watch for package.Foo.Inner -> package.foo.Inner
         String bindingName = this.getWithoutGenericPart() + "Binding";
         if (this.hasGenerics() && !this.hasWildcards()) {
             bindingName += this.getGenericPart();
         }
-        Matcher m = p.matcher(bindingName);
+        // Watch for package.Foo.Inner -> package.foo.Inner
+        Matcher m = outerClassName.matcher(bindingName);
         while (m.find()) {
             bindingName = m.replaceFirst("." + Inflector.uncapitalize(m.group(1)) + ".");
-            m = p.matcher(bindingName);
+            m = outerClassName.matcher(bindingName);
         }
         return "bindgen." + bindingName;
     }
