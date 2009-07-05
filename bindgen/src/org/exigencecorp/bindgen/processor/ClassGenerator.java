@@ -54,18 +54,20 @@ public class ClassGenerator {
     }
 
     private void initializeBindingClass() {
-        // Put together bindingClassName, along with the generics and any bounds on them
-        ClassName bindingTypeName = new ClassName(this.name.getBindingType());
-        String bindingClassName = bindingTypeName.getWithoutGenericPart();
-        DeclaredType dt = (DeclaredType) this.element.asType();
-        if (dt.getTypeArguments().size() > 0) {
-            TypeVars tv = new TypeVars(dt);
-            bindingClassName += "<" + tv.genericsWithBounds + ">";
-        }
-
-        this.bindingClass = new GClass(bindingClassName);
+        this.bindingClass = new GClass(this.getBindingClassName());
         this.bindingClass.baseClassName("{}<{}>", AbstractBinding.class.getName(), this.name.get());
         this.bindingClass.addImports(Generated.class);
+    }
+
+    // Put together bindingClassName, along with the generics and any bounds on them
+    private String getBindingClassName() {
+        ClassName bindingTypeName = new ClassName(this.name.getBindingType());
+        DeclaredType dt = (DeclaredType) this.element.asType();
+        if (dt.getTypeArguments().size() == 0) {
+            return bindingTypeName.getWithoutGenericPart();
+        } else {
+            return bindingTypeName.getWithoutGenericPart() + "<" + new TypeVars(dt).genericsWithBounds + ">";
+        }
     }
 
     private void addGeneratedTimestamp() {
