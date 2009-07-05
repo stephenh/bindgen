@@ -85,7 +85,7 @@ public class ClassGenerator {
         GMethod name = this.bindingClass.getMethod("getName").returnType(String.class);
         name.body.line("return \"\";");
 
-        GMethod type = this.bindingClass.getMethod("getType").returnType("Class<?>", this.element.getSimpleName());
+        GMethod type = this.bindingClass.getMethod("getType").returnType("Class<?>");
         type.body.line("return {}.class;", this.element.getSimpleName());
     }
 
