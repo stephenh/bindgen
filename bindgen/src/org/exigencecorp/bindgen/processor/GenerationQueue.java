@@ -32,8 +32,8 @@ public class GenerationQueue {
         this.addDefaultProperties();
         this.addProcessingEnvProperties();
         this.log = "true".equals(this.properties.get("bindgen.log"));
-        this.skipExistingBindingCheck = "true".equals(this.processingEnv.getOptions().get("bindgen.skipExistingBindingCheck"));
-        this.skipBindKeyword = "true".equals(this.processingEnv.getOptions().get("bindgen.skipBindKeyword"));
+        this.skipExistingBindingCheck = "true".equals(this.properties.get("bindgen.skipExistingBindingCheck"));
+        this.skipBindKeyword = "true".equals(this.properties.get("bindgen.skipBindKeyword"));
     }
 
     public void enqueueForcefully(TypeElement element) {
