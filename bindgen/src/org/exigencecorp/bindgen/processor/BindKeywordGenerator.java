@@ -47,20 +47,24 @@ public class BindKeywordGenerator {
                 this.queue.log("TypeElement not found for " + className);
                 continue;
             }
-            DeclaredType t = (DeclaredType) e.asType();
-            String bindingType = new ClassName(className).getBindingType();
-            if (t.getTypeArguments().size() > 0) {
-                TypeVars tv = new TypeVars(t);
-                GMethod method = this.bindClass
-                    .getMethod("bind({}<{}> o)", className, tv.generics)
-                    .returnType("{}<{}>", bindingType, tv.generics)
-                    .typeParameters(tv.genericsWithBounds)
-                    .setStatic();
-                method.body.line("return new {}<{}>(o);", bindingType, tv.generics);
-            } else {
-                GMethod method = this.bindClass.getMethod("bind({} o)", className).returnType(bindingType).setStatic();
-                method.body.line("return new {}(o);", bindingType);
-            }
+            this.addBindMethod(className, (DeclaredType) e.asType());
+        }
+    }
+
+    private void addBindMethod(String className, DeclaredType type) {
+        String bindingType = new ClassName(className).getBindingType();
+        if (type.getTypeArguments().size() > 0) {
+            TypeVars tv = new TypeVars(type);
+            GMethod method = this.bindClass.getMethod("bind({}<{}> o)", className, tv.generics);
+            method.returnType("{}<{}>", bindingType, tv.generics);
+            method.typeParameters(tv.genericsWithBounds);
+            method.setStatic();
+            method.body.line("return new {}<{}>(o);", bindingType, tv.generics);
+        } else {
+            GMethod method = this.bindClass.getMethod("bind({} o)", className);
+            method.returnType(bindingType);
+            method.setStatic();
+            method.body.line("return new {}(o);", bindingType);
         }
     }
 
