@@ -51,7 +51,7 @@ public class ClassGenerator {
         this.addGetName();
         this.addGetType();
         this.generateProperties();
-        this.addBindingsMethod();
+        this.addGetChildBindings();
         this.saveCode();
     }
 
@@ -127,7 +127,7 @@ public class ClassGenerator {
         this.queue.enqueueIfNew(pg.getPropertyTypeElement());
     }
 
-    private void addBindingsMethod() {
+    private void addGetChildBindings() {
         this.bindingClass.addImports(Binding.class, List.class);
         GMethod children = this.bindingClass.getMethod("getChildBindings").returnType("List<Binding<?>>").addAnnotation("@Override");
         children.body.line("List<Binding<?>> bindings = new java.util.ArrayList<Binding<?>>();");
