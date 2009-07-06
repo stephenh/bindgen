@@ -337,7 +337,7 @@ public class MethodPropertyGenerator implements PropertyGenerator {
     private void fixRawTypeIfNeeded(ClassName propertyType, String propertyName) {
         String configKey = "fixRawType." + this.enclosed.getEnclosingElement().toString() + "." + propertyName;
         String configValue = this.queue.getProperties().getProperty(configKey);
-        if ("".equals(propertyType.getGenericPart()) && configValue != null) {
+        if (!propertyType.hasGenerics() && configValue != null) {
             propertyType.appendGenericType(configValue);
             this.isFixingRawType = true;
         }
