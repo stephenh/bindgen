@@ -1,22 +1,30 @@
 package org.exigencecorp.bindgen.processor;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
+import javax.lang.model.type.WildcardType;
 
 import joist.util.Inflector;
+import joist.util.Join;
 
 public class ClassName {
 
     private static final Pattern outerClassName = Pattern.compile("\\.([A-Z]\\w+)\\.");
+    private final TypeMirror type;
     private String fullClassNameWithGenerics;
 
     public ClassName(TypeMirror type) {
+        this.type = type;
         this.fullClassNameWithGenerics = type.toString();
     }
 
     public ClassName(String fullClassNameWithGenerics) {
+        this.type = null;
         this.fullClassNameWithGenerics = fullClassNameWithGenerics;
     }
 
@@ -74,6 +82,29 @@ public class ClassName {
             m = outerClassName.matcher(bindingName);
         }
         return "bindgen." + bindingName;
+    }
+
+    /** @return the type appropriate for setter/return arguments. */
+    public String getSetType() {
+        if (this.hasWildcards()) {
+            List<String> dummyParams = new ArrayList<String>();
+            if (this.type instanceof DeclaredType) {
+                DeclaredType dt = (DeclaredType) this.type;
+                for (TypeMirror tm : dt.getTypeArguments()) {
+                    if (tm instanceof WildcardType) {
+                        dummyParams.add("U" + (dummyParams.size()));
+                    } else {
+                        dummyParams.add(tm.toString());
+                    }
+                }
+            }
+            return this.getWithoutGenericPart() + "<" + Join.commaSpace(dummyParams) + ">";
+        }
+        return this.get();
+    }
+
+    public String getCastForReturnIfNeeded() {
+        return this.hasWildcards() ? "(" + this.getSetType() + ") " : "";
     }
 
     public boolean hasGenerics() {

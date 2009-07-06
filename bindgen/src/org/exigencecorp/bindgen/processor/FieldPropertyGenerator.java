@@ -176,7 +176,7 @@ public class FieldPropertyGenerator implements PropertyGenerator {
             if (this.propertyType.hasGenerics()) {
                 List<String> dummyParams = new ArrayList<String>();
                 dummyParams.add("R");
-                TypeMirror returnType = this.queue.boxIfNeeded(this.enclosed.asType());
+                TypeMirror returnType = this.enclosed.asType();
                 if (returnType instanceof DeclaredType) {
                     DeclaredType dt = (DeclaredType) returnType;
                     for (TypeMirror tm : dt.getTypeArguments()) {
@@ -210,55 +210,24 @@ public class FieldPropertyGenerator implements PropertyGenerator {
     }
 
     private void addInnerClassGet() {
-        GMethod fieldClassGet = this.innerClass.getMethod("get").returnType(this.getSetType()).addAnnotation("@Override");
-        if (this.propertyType.hasWildcards()) {
-            fieldClassGet.body.line(
-                "return ({}) {}.this.get().{};",
-                this.getSetType(),
-                this.bindingClass.getSimpleClassNameWithoutGeneric(),
-                this.propertyName);
-        } else {
-            fieldClassGet.body.line("return {}.this.get().{};", this.bindingClass.getSimpleClassNameWithoutGeneric(), this.propertyName);
-        }
-    }
-
-    private String getSetType() {
-        if (this.propertyType.hasWildcards()) {
-            List<String> dummyParams = new ArrayList<String>();
-            TypeMirror returnType = this.queue.boxIfNeeded(this.enclosed.asType());
-            if (returnType instanceof DeclaredType) {
-                DeclaredType dt = (DeclaredType) returnType;
-                for (TypeMirror tm : dt.getTypeArguments()) {
-                    if (tm instanceof WildcardType) {
-                        dummyParams.add("U" + (dummyParams.size()));
-                    } else {
-                        dummyParams.add(tm.toString());
-                    }
-                }
-            }
-            return this.propertyType.getWithoutGenericPart() + "<" + Join.commaSpace(dummyParams) + ">";
-        }
-        return this.propertyType.get();
+        GMethod fieldClassGet = this.innerClass.getMethod("get").returnType(this.propertyType.getSetType()).addAnnotation("@Override");
+        fieldClassGet.body.line("return {}{}.this.get().{};",//
+            this.propertyType.getCastForReturnIfNeeded(),
+            this.bindingClass.getSimpleClassNameWithoutGeneric(),
+            this.propertyName);
     }
 
     private void addInnerClassGetWithRoot() {
-        GMethod fieldClassGetWithRoot = this.innerClass.getMethod("getWithRoot").argument("R", "root").returnType(this.getSetType()).addAnnotation(
-            "@Override");
-        if (this.propertyType.hasWildcards()) {
-            fieldClassGetWithRoot.body.line("return ({}) {}.this.getWithRoot(root).{};",//
-                this.getSetType(),
-                this.bindingClass.getSimpleClassNameWithoutGeneric(),
-                this.propertyName);
-        } else {
-            fieldClassGetWithRoot.body.line(
-                "return {}.this.getWithRoot(root).{};",
-                this.bindingClass.getSimpleClassNameWithoutGeneric(),
-                this.propertyName);
-        }
+        GMethod fieldClassGetWithRoot = this.innerClass.getMethod("getWithRoot");
+        fieldClassGetWithRoot.argument("R", "root").returnType(this.propertyType.getSetType()).addAnnotation("@Override");
+        fieldClassGetWithRoot.body.line("return {}{}.this.getWithRoot(root).{};",//
+            this.propertyType.getCastForReturnIfNeeded(),
+            this.bindingClass.getSimpleClassNameWithoutGeneric(),
+            this.propertyName);
     }
 
     private void addInnerClassSet() {
-        GMethod fieldClassSet = this.innerClass.getMethod("set").argument(this.getSetType(), this.propertyName);
+        GMethod fieldClassSet = this.innerClass.getMethod("set").argument(this.propertyType.getSetType(), this.propertyName);
         if (!this.isFinal) {
             fieldClassSet.body.line(
                 "{}.this.get().{} = {};",
@@ -271,7 +240,7 @@ public class FieldPropertyGenerator implements PropertyGenerator {
     }
 
     private void addInnerClassSetWithRoot() {
-        GMethod fieldClassSetWithRoot = this.innerClass.getMethod("setWithRoot(R root, {} {})", this.getSetType(), this.propertyName);
+        GMethod fieldClassSetWithRoot = this.innerClass.getMethod("setWithRoot(R root, {} {})", this.propertyType.getSetType(), this.propertyName);
         if (!this.isFinal) {
             fieldClassSetWithRoot.body.line(
                 "{}.this.getWithRoot(root).{} = {};",
