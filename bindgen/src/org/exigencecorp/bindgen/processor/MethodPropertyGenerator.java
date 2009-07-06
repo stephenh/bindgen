@@ -7,6 +7,7 @@ import java.util.regex.Pattern;
 
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.Element;
+import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
@@ -68,17 +69,10 @@ public class MethodPropertyGenerator implements PropertyGenerator {
         }
 
         Element returnTypeAsElement = this.getProcessingEnv().getTypeUtils().asElement(returnType);
-        if (returnTypeAsElement instanceof TypeParameterElement) {
-            // javac goes in here even when this is not really a TypeParameterElement, which I thought meant it was always generic
-            if (this.isReallyATypeParameter(returnTypeAsElement)) {
-                this.propertyGenericElement = (TypeParameterElement) returnTypeAsElement;
-                this.propertyType = new ClassName(this.propertyGenericElement.toString());
-                this.propertyTypeElement = null;
-            } else {
-                // recover the non-parameter element for javac
-                this.propertyTypeElement = this.getProcessingEnv().getElementUtils().getTypeElement(returnTypeAsElement.toString());
-                this.propertyType = new ClassName(returnType.toString());
-            }
+        if (returnTypeAsElement != null && returnTypeAsElement.getKind() == ElementKind.TYPE_PARAMETER) {
+            this.propertyGenericElement = (TypeParameterElement) returnTypeAsElement;
+            this.propertyType = new ClassName(this.propertyGenericElement.toString());
+            this.propertyTypeElement = null;
         } else if (returnTypeAsElement instanceof TypeElement) {
             this.propertyTypeElement = (TypeElement) returnTypeAsElement;
         } else {
@@ -100,16 +94,6 @@ public class MethodPropertyGenerator implements PropertyGenerator {
         this.addInnerClassSet();
         this.addInnerClassSetWithRoot();
         this.addInnerClassGetContainedTypeIfNeeded();
-    }
-
-    private boolean isReallyATypeParameter(Element e) {
-        DeclaredType parent = (DeclaredType) this.enclosed.getEnclosingElement().asType();
-        for (TypeMirror m : parent.getTypeArguments()) {
-            if (e.toString().equals(m.toString())) {
-                return true;
-            }
-        }
-        return false;
     }
 
     private String getInnerClassName() {
