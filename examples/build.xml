@@ -23,6 +23,7 @@
 			<compilerarg value="org.exigencecorp.bindgen.processor.BindgenAnnotationProcessor"/>
 			<compilerarg value="-Abindgen.skipExistingBindingCheck=true"/> <!-- for javac -->
 			<compilerarg value="-AblockTypes=org.exigencecorp.bindgen.example.blocks.TransactionBlock"/>
+			<compilerarg value="-AfixRawType.org.exigencecorp.bindgen.example.fixRawTypes.RawTypesExample.attributeNames=String"/>
 			<compilerarg value="-XprintRounds"/>
 		</javac>
 	</target>
