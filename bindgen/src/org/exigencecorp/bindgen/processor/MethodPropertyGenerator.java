@@ -52,16 +52,12 @@ public class MethodPropertyGenerator implements PropertyGenerator {
 
     public boolean shouldGenerate() {
         this.propertyName = this.guessPropertyNameOrNull();
-        if (this.propertyName == null) {
-            return false;
-        }
-
-        if (this.shouldSkipAttribute(this.propertyName) || "get".equals(this.propertyName) || "declaringClass".equals(this.propertyName)) {
-            return false;
-        }
-
-        ExecutableType e = (ExecutableType) this.enclosed.asType();
-        if (e.getThrownTypes().size() > 0 || e.getParameterTypes().size() > 0) {
+        if (this.propertyName == null
+            || this.shouldSkipAttribute(this.propertyName)
+            || "get".equals(this.propertyName)
+            || "declaringClass".equals(this.propertyName)
+            || this.methodThrowsExceptions()
+            || this.methodHasParameters()) {
             return false;
         }
 
@@ -416,6 +412,14 @@ public class MethodPropertyGenerator implements PropertyGenerator {
             propertyName = this.methodName;
         }
         return propertyName;
+    }
+
+    private boolean methodThrowsExceptions() {
+        return ((ExecutableType) this.enclosed.asType()).getThrownTypes().size() > 0;
+    }
+
+    private boolean methodHasParameters() {
+        return ((ExecutableType) this.enclosed.asType()).getParameterTypes().size() > 0;
     }
 
     private boolean shouldSkipAttribute(String name) {
