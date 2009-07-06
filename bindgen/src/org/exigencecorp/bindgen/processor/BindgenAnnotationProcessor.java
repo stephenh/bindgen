@@ -31,6 +31,7 @@ public class BindgenAnnotationProcessor extends AbstractProcessor {
 
     @Override
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
+        CurrentEnv.set(this.processingEnv);
         for (Element element : roundEnv.getElementsAnnotatedWith(Bindable.class)) {
             if (element instanceof PackageElement) {
                 for (Element nested : ((PackageElement) element).getEnclosedElements()) {
@@ -44,6 +45,7 @@ public class BindgenAnnotationProcessor extends AbstractProcessor {
         }
         this.queue.processQueue();
         this.updateKeywordClassIfLastRound(roundEnv);
+        CurrentEnv.unset();
         return true;
     }
 

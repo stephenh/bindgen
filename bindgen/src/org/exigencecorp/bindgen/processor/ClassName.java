@@ -5,7 +5,10 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.lang.model.element.TypeElement;
+import javax.lang.model.element.TypeParameterElement;
 import javax.lang.model.type.DeclaredType;
+import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.type.WildcardType;
 
@@ -17,6 +20,7 @@ public class ClassName {
     private static final Pattern outerClassName = Pattern.compile("\\.([A-Z]\\w+)\\.");
     private final TypeMirror type;
     private String fullClassNameWithGenerics;
+    public boolean isFixingRawType = false;
 
     public ClassName(TypeMirror type) {
         this.type = type;
@@ -52,17 +56,6 @@ public class ClassName {
         return this.fullClassNameWithGenerics;
     }
 
-    public String getBindingTypeForPathWithR() {
-        String bindingName = this.getWithoutGenericPart() + "BindingPath";
-        if (this.hasGenerics()) {
-            bindingName += this.getGenericPart().replaceFirst("<", "<R, ");
-        } else {
-            bindingName += "<R>";
-        }
-        bindingName = bindingName.replaceAll(" super \\w+", ""); // for Class.getSuperClass()
-        return "bindgen." + this.lowerCaseOuterClassNames(bindingName);
-    }
-
     /** @return binding type, e.g. bindgen.java.lang.StringBinding, bindgen.app.EmployeeBinding */
     public String getBindingType() {
         String bindingName = this.getWithoutGenericPart() + "Binding";
@@ -72,14 +65,85 @@ public class ClassName {
         return "bindgen." + this.lowerCaseOuterClassNames(bindingName);
     }
 
-    // Watch for package.Foo.Inner -> package.foo.Inner
-    private String lowerCaseOuterClassNames(String className) {
-        Matcher m = outerClassName.matcher(className);
-        while (m.find()) {
-            className = m.replaceFirst("." + Inflector.uncapitalize(m.group(1)) + ".");
-            m = outerClassName.matcher(className);
+    public String getBindingTypeForPathWithR() {
+        String bindingName = this.getWithoutGenericPart() + "BindingPath";
+
+        if (this.isRawType() && !this.isFixingRawType) {
+            List<String> foo = new ArrayList<String>();
+            foo.add("R");
+            TypeElement e = (TypeElement) CurrentEnv.get().getTypeUtils().asElement(this.type);
+            for (TypeParameterElement tpe : e.getTypeParameters()) {
+                foo.add("?");
+            }
+            bindingName += "<" + Join.commaSpace(foo) + ">";
+        } else if (this.hasGenerics()) {
+            bindingName += this.getGenericPart().replaceFirst("<", "<R, ");
+        } else {
+            bindingName += "<R>";
         }
-        return className;
+
+        bindingName = bindingName.replaceAll(" super \\w+", ""); // for Class.getSuperClass()
+
+        return "bindgen." + this.lowerCaseOuterClassNames(bindingName);
+    }
+
+    public String getInnerClass(String propertyName) {
+        String name = "My" + Inflector.capitalize(propertyName) + "Binding";
+
+        if (this.type.getKind() == TypeKind.DECLARED) {
+            List<String> dummyParams = new ArrayList<String>();
+            DeclaredType dt = (DeclaredType) this.type;
+            if (!this.isRawType() || this.isFixingRawType) {
+                for (TypeMirror tm : dt.getTypeArguments()) {
+                    if (tm instanceof WildcardType) {
+                        dummyParams.add("U" + dummyParams.size());
+                    }
+                }
+            } else {
+                TypeElement e = (TypeElement) CurrentEnv.get().getTypeUtils().asElement(dt);
+                for (TypeParameterElement tpe : e.getTypeParameters()) {
+                    dummyParams.add(tpe.toString());
+                }
+            }
+            if (dummyParams.size() > 0) {
+                name += "<" + Join.commaSpace(dummyParams) + ">";
+            }
+        }
+
+        return name;
+    }
+
+    public String getInnerClassSuperClass() {
+        String superName = this.lowerCaseOuterClassNames("bindgen." + this.getWithoutGenericPart() + "BindingPath");
+
+        DeclaredType dt = (DeclaredType) this.type;
+        TypeElement te = (TypeElement) CurrentEnv.get().getTypeUtils().asElement(dt);
+
+        if ((this.isRawType() && !this.isFixingRawType) || this.hasGenerics()) {
+            List<String> dummyParams = new ArrayList<String>();
+            dummyParams.add("R");
+
+            if (this.isRawType() && !this.isFixingRawType) {
+                for (TypeParameterElement tpe : te.getTypeParameters()) {
+                    dummyParams.add(tpe.toString());
+                }
+            } else if (!this.isFixingRawType) {
+                for (TypeMirror tm : dt.getTypeArguments()) {
+                    if (tm instanceof WildcardType) {
+                        dummyParams.add("U" + (dummyParams.size() - 1));
+                    } else {
+                        dummyParams.add(tm.toString());
+                    }
+                }
+            } else {
+                dummyParams.add(this.getGenericPartWithoutBrackets());
+            }
+            superName += "<" + Join.commaSpace(dummyParams) + ">";
+        } else {
+            superName += "<R>";
+        }
+
+        return superName;
     }
 
     /** @return the type appropriate for setter/return arguments. */
@@ -101,6 +165,24 @@ public class ClassName {
         return this.get();
     }
 
+    /** Add generic suffixes to avoid warnings in bindings for pre-1.5 APIs.
+     *
+     * This is for old pre-1.5 APIs that use, say, Enumeration. We upgrade it
+     * to something like Enumeration<String> based on the user configuration,
+     * e.g.:
+     *
+     * <code>fixRawType.javax.servlet.http.HttpServletRequest.attributeNames=String</code>
+     *
+     */
+    public void fixRawTypeIfNeeded(TypeElement enclosed, String propertyName) {
+        String configKey = "fixRawType." + enclosed.toString() + "." + propertyName;
+        String configValue = CurrentEnv.get().getOptions().get(configKey);
+        if (!this.hasGenerics() && configValue != null) {
+            this.appendGenericType(configValue);
+            this.isFixingRawType = true;
+        }
+    }
+
     public String getCastForReturnIfNeeded() {
         return this.hasWildcards() ? "(" + this.getSetType() + ") " : "";
     }
@@ -111,6 +193,18 @@ public class ClassName {
 
     public boolean hasWildcards() {
         return this.getGenericPart().indexOf('?') > -1;
+    }
+
+    public boolean isRawType() {
+        if (this.isFixingRawType) {
+            return false;
+        }
+        if (this.type.getKind() == TypeKind.DECLARED) {
+            DeclaredType dt = (DeclaredType) this.type;
+            TypeElement te = (TypeElement) CurrentEnv.get().getTypeUtils().asElement(dt);
+            return dt.getTypeArguments().size() != te.getTypeParameters().size();
+        }
+        return false;
     }
 
     /** @return "com.app.Type<String, String>" if the type is "com.app.Type<String, String>" */
@@ -125,5 +219,15 @@ public class ClassName {
 
     public void appendGenericType(String type) {
         this.fullClassNameWithGenerics += "<" + type + ">";
+    }
+
+    // Watch for package.Foo.Inner -> package.foo.Inner
+    private String lowerCaseOuterClassNames(String className) {
+        Matcher m = outerClassName.matcher(className);
+        while (m.find()) {
+            className = m.replaceFirst("." + Inflector.uncapitalize(m.group(1)) + ".");
+            m = outerClassName.matcher(className);
+        }
+        return className;
     }
 }

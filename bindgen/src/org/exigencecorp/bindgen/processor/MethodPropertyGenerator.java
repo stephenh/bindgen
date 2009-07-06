@@ -2,8 +2,6 @@ package org.exigencecorp.bindgen.processor;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.Element;
@@ -14,7 +12,6 @@ import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.TypeParameterElement;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.ExecutableType;
-import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.type.WildcardType;
 
@@ -37,7 +34,6 @@ public class MethodPropertyGenerator implements PropertyGenerator {
     private ClassName propertyType;
     private TypeElement propertyTypeElement;
     private TypeParameterElement propertyGenericElement;
-    private boolean isFixingRawType = false;
     private GClass innerClass;
 
     public MethodPropertyGenerator(GenerationQueue queue, GClass bindingClass, ExecutableElement enclosed) {
@@ -80,11 +76,12 @@ public class MethodPropertyGenerator implements PropertyGenerator {
             return false;
         }
 
+        this.propertyType.fixRawTypeIfNeeded((TypeElement) this.enclosed.getEnclosingElement(), this.propertyName);
+
         return true;
     }
 
     public void generate() {
-        this.fixRawTypeIfNeeded(this.propertyType, this.propertyName);
         this.addOuterClassGet();
         this.addOuterClassBindingField();
         this.addInnerClass();
@@ -97,38 +94,10 @@ public class MethodPropertyGenerator implements PropertyGenerator {
         this.addInnerClassGetContainedTypeIfNeeded();
     }
 
-    private String getInnerClassName() {
-        String name = "My" + Inflector.capitalize(this.propertyName) + "Binding";
-
-        TypeMirror returnType = this.enclosed.getReturnType();
-
-        if (returnType.getKind() == TypeKind.DECLARED) {
-            List<String> dummyParams = new ArrayList<String>();
-            DeclaredType dt = (DeclaredType) returnType;
-            if (!this.isFixingRawType) {
-                for (TypeMirror tm : dt.getTypeArguments()) {
-                    if (tm instanceof WildcardType) {
-                        dummyParams.add("U" + dummyParams.size());
-                    }
-                }
-            } else {
-                TypeElement e = (TypeElement) this.getProcessingEnv().getTypeUtils().asElement(dt);
-                for (TypeParameterElement tpe : e.getTypeParameters()) {
-                    dummyParams.add(tpe.toString());
-                }
-            }
-            if (dummyParams.size() > 0) {
-                name += "<" + Join.commaSpace(dummyParams) + ">";
-            }
-        }
-
-        return name;
-    }
-
     private void addOuterClassGet() {
         GMethod fieldGet = this.bindingClass.getMethod(this.propertyName + "()");
         if (this.propertyGenericElement != null) {
-            fieldGet.returnType(this.getInnerClassName());
+            fieldGet.returnType(this.propertyType.getInnerClass(this.propertyName));
         } else {
             fieldGet.returnType(this.propertyType.getBindingTypeForPathWithR());
         }
@@ -153,7 +122,7 @@ public class MethodPropertyGenerator implements PropertyGenerator {
         fieldGet.body.line("}");
         fieldGet.body.line("return this.{};", this.propertyName);
 
-        if (this.isFixingRawType) {
+        if (this.propertyType.isRawType()) {
             fieldGet.addAnnotation("@SuppressWarnings(\"unchecked\")");
         }
     }
@@ -176,49 +145,19 @@ public class MethodPropertyGenerator implements PropertyGenerator {
         }
 
         GField f = this.bindingClass.getField(this.propertyName).type(name);
-        if (this.isFixingRawType) {
+        if (this.propertyType.isRawType()) {
             f.addAnnotation("@SuppressWarnings(\"unchecked\")");
         }
     }
 
     private void addInnerClass() {
-        this.innerClass = this.bindingClass.getInnerClass(this.getInnerClassName()).notStatic();
+        this.innerClass = this.bindingClass.getInnerClass(this.propertyType.getInnerClass(this.propertyName)).notStatic();
         if (this.propertyGenericElement != null) {
             this.innerClass.baseClassName("{}<R, {}>", AbstractBinding.class.getName(), this.propertyGenericElement);
             this.innerClass.getMethod("getType").returnType("Class<?>").body.line("return null;");
         } else {
-            String superName = "bindgen." + this.propertyType.getWithoutGenericPart() + "BindingPath";
-
-            Pattern outerClassName = Pattern.compile("\\.([A-Z]\\w+)\\.");
-            Matcher m = outerClassName.matcher(superName);
-            while (m.find()) {
-                superName = m.replaceFirst("." + Inflector.uncapitalize(m.group(1)) + ".");
-                m = outerClassName.matcher(superName);
-            }
-
-            if (this.propertyType.hasGenerics()) {
-                List<String> dummyParams = new ArrayList<String>();
-                dummyParams.add("R");
-                TypeMirror returnType = this.queue.boxIfNeeded(this.enclosed.getReturnType());
-                if (!this.isFixingRawType) {
-                    DeclaredType dt = (DeclaredType) returnType;
-                    for (TypeMirror tm : dt.getTypeArguments()) {
-                        if (tm instanceof WildcardType) {
-                            dummyParams.add("U" + (dummyParams.size() - 1));
-                        } else {
-                            dummyParams.add(tm.toString());
-                        }
-                    }
-                } else {
-                    dummyParams.add(this.propertyType.getGenericPartWithoutBrackets());
-                }
-                superName += "<" + Join.commaSpace(dummyParams) + ">";
-            } else {
-                superName += "<R>";
-            }
-
-            this.innerClass.baseClassName(superName);
-            if (this.propertyType.hasWildcards()) {
+            this.innerClass.baseClassName(this.propertyType.getInnerClassSuperClass());
+            if (this.propertyType.hasWildcards() || this.propertyType.isRawType()) {
                 this.innerClass.addAnnotation("@SuppressWarnings(\"unchecked\")");
             }
         }
@@ -241,7 +180,7 @@ public class MethodPropertyGenerator implements PropertyGenerator {
             this.propertyType.getCastForReturnIfNeeded(),
             this.bindingClass.getSimpleClassNameWithoutGeneric(),
             this.methodName);
-        if (this.isFixingRawType) {
+        if (this.propertyType.isFixingRawType) {
             get.addAnnotation("@SuppressWarnings(\"unchecked\")");
         }
     }
@@ -253,7 +192,7 @@ public class MethodPropertyGenerator implements PropertyGenerator {
             this.propertyType.getCastForReturnIfNeeded(),
             this.bindingClass.getSimpleClassNameWithoutGeneric(),
             this.methodName);
-        if (this.isFixingRawType) {
+        if (this.propertyType.isFixingRawType) {
             getWithRoot.addAnnotation("@SuppressWarnings(\"unchecked\")");
         }
     }
@@ -323,24 +262,6 @@ public class MethodPropertyGenerator implements PropertyGenerator {
     private String getSetterName() {
         String methodName = this.enclosed.getSimpleName().toString();
         return "set" + methodName.substring(this.getPrefix().length());
-    }
-
-    /** Add generic suffixes to avoid warnings in bindings for pre-1.5 APIs.
-     *
-     * This is for old pre-1.5 APIs that use, say, Enumeration. We upgrade it
-     * to something like Enumeration<String> based on the user configuration,
-     * e.g.:
-     *
-     * <code>fixRawType.javax.servlet.http.HttpServletRequest.attributeNames=String</code>
-     *
-     */
-    private void fixRawTypeIfNeeded(ClassName propertyType, String propertyName) {
-        String configKey = "fixRawType." + this.enclosed.getEnclosingElement().toString() + "." + propertyName;
-        String configValue = this.queue.getProperties().getProperty(configKey);
-        if (!propertyType.hasGenerics() && configValue != null) {
-            propertyType.appendGenericType(configValue);
-            this.isFixingRawType = true;
-        }
     }
 
     private String getPrefix() {
