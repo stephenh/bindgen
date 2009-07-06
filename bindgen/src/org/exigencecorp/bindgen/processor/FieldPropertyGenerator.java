@@ -65,7 +65,7 @@ public class FieldPropertyGenerator implements PropertyGenerator {
         Element fieldTypeAsElement = this.getProcessingEnv().getTypeUtils().asElement(fieldType);
         if (fieldTypeAsElement != null && fieldTypeAsElement.getKind() == ElementKind.TYPE_PARAMETER) {
             this.propertyGenericElement = (TypeParameterElement) fieldTypeAsElement;
-            this.propertyType = new ClassName(this.propertyGenericElement.toString());
+            this.propertyType = new ClassName(this.propertyGenericElement.asType());
             this.propertyTypeElement = null;
         } else if (fieldTypeAsElement instanceof TypeElement) {
             this.propertyTypeElement = (TypeElement) fieldTypeAsElement;
