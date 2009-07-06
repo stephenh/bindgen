@@ -60,13 +60,7 @@ public class ClassName {
             bindingName += "<R>";
         }
         bindingName = bindingName.replaceAll(" super \\w+", ""); // for Class.getSuperClass()
-        // Watch for package.Foo.Inner -> package.foo.Inner
-        Matcher m = outerClassName.matcher(bindingName);
-        while (m.find()) {
-            bindingName = m.replaceFirst("." + Inflector.uncapitalize(m.group(1)) + ".");
-            m = outerClassName.matcher(bindingName);
-        }
-        return "bindgen." + bindingName;
+        return "bindgen." + this.lowerCaseOuterClassNames(bindingName);
     }
 
     /** @return binding type, e.g. bindgen.java.lang.StringBinding, bindgen.app.EmployeeBinding */
@@ -75,13 +69,17 @@ public class ClassName {
         if (this.hasGenerics() && !this.hasWildcards()) {
             bindingName += this.getGenericPart();
         }
-        // Watch for package.Foo.Inner -> package.foo.Inner
-        Matcher m = outerClassName.matcher(bindingName);
+        return "bindgen." + this.lowerCaseOuterClassNames(bindingName);
+    }
+
+    // Watch for package.Foo.Inner -> package.foo.Inner
+    private String lowerCaseOuterClassNames(String className) {
+        Matcher m = outerClassName.matcher(className);
         while (m.find()) {
-            bindingName = m.replaceFirst("." + Inflector.uncapitalize(m.group(1)) + ".");
-            m = outerClassName.matcher(bindingName);
+            className = m.replaceFirst("." + Inflector.uncapitalize(m.group(1)) + ".");
+            m = outerClassName.matcher(className);
         }
-        return "bindgen." + bindingName;
+        return className;
     }
 
     /** @return the type appropriate for setter/return arguments. */
