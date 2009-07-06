@@ -28,4 +28,9 @@ public class TypeVars {
         this.generics = Join.commaSpace(simple);
         this.genericsWithBounds = Join.commaSpace(args);
     }
+
+    public String get(boolean withBounds) {
+        return withBounds ? this.genericsWithBounds : this.generics;
+    }
+
 }

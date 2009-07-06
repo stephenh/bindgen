@@ -35,7 +35,8 @@ public class ClassGenerator {
     private final ClassName name;
     private final List<String> foundSubBindings = new ArrayList<String>();
     private final List<String> done = new ArrayList<String>();
-    private GClass bindingClass;
+    private GClass pathBindingClass;
+    private GClass rootBindingClass;
 
     public ClassGenerator(GenerationQueue queue, TypeElement element) {
         this.queue = queue;
@@ -45,51 +46,77 @@ public class ClassGenerator {
     }
 
     public void generate() {
-        this.initializeBindingClass();
+        this.initializePathBindingClass();
         this.addGeneratedTimestamp();
-        this.addConstructors();
         this.addGetName();
         this.addGetType();
         this.generateProperties();
         this.addGetChildBindings();
-        this.saveCode();
+
+        this.initializeRootBindingClass();
+        this.addConstructors();
+
+        this.saveCode(this.pathBindingClass);
+        this.saveCode(this.rootBindingClass);
     }
 
-    private void initializeBindingClass() {
-        this.bindingClass = new GClass(this.getBindingClassName());
-        this.bindingClass.baseClassName("{}<{}>", AbstractBinding.class.getName(), this.name.get());
-        this.bindingClass.addImports(Generated.class);
+    private void initializePathBindingClass() {
+        this.pathBindingClass = new GClass(this.getBindingClassName(false, true));
+        this.pathBindingClass.baseClassName("{}<R, {}>", AbstractBinding.class.getName(), this.name.get());
+        this.pathBindingClass.addImports(Generated.class);
+        this.pathBindingClass.setAbstract();
+    }
+
+    private void initializeRootBindingClass() {
+        this.rootBindingClass = new GClass(this.getBindingClassName(true, true));
+        this.rootBindingClass.baseClassName("{}", this.getBindingClassName(false, false).replaceFirst("<R", "<" + this.name.get()));
+        this.rootBindingClass.addImports(Generated.class);
+
+        GMethod getWithRoot = this.rootBindingClass.getMethod("getWithRoot").argument(this.name.get(), "root").returnType(this.name.get());
+        getWithRoot.body.line("return root;");
+
+        String value = BindgenAnnotationProcessor.class.getName();
+        String date = new SimpleDateFormat("dd MMM yyyy hh:mm").format(new Date());
+        this.rootBindingClass.addAnnotation("@Generated(value = \"" + value + "\", date = \"" + date + "\")");
     }
 
     // Put together bindingClassName, along with the generics and any bounds on them
-    private String getBindingClassName() {
+    private String getBindingClassName(boolean isRoot, boolean withBounds) {
         ClassName bindingTypeName = new ClassName(this.name.getBindingType());
         DeclaredType dt = (DeclaredType) this.element.asType();
-        if (dt.getTypeArguments().size() == 0) {
-            return bindingTypeName.getWithoutGenericPart();
+        if (isRoot) {
+            if (dt.getTypeArguments().size() == 0) {
+                return bindingTypeName.getWithoutGenericPart();
+            } else {
+                return bindingTypeName.getWithoutGenericPart() + "<" + new TypeVars(dt).get(withBounds) + ">";
+            }
         } else {
-            return bindingTypeName.getWithoutGenericPart() + "<" + new TypeVars(dt).genericsWithBounds + ">";
+            if (dt.getTypeArguments().size() == 0) {
+                return bindingTypeName.getWithoutGenericPart() + "Path<R>";
+            } else {
+                return bindingTypeName.getWithoutGenericPart() + "Path" + "<R, " + new TypeVars(dt).get(withBounds) + ">";
+            }
         }
     }
 
     private void addGeneratedTimestamp() {
         String value = BindgenAnnotationProcessor.class.getName();
         String date = new SimpleDateFormat("dd MMM yyyy hh:mm").format(new Date());
-        this.bindingClass.addAnnotation("@Generated(value = \"" + value + "\", date = \"" + date + "\")");
+        this.pathBindingClass.addAnnotation("@Generated(value = \"" + value + "\", date = \"" + date + "\")");
     }
 
     private void addConstructors() {
-        this.bindingClass.getConstructor();
-        this.bindingClass.getConstructor(this.name.get() + " value").body.line("this.set(value);");
+        this.rootBindingClass.getConstructor();
+        this.rootBindingClass.getConstructor(this.name.get() + " value").body.line("this.set(value);");
     }
 
     private void addGetName() {
-        GMethod name = this.bindingClass.getMethod("getName").returnType(String.class).addAnnotation("@Override");
+        GMethod name = this.pathBindingClass.getMethod("getName").returnType(String.class).addAnnotation("@Override");
         name.body.line("return \"\";");
     }
 
     private void addGetType() {
-        GMethod type = this.bindingClass.getMethod("getType").returnType("Class<?>").addAnnotation("@Override");
+        GMethod type = this.pathBindingClass.getMethod("getType").returnType("Class<?>").addAnnotation("@Override");
         type.body.line("return {}.class;", this.element.getSimpleName());
     }
 
@@ -128,8 +155,8 @@ public class ClassGenerator {
     }
 
     private void addGetChildBindings() {
-        this.bindingClass.addImports(Binding.class, List.class);
-        GMethod children = this.bindingClass.getMethod("getChildBindings").returnType("List<Binding<?>>").addAnnotation("@Override");
+        this.pathBindingClass.addImports(Binding.class, List.class);
+        GMethod children = this.pathBindingClass.getMethod("getChildBindings").returnType("List<Binding<?>>").addAnnotation("@Override");
         children.body.line("List<Binding<?>> bindings = new java.util.ArrayList<Binding<?>>();");
         for (String foundSubBinding : this.foundSubBindings) {
             children.body.line("bindings.add(this.{}());", foundSubBinding);
@@ -152,15 +179,15 @@ public class ClassGenerator {
         return elements;
     }
 
-    private void saveCode() {
+    private void saveCode(GClass gc) {
         try {
             JavaFileObject jfo = this.getProcessingEnv().getFiler().createSourceFile(//
-                this.bindingClass.getFullClassNameWithoutGeneric(),
+                gc.getFullClassNameWithoutGeneric(),
                 this.getSourceElements());
             Writer w = jfo.openWriter();
-            w.write(this.bindingClass.toCode());
+            w.write(gc.toCode());
             w.close();
-            this.queue.log("Saved " + this.bindingClass.getFullClassNameWithoutGeneric());
+            this.queue.log("Saved " + gc.getFullClassNameWithoutGeneric());
         } catch (IOException io) {
             this.getProcessingEnv().getMessager().printMessage(Kind.ERROR, io.getMessage());
         }
@@ -183,18 +210,18 @@ public class ClassGenerator {
                 continue;
             }
             if (enclosed.getKind().isField()) {
-                FieldPropertyGenerator fpg = new FieldPropertyGenerator(this.queue, this.bindingClass, enclosed);
+                FieldPropertyGenerator fpg = new FieldPropertyGenerator(this.queue, this.pathBindingClass, enclosed);
                 if (fpg.shouldGenerate()) {
                     generators.add(fpg);
                     continue;
                 }
             } else if (enclosed.getKind() == ElementKind.METHOD) {
-                MethodPropertyGenerator mpg = new MethodPropertyGenerator(this.queue, this.bindingClass, (ExecutableElement) enclosed);
+                MethodPropertyGenerator mpg = new MethodPropertyGenerator(this.queue, this.pathBindingClass, (ExecutableElement) enclosed);
                 if (mpg.shouldGenerate()) {
                     generators.add(mpg);
                     continue;
                 }
-                MethodCallableGenerator mcg = new MethodCallableGenerator(this.queue, this.bindingClass, (ExecutableElement) enclosed);
+                MethodCallableGenerator mcg = new MethodCallableGenerator(this.queue, this.pathBindingClass, (ExecutableElement) enclosed);
                 if (mcg.shouldGenerate()) {
                     generators.add(mcg);
                     continue;

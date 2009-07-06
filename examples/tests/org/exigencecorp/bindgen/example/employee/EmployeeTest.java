@@ -94,7 +94,7 @@ public class EmployeeTest extends TestCase {
         Employee ee = new Employee("bob");
         EmployeeBinding eb = new EmployeeBinding(ee);
 
-        StringBinding erName = eb.employer().name();
+        Binding<String> erName = eb.employer().name();
         try {
             erName.get();
             Assert.fail();

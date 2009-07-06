@@ -2,14 +2,14 @@ package org.exigencecorp.bindgen.example.methods;
 
 import junit.framework.Assert;
 import junit.framework.TestCase;
-import bindgen.java.lang.StringBinding;
+import bindgen.java.lang.StringBindingPath;
 import bindgen.org.exigencecorp.bindgen.example.methods.MethodExampleBinding;
 
 public class MethodExampleStatelessTest extends TestCase {
 
     public void testReadWrite() {
         MethodExampleBinding b = new MethodExampleBinding();
-        StringBinding name = b.name();
+        StringBindingPath<MethodExample> name = b.name();
 
         MethodExample e1 = new MethodExample("1", "fred");
         MethodExample e2 = new MethodExample("2", "bob");

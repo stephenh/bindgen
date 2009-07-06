@@ -3,7 +3,7 @@ package org.exigencecorp.bindgen;
 import java.util.ArrayList;
 import java.util.List;
 
-public abstract class AbstractBinding<T> implements Binding<T> {
+public abstract class AbstractBinding<R, T> implements BindingRoot<R, T> {
 
     protected T _value;
 
@@ -18,12 +18,7 @@ public abstract class AbstractBinding<T> implements Binding<T> {
     }
 
     @Override
-    public T getWithRoot(Object root) {
-        return (T) root;
-    }
-
-    @Override
-    public void setWithRoot(Object root, T value) {
+    public void setWithRoot(R root, T value) {
         throw new RuntimeException("Should be overridden by a field/method-specific binding.");
     }
 

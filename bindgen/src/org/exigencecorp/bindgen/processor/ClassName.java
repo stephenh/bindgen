@@ -44,6 +44,22 @@ public class ClassName {
         return this.fullClassNameWithGenerics;
     }
 
+    public String getBindingTypeForPathWithR() {
+        String bindingName = this.getWithoutGenericPart() + "BindingPath";
+        if (this.hasGenerics()) {
+            bindingName += this.getGenericPart().replaceFirst("<", "<R, ");
+        } else {
+            bindingName += "<R>";
+        }
+        // Watch for package.Foo.Inner -> package.foo.Inner
+        Matcher m = outerClassName.matcher(bindingName);
+        while (m.find()) {
+            bindingName = m.replaceFirst("." + Inflector.uncapitalize(m.group(1)) + ".");
+            m = outerClassName.matcher(bindingName);
+        }
+        return "bindgen." + bindingName;
+    }
+
     /** @return binding type, e.g. bindgen.java.lang.StringBinding, bindgen.app.EmployeeBinding */
     public String getBindingType() {
         String bindingName = this.getWithoutGenericPart() + "Binding";

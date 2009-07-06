@@ -125,7 +125,7 @@ public class MethodPropertyGenerator implements PropertyGenerator {
         if (this.propertyGenericElement != null) {
             fieldGet.returnType(this.getInnerClassName());
         } else {
-            fieldGet.returnType(this.propertyType.getBindingType());
+            fieldGet.returnType(this.propertyType.getBindingTypeForPathWithR());
             if (this.propertyType.hasWildcards()) {
                 fieldGet.addAnnotation("@SuppressWarnings(\"unchecked\")");
             }
@@ -143,10 +143,10 @@ public class MethodPropertyGenerator implements PropertyGenerator {
     private void addInnerClass() {
         this.innerClass = this.bindingClass.getInnerClass(this.getInnerClassName()).notStatic();
         if (this.propertyGenericElement != null) {
-            this.innerClass.baseClassName("{}<{}>", AbstractBinding.class.getName(), this.propertyGenericElement);
+            this.innerClass.baseClassName("{}<R, {}>", AbstractBinding.class.getName(), this.propertyGenericElement);
             this.innerClass.getMethod("getType").returnType("Class<?>").body.line("return null;");
         } else {
-            this.innerClass.baseClassName(this.propertyType.getBindingType());
+            this.innerClass.baseClassName(this.propertyType.getBindingTypeForPathWithR());
             if (this.propertyType.hasWildcards()) {
                 this.innerClass.addAnnotation("@SuppressWarnings(\"unchecked\")");
             }
@@ -174,7 +174,7 @@ public class MethodPropertyGenerator implements PropertyGenerator {
     private void addInnerClassGetWithRoot() {
         GMethod fieldClassGetWithRoot = this.innerClass
             .getMethod("getWithRoot")
-            .argument("Object", "root")
+            .argument("R", "root")
             .returnType(this.propertyType.get())
             .addAnnotation("@Override");
         fieldClassGetWithRoot.body.line(
@@ -199,7 +199,7 @@ public class MethodPropertyGenerator implements PropertyGenerator {
     }
 
     private void addInnerClassSetWithRoot() {
-        GMethod fieldClassSetWithRoot = this.innerClass.getMethod("setWithRoot(Object root, {} {})", this.getSetType(), this.propertyName);
+        GMethod fieldClassSetWithRoot = this.innerClass.getMethod("setWithRoot(R root, {} {})", this.getSetType(), this.propertyName);
         // .addAnnotation("@Override");
         if (this.hasSetter()) {
             fieldClassSetWithRoot.body.line("{}.this.getWithRoot(root).{}({});",//
