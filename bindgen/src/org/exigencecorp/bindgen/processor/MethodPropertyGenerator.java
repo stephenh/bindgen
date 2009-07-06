@@ -27,8 +27,6 @@ import org.exigencecorp.bindgen.ContainerBinding;
 
 public class MethodPropertyGenerator implements PropertyGenerator {
 
-    private static final String[] javaKeywords = "abstract,continue,for,new,switch,assert,default,goto,package,synchronized,boolean,do,if,private,this,break,double,implements,protected,throw,byte,else,import,public,throws,case,enum,instanceof,return,transient,catch,extends,int,short,try,char,final,interface,static,void,class,finally,long,strictfp,volatile,const,float,native,super,while"
-        .split(",");
     private final GenerationQueue queue;
     private final GClass bindingClass;
     private final ExecutableElement enclosed;
@@ -414,15 +412,7 @@ public class MethodPropertyGenerator implements PropertyGenerator {
                 break;
             }
         }
-        // Ugly duplication from MethodPropertyGenerator
-        boolean isKeyword = false;
-        for (String keyword : javaKeywords) {
-            if (keyword.equals(propertyName)) {
-                isKeyword = true;
-                break;
-            }
-        }
-        if (isKeyword || "get".equals(propertyName)) {
+        if (JavaKeywords.is(propertyName) || "get".equals(propertyName)) {
             propertyName = this.methodName;
         }
         return propertyName;
