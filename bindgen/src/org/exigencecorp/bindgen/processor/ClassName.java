@@ -125,28 +125,6 @@ public class ClassName {
         return this.fullClassNameWithGenerics;
     }
 
-    /** @return "Type" if the type is "com.app.Type<String, String>" */
-    public String getSimpleName() {
-        String p = this.getWithoutGenericPart();
-        int lastDot = p.lastIndexOf('.');
-        if (lastDot == -1) {
-            return p;
-        } else {
-            return p.substring(lastDot + 1);
-        }
-    }
-
-    /** @return "com.app" if the type is "com.app.Type<String, String>" */
-    public String getPackageName() {
-        String p = this.getWithoutGenericPart();
-        int lastDot = p.lastIndexOf('.');
-        if (lastDot == -1) {
-            return "";
-        } else {
-            return p.substring(0, lastDot);
-        }
-    }
-
     public void appendGenericType(String type) {
         this.fullClassNameWithGenerics += "<" + type + ">";
     }
