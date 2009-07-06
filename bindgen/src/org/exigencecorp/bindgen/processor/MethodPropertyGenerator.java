@@ -126,7 +126,7 @@ public class MethodPropertyGenerator implements PropertyGenerator {
                     }
                 }
             } else {
-                TypeElement e = this.getProcessingEnv().getElementUtils().getTypeElement(new ClassName(dt).getWithoutGenericPart());
+                TypeElement e = (TypeElement) this.getProcessingEnv().getTypeUtils().asElement(dt);
                 for (TypeParameterElement tpe : e.getTypeParameters()) {
                     dummyParams.add(tpe.toString());
                 }
