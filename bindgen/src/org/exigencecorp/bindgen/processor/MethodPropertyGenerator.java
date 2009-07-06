@@ -225,64 +225,61 @@ public class MethodPropertyGenerator implements PropertyGenerator {
     }
 
     private void addInnerClassGetName() {
-        GMethod fieldClassName = this.innerClass.getMethod("getName").returnType(String.class).addAnnotation("@Override");
-        fieldClassName.body.line("return \"{}\";", this.propertyName);
+        GMethod getName = this.innerClass.getMethod("getName").returnType(String.class).addAnnotation("@Override");
+        getName.body.line("return \"{}\";", this.propertyName);
     }
 
     private void addInnerClassParent() {
-        GMethod fieldClassGetParent = this.innerClass.getMethod("getParentBinding").returnType("Binding<?>").addAnnotation("@Override");
-        fieldClassGetParent.body.line("return {}.this;", this.bindingClass.getSimpleClassNameWithoutGeneric());
+        GMethod getParent = this.innerClass.getMethod("getParentBinding").returnType("Binding<?>").addAnnotation("@Override");
+        getParent.body.line("return {}.this;", this.bindingClass.getSimpleClassNameWithoutGeneric());
     }
 
     private void addInnerClassGet() {
-        GMethod fieldClassGet = this.innerClass.getMethod("get").returnType(this.propertyType.getSetType()).addAnnotation("@Override");
-        fieldClassGet.body.line("return {}{}.this.get().{}();",//
+        GMethod get = this.innerClass.getMethod("get");
+        get.returnType(this.propertyType.getSetType()).addAnnotation("@Override");
+        get.body.line("return {}{}.this.get().{}();",//
             this.propertyType.getCastForReturnIfNeeded(),
             this.bindingClass.getSimpleClassNameWithoutGeneric(),
             this.methodName);
         if (this.isFixingRawType) {
-            fieldClassGet.addAnnotation("@SuppressWarnings(\"unchecked\")");
+            get.addAnnotation("@SuppressWarnings(\"unchecked\")");
         }
     }
 
     private void addInnerClassGetWithRoot() {
-        GMethod fieldClassGetWithRoot = this.innerClass
-            .getMethod("getWithRoot")
-            .argument("R", "root")
-            .returnType(this.propertyType.getSetType())
-            .addAnnotation("@Override");
-        fieldClassGetWithRoot.body.line("return {}{}.this.getWithRoot(root).{}();",//
+        GMethod getWithRoot = this.innerClass.getMethod("getWithRoot");
+        getWithRoot.argument("R", "root").returnType(this.propertyType.getSetType()).addAnnotation("@Override");
+        getWithRoot.body.line("return {}{}.this.getWithRoot(root).{}();",//
             this.propertyType.getCastForReturnIfNeeded(),
             this.bindingClass.getSimpleClassNameWithoutGeneric(),
             this.methodName);
         if (this.isFixingRawType) {
-            fieldClassGetWithRoot.addAnnotation("@SuppressWarnings(\"unchecked\")");
+            getWithRoot.addAnnotation("@SuppressWarnings(\"unchecked\")");
         }
     }
 
     private void addInnerClassSet() {
-        GMethod fieldClassSet = this.innerClass.getMethod("set({} {})", this.propertyType.getSetType(), this.propertyName); // .addAnnotation("@Override");
-        if (this.hasSetter()) {
-            fieldClassSet.body.line("{}.this.get().{}({});",//
-                this.bindingClass.getSimpleClassNameWithoutGeneric(),
-                this.getSetterName(),
-                this.propertyName);
-        } else {
-            fieldClassSet.body.line("throw new RuntimeException(this.getName() + \" is read only\");");
+        GMethod set = this.innerClass.getMethod("set({} {})", this.propertyType.getSetType(), this.propertyName); // .addAnnotation("@Override");
+        if (!this.hasSetter()) {
+            set.body.line("throw new RuntimeException(this.getName() + \" is read only\");");
+            return;
         }
+        set.body.line("{}.this.get().{}({});",//
+            this.bindingClass.getSimpleClassNameWithoutGeneric(),
+            this.getSetterName(),
+            this.propertyName);
     }
 
     private void addInnerClassSetWithRoot() {
-        GMethod fieldClassSetWithRoot = this.innerClass.getMethod("setWithRoot(R root, {} {})", this.propertyType.getSetType(), this.propertyName);
-        // .addAnnotation("@Override");
-        if (this.hasSetter()) {
-            fieldClassSetWithRoot.body.line("{}.this.getWithRoot(root).{}({});",//
-                this.bindingClass.getSimpleClassNameWithoutGeneric(),
-                this.getSetterName(),
-                this.propertyName);
-        } else {
-            fieldClassSetWithRoot.body.line("throw new RuntimeException(this.getName() + \" is read only\");");
+        GMethod setWithRoot = this.innerClass.getMethod("setWithRoot(R root, {} {})", this.propertyType.getSetType(), this.propertyName); // .addAnnotation("@Override");
+        if (!this.hasSetter()) {
+            setWithRoot.body.line("throw new RuntimeException(this.getName() + \" is read only\");");
+            return;
         }
+        setWithRoot.body.line("{}.this.getWithRoot(root).{}({});",//
+            this.bindingClass.getSimpleClassNameWithoutGeneric(),
+            this.getSetterName(),
+            this.propertyName);
     }
 
     private void addInnerClassGetContainedTypeIfNeeded() {
