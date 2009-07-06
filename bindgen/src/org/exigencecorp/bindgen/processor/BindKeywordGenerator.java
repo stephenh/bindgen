@@ -52,14 +52,14 @@ public class BindKeywordGenerator {
     }
 
     private void addBindMethod(String className, DeclaredType type) {
-        String bindingType = new ClassName(className).getBindingType();
+        String bindingType = new ClassName(type).getBindingType();
         if (type.getTypeArguments().size() > 0) {
             TypeVars tv = new TypeVars(type);
             GMethod method = this.bindClass.getMethod("bind({}<{}> o)", className, tv.generics);
-            method.returnType("{}<{}>", bindingType, tv.generics);
+            method.returnType("{}", bindingType);
             method.typeParameters(tv.genericsWithBounds);
             method.setStatic();
-            method.body.line("return new {}<{}>(o);", bindingType, tv.generics);
+            method.body.line("return new {}(o);", bindingType);
         } else {
             GMethod method = this.bindClass.getMethod("bind({} o)", className);
             method.returnType(bindingType);
