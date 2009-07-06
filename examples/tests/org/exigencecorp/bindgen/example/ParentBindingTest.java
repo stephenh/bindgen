@@ -126,6 +126,7 @@ public class ParentBindingTest extends TestCase {
         f1.bar = "string";
         Zaz z1 = new Zaz();
         z1.name = "string"; // not even the say property name
+
         FooBinding b1 = new FooBinding(f1);
         ZazBinding b2 = new ZazBinding(z1);
         Assert.assertEquals(false, this.areForSameProperty(b1.bar(), b2.name()));

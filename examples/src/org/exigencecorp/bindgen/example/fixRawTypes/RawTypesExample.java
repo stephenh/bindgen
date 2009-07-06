@@ -7,6 +7,10 @@ import org.exigencecorp.bindgen.Bindable;
 @Bindable
 public class RawTypesExample {
 
+    // TODO: Test field too
+    // public Enumeration bare;
+    public Enumeration<String> good;
+
     @SuppressWarnings("unchecked")
     public Enumeration getAttributeNames() {
         return null;

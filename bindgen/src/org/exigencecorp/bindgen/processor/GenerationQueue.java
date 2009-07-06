@@ -31,7 +31,7 @@ public class GenerationQueue {
         this.processingEnv = processingEnv;
         this.addDefaultProperties();
         this.addProcessingEnvProperties();
-        this.log = this.isEnabled("bindgen.log");
+        this.log = true; // this.isEnabled("bindgen.log");
         this.skipExistingBindingCheck = this.isEnabled("bindgen.skipExistingBindingCheck");
         this.skipBindKeyword = this.isEnabled("bindgen.skipBindKeyword");
     }

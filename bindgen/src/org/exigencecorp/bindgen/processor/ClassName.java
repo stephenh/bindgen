@@ -51,6 +51,7 @@ public class ClassName {
         } else {
             bindingName += "<R>";
         }
+        bindingName = bindingName.replaceAll(" super \\w+", ""); // for Class.getSuperClass()
         // Watch for package.Foo.Inner -> package.foo.Inner
         Matcher m = outerClassName.matcher(bindingName);
         while (m.find()) {
