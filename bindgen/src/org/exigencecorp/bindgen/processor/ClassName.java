@@ -56,6 +56,38 @@ public class ClassName {
         return this.fullClassNameWithGenerics;
     }
 
+    public String getBindingPathClassDeclaration() {
+        ClassName bindingTypeName = new ClassName(this.getBindingType());
+        DeclaredType dt = (DeclaredType) this.type;
+        if (dt.getTypeArguments().size() == 0) {
+            return bindingTypeName.getWithoutGenericPart() + "Path<R>";
+        } else {
+            return bindingTypeName.getWithoutGenericPart() + "Path" + "<R, " + new TypeVars(dt).genericsWithBounds + ">";
+        }
+    }
+
+    public String getBindingRootClassDeclaration() {
+        ClassName bindingTypeName = new ClassName(this.getBindingType());
+        DeclaredType dt = (DeclaredType) this.type;
+        if (dt.getTypeArguments().size() == 0) {
+            return bindingTypeName.getWithoutGenericPart();
+        } else {
+            return bindingTypeName.getWithoutGenericPart() + "<" + new TypeVars(dt).genericsWithBounds + ">";
+        }
+    }
+
+    public String getBindingRootClassSuperClass() {
+        ClassName bindingTypeName = new ClassName(this.getBindingType());
+        String name;
+        DeclaredType dt = (DeclaredType) this.type;
+        if (dt.getTypeArguments().size() == 0) {
+            name = bindingTypeName.getWithoutGenericPart() + "Path<R>";
+        } else {
+            name = bindingTypeName.getWithoutGenericPart() + "Path<R, " + new TypeVars(dt).generics + ">";
+        }
+        return name.replaceFirst("<R", "<" + this.get());
+    }
+
     /** @return binding type, e.g. bindgen.java.lang.StringBinding, bindgen.app.EmployeeBinding */
     public String getBindingType() {
         String bindingName = this.getWithoutGenericPart() + "Binding";
@@ -72,7 +104,7 @@ public class ClassName {
             List<String> foo = new ArrayList<String>();
             foo.add("R");
             TypeElement e = (TypeElement) CurrentEnv.get().getTypeUtils().asElement(this.type);
-            for (TypeParameterElement tpe : e.getTypeParameters()) {
+            for (int i = 0; i < e.getTypeParameters().size(); i++) {
                 foo.add("?");
             }
             bindingName += "<" + Join.commaSpace(foo) + ">";

@@ -14,7 +14,6 @@ import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
-import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 import javax.tools.JavaFileObject;
@@ -62,38 +61,19 @@ public class ClassGenerator {
     }
 
     private void initializePathBindingClass() {
-        this.pathBindingClass = new GClass(this.getBindingClassName(false, true));
+        this.pathBindingClass = new GClass(this.name.getBindingPathClassDeclaration());
         this.pathBindingClass.baseClassName("{}<R, {}>", AbstractBinding.class.getName(), this.name.get());
         this.pathBindingClass.setAbstract();
     }
 
     private void initializeRootBindingClass() {
-        this.rootBindingClass = new GClass(this.getBindingClassName(true, true));
-        this.rootBindingClass.baseClassName("{}", this.getBindingClassName(false, false).replaceFirst("<R", "<" + this.name.get()));
+        this.rootBindingClass = new GClass(this.name.getBindingRootClassDeclaration());
+        this.rootBindingClass.baseClassName(this.name.getBindingRootClassSuperClass());
     }
 
     private void addGetWithRoot() {
         GMethod getWithRoot = this.rootBindingClass.getMethod("getWithRoot").argument(this.name.get(), "root").returnType(this.name.get());
         getWithRoot.body.line("return root;");
-    }
-
-    // Put together bindingClassName, along with the generics and any bounds on them
-    private String getBindingClassName(boolean isRoot, boolean withBounds) {
-        ClassName bindingTypeName = new ClassName(this.name.getBindingType());
-        DeclaredType dt = (DeclaredType) this.element.asType();
-        if (isRoot) {
-            if (dt.getTypeArguments().size() == 0) {
-                return bindingTypeName.getWithoutGenericPart();
-            } else {
-                return bindingTypeName.getWithoutGenericPart() + "<" + new TypeVars(dt).get(withBounds) + ">";
-            }
-        } else {
-            if (dt.getTypeArguments().size() == 0) {
-                return bindingTypeName.getWithoutGenericPart() + "Path<R>";
-            } else {
-                return bindingTypeName.getWithoutGenericPart() + "Path" + "<R, " + new TypeVars(dt).get(withBounds) + ">";
-            }
-        }
     }
 
     private void addGeneratedTimestamp() {
