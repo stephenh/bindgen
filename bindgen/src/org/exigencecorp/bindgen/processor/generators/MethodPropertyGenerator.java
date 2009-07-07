@@ -11,7 +11,6 @@ import joist.sourcegen.GField;
 import joist.sourcegen.GMethod;
 import joist.util.Inflector;
 
-import org.exigencecorp.bindgen.AbstractBinding;
 import org.exigencecorp.bindgen.ContainerBinding;
 import org.exigencecorp.bindgen.processor.util.BoundProperty;
 import org.exigencecorp.bindgen.processor.util.Util;
@@ -85,14 +84,12 @@ public class MethodPropertyGenerator implements PropertyGenerator {
 
     private void addInnerClass() {
         this.innerClass = this.outerClass.getInnerClass(this.property.getInnerClass()).notStatic();
+        this.innerClass.baseClassName(this.property.getInnerClassSuperClass());
+        if (this.property.hasWildcards() || this.property.isRawType()) {
+            this.innerClass.addAnnotation("@SuppressWarnings(\"unchecked\")");
+        }
         if (this.property.isForGenericTypeParameter()) {
-            this.innerClass.baseClassName("{}<R, {}>", AbstractBinding.class.getName(), this.property.getGenericElement());
             this.innerClass.getMethod("getType").returnType("Class<?>").body.line("return null;");
-        } else {
-            this.innerClass.baseClassName(this.property.getInnerClassSuperClass());
-            if (this.property.hasWildcards() || this.property.isRawType()) {
-                this.innerClass.addAnnotation("@SuppressWarnings(\"unchecked\")");
-            }
         }
     }
 

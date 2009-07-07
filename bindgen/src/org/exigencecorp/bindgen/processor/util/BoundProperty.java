@@ -18,6 +18,8 @@ import javax.lang.model.type.WildcardType;
 import joist.util.Inflector;
 import joist.util.Join;
 
+import org.exigencecorp.bindgen.AbstractBinding;
+
 /** Given a TypeMirror type of a field/method property, provides information about its binding outer/inner class. */
 public class BoundProperty {
 
@@ -131,6 +133,10 @@ public class BoundProperty {
     }
 
     public String getInnerClassSuperClass() {
+        if (this.isForGenericTypeParameter()) {
+            return AbstractBinding.class.getName() + "<R, " + this.getGenericElement() + ">";
+        }
+
         String superName = Util.lowerCaseOuterClassNames("bindgen." + this.name.getWithoutGenericPart() + "BindingPath");
         DeclaredType dt = (DeclaredType) this.type;
         TypeElement te = (TypeElement) getTypeUtils().asElement(dt);
