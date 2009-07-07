@@ -49,11 +49,7 @@ public class FieldPropertyGenerator implements PropertyGenerator {
     }
 
     public boolean shouldGenerate() {
-        if (this.propertyType.getWithoutGenericPart().endsWith("Binding")) {
-            return false;
-        }
-
-        if (this.shouldSkipAttribute(this.propertyName) || "get".equals(this.propertyName)) {
+        if (this.propertyType.isForBinding() || this.shouldSkipAttribute(this.propertyName) || "get".equals(this.propertyName)) {
             return false;
         }
 
@@ -207,7 +203,7 @@ public class FieldPropertyGenerator implements PropertyGenerator {
     }
 
     private void addInnerClassGetContainedTypeIfNeeded() {
-        if ("java.util.List".equals(this.propertyType.getWithoutGenericPart()) || "java.util.Set".equals(this.propertyType.getWithoutGenericPart())) {
+        if (this.propertyType.isForListOrSet()) {
             String contained = this.propertyType.getGenericPartWithoutBrackets();
             if (!this.matchesTypeParameterOfParent(contained)) {
                 this.innerClass.implementsInterface(ContainerBinding.class);

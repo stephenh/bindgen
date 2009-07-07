@@ -55,7 +55,7 @@ public class MethodPropertyGenerator implements PropertyGenerator {
 
         TypeMirror returnType = this.queue.boxIfNeeded(this.enclosed.getReturnType());
         this.propertyType = new Property(returnType);
-        if (this.propertyType.getWithoutGenericPart().endsWith("Binding")) {
+        if (this.propertyType.isForBinding()) {
             return false; // Skip methods that themselves return bindings
         }
 
@@ -183,7 +183,7 @@ public class MethodPropertyGenerator implements PropertyGenerator {
     }
 
     private void addInnerClassGetContainedTypeIfNeeded() {
-        if ("java.util.List".equals(this.propertyType.getWithoutGenericPart()) || "java.util.Set".equals(this.propertyType.getWithoutGenericPart())) {
+        if (this.propertyType.isForListOrSet()) {
             String contained = this.propertyType.getGenericPartWithoutBrackets();
             if (!this.matchesTypeParameterOfParent(contained)) {
                 this.innerClass.implementsInterface(ContainerBinding.class);

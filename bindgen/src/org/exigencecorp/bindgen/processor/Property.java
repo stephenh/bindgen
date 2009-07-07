@@ -15,75 +15,53 @@ import javax.lang.model.type.WildcardType;
 import joist.util.Inflector;
 import joist.util.Join;
 
+/** Given a TypeMirror type of a field/method property, provides information about its binding outer/inner class. */
 public class Property {
 
     private static final Pattern outerClassName = Pattern.compile("\\.([A-Z]\\w+)\\.");
     private final TypeMirror type;
-    private String fullClassNameWithGenerics;
+    private final ClassName2 name;
     public boolean isFixingRawType = false;
 
     public Property(TypeMirror type) {
         this.type = type;
-        this.fullClassNameWithGenerics = type.toString();
+        this.name = new ClassName2(type.toString());
     }
 
-    public Property(String fullClassNameWithGenerics) {
-        this.type = null;
-        this.fullClassNameWithGenerics = fullClassNameWithGenerics;
-    }
-
-    /** @return "<String, String>" if the type is "com.app.Type<String, String>" or "" if no generics */
-    public String getGenericPart() {
-        int firstBracket = this.fullClassNameWithGenerics.indexOf("<");
-        if (firstBracket != -1) {
-            return this.fullClassNameWithGenerics.substring(firstBracket);
+    /** @return binding type, e.g. bindgen.java.lang.StringBinding, bindgen.app.EmployeeBinding */
+    public ClassName2 getBindingType() {
+        String bindingName = this.name.getWithoutGenericPart() + "Binding";
+        if (this.hasGenerics() && !this.hasWildcards()) {
+            bindingName += this.name.getGenericPart();
         }
-        return "";
-    }
-
-    /** @return "String, String" if the type is "com.app.Type<String, String>" or "" if no generics */
-    public String getGenericPartWithoutBrackets() {
-        String type = this.getGenericPart();
-        return type.substring(1, type.length() - 1);
-    }
-
-    /** @return "com.app.Type" if the type is "com.app.Type<String, String>" */
-    public String getWithoutGenericPart() {
-        int firstBracket = this.fullClassNameWithGenerics.indexOf("<");
-        if (firstBracket != -1) {
-            return this.fullClassNameWithGenerics.substring(0, firstBracket);
-        }
-        return this.fullClassNameWithGenerics;
+        return new ClassName2("bindgen." + this.lowerCaseOuterClassNames(bindingName));
     }
 
     public String getBindingPathClassDeclaration() {
-        Property bindingTypeName = new Property(this.getBindingType());
         DeclaredType dt = (DeclaredType) this.type;
         if (dt.getTypeArguments().size() == 0) {
-            return bindingTypeName.getWithoutGenericPart() + "Path<R>";
+            return this.getBindingType().getWithoutGenericPart() + "Path<R>";
         } else {
-            return bindingTypeName.getWithoutGenericPart() + "Path" + "<R, " + new TypeVars(dt).genericsWithBounds + ">";
+            return this.getBindingType().getWithoutGenericPart() + "Path" + "<R, " + new TypeVars(dt).genericsWithBounds + ">";
         }
     }
 
     public String getBindingRootClassDeclaration() {
-        Property bindingTypeName = new Property(this.getBindingType());
         DeclaredType dt = (DeclaredType) this.type;
         if (dt.getTypeArguments().size() == 0) {
-            return bindingTypeName.getWithoutGenericPart();
+            return this.getBindingType().getWithoutGenericPart();
         } else {
-            return bindingTypeName.getWithoutGenericPart() + "<" + new TypeVars(dt).genericsWithBounds + ">";
+            return this.getBindingType().getWithoutGenericPart() + "<" + new TypeVars(dt).genericsWithBounds + ">";
         }
     }
 
     public String getBindingRootClassSuperClass() {
-        Property bindingTypeName = new Property(this.getBindingType());
         String name;
         DeclaredType dt = (DeclaredType) this.type;
         if (dt.getTypeArguments().size() == 0) {
-            name = bindingTypeName.getWithoutGenericPart() + "Path<R>";
+            name = this.getBindingType().getWithoutGenericPart() + "Path<R>";
         } else {
-            name = bindingTypeName.getWithoutGenericPart() + "Path<R, " + new TypeVars(dt).generics + ">";
+            name = this.getBindingType().getWithoutGenericPart() + "Path<R, " + new TypeVars(dt).generics + ">";
         }
         return name.replaceFirst("<R", "<" + this.get());
     }
@@ -122,17 +100,8 @@ public class Property {
         return name;
     }
 
-    /** @return binding type, e.g. bindgen.java.lang.StringBinding, bindgen.app.EmployeeBinding */
-    public String getBindingType() {
-        String bindingName = this.getWithoutGenericPart() + "Binding";
-        if (this.hasGenerics() && !this.hasWildcards()) {
-            bindingName += this.getGenericPart();
-        }
-        return "bindgen." + this.lowerCaseOuterClassNames(bindingName);
-    }
-
     public String getBindingTypeForPathWithR() {
-        String bindingName = this.getWithoutGenericPart() + "BindingPath";
+        String bindingName = this.name.getWithoutGenericPart() + "BindingPath";
 
         if (this.isRawType()) {
             List<String> foo = new ArrayList<String>();
@@ -143,7 +112,7 @@ public class Property {
             }
             bindingName += "<" + Join.commaSpace(foo) + ">";
         } else if (this.hasGenerics()) {
-            bindingName += this.getGenericPart().replaceFirst("<", "<R, ");
+            bindingName += this.name.getGenericPart().replaceFirst("<", "<R, ");
         } else {
             bindingName += "<R>";
         }
@@ -180,7 +149,7 @@ public class Property {
     }
 
     public String getInnerClassSuperClass() {
-        String superName = this.lowerCaseOuterClassNames("bindgen." + this.getWithoutGenericPart() + "BindingPath");
+        String superName = this.lowerCaseOuterClassNames("bindgen." + this.name.getWithoutGenericPart() + "BindingPath");
 
         DeclaredType dt = (DeclaredType) this.type;
         TypeElement te = (TypeElement) CurrentEnv.get().getTypeUtils().asElement(dt);
@@ -202,7 +171,7 @@ public class Property {
                     }
                 }
             } else {
-                dummyParams.add(this.getGenericPartWithoutBrackets());
+                dummyParams.add(this.name.getGenericPartWithoutBrackets());
             }
             superName += "<" + Join.commaSpace(dummyParams) + ">";
         } else {
@@ -226,7 +195,7 @@ public class Property {
                     }
                 }
             }
-            return this.getWithoutGenericPart() + "<" + Join.commaSpace(dummyParams) + ">";
+            return this.name.getWithoutGenericPart() + "<" + Join.commaSpace(dummyParams) + ">";
         }
         return this.get();
     }
@@ -254,11 +223,11 @@ public class Property {
     }
 
     public boolean hasGenerics() {
-        return this.getGenericPart().length() > 0;
+        return this.name.getGenericPart().length() > 0;
     }
 
     public boolean hasWildcards() {
-        return this.getGenericPart().indexOf('?') > -1;
+        return this.name.getGenericPart().indexOf('?') > -1;
     }
 
     public boolean isRawType() {
@@ -275,16 +244,29 @@ public class Property {
 
     /** @return "com.app.Type<String, String>" if the type is "com.app.Type<String, String>" */
     public String get() {
-        return this.fullClassNameWithGenerics;
+        return this.name.get();
     }
 
     /** @return "com.app.Type<String, String>" if the type is "com.app.Type<String, String>" */
     public String toString() {
-        return this.fullClassNameWithGenerics;
+        return this.name.get();
     }
 
     public void appendGenericType(String type) {
         this.fullClassNameWithGenerics += "<" + type + ">";
+    }
+
+    public boolean isForListOrSet() {
+        return "java.util.List".equals(this.name.getWithoutGenericPart()) || "java.util.Set".equals(this.name.getWithoutGenericPart());
+    }
+
+    public boolean isForBinding() {
+        return this.name.getWithoutGenericPart().endsWith("Binding");
+    }
+
+    // Make this go away
+    public String getGenericPartWithoutBrackets() {
+        return this.name.getGenericPartWithoutBrackets();
     }
 
     // Watch for package.Foo.Inner -> package.foo.Inner

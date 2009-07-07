@@ -8,11 +8,7 @@ public class ClassName2 {
         this.fullClassNameWithGenerics = fullClassNameWithGenerics;
     }
 
-    public String getWithoutGenericPart() {
-        int firstBracket = this.fullClassNameWithGenerics.indexOf("<");
-        if (firstBracket != -1) {
-            return this.fullClassNameWithGenerics.substring(0, firstBracket);
-        }
+    public String get() {
         return this.fullClassNameWithGenerics;
     }
 
@@ -36,6 +32,30 @@ public class ClassName2 {
         } else {
             return p.substring(0, lastDot);
         }
+    }
+
+    /** @return "<String, String>" if the type is "com.app.Type<String, String>" or "" if no generics */
+    public String getGenericPart() {
+        int firstBracket = this.fullClassNameWithGenerics.indexOf("<");
+        if (firstBracket != -1) {
+            return this.fullClassNameWithGenerics.substring(firstBracket);
+        }
+        return "";
+    }
+
+    /** @return "String, String" if the type is "com.app.Type<String, String>" or "" if no generics */
+    public String getGenericPartWithoutBrackets() {
+        String type = this.getGenericPart();
+        return type.substring(1, type.length() - 1);
+    }
+
+    /** @return "com.app.Type" if the type is "com.app.Type<String, String>" */
+    public String getWithoutGenericPart() {
+        int firstBracket = this.fullClassNameWithGenerics.indexOf("<");
+        if (firstBracket != -1) {
+            return this.fullClassNameWithGenerics.substring(0, firstBracket);
+        }
+        return this.fullClassNameWithGenerics;
     }
 
 }
