@@ -59,8 +59,7 @@ public class BoundProperty {
         String name = "My" + Inflector.capitalize(this.propertyName) + "Binding";
         if (this.type instanceof DeclaredType) {
             List<String> dummyParams = new ArrayList<String>();
-            DeclaredType dt = (DeclaredType) this.type;
-            for (TypeMirror tm : dt.getTypeArguments()) {
+            for (TypeMirror tm : ((DeclaredType) this.type).getTypeArguments()) {
                 if (tm instanceof WildcardType) {
                     dummyParams.add("Object");
                 }
@@ -76,8 +75,7 @@ public class BoundProperty {
         String name = "My" + Inflector.capitalize(this.propertyName) + "Binding";
         if (this.type instanceof DeclaredType) {
             List<String> dummyParams = new ArrayList<String>();
-            DeclaredType dt = (DeclaredType) this.type;
-            for (TypeMirror tm : dt.getTypeArguments()) {
+            for (TypeMirror tm : ((DeclaredType) this.type).getTypeArguments()) {
                 if (tm instanceof WildcardType) {
                     dummyParams.add("?");
                 }
