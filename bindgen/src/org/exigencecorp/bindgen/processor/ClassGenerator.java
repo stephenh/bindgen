@@ -91,13 +91,13 @@ public class ClassGenerator {
     }
 
     private void addGetName() {
-        GMethod name = this.pathBindingClass.getMethod("getName").returnType(String.class).addAnnotation("@Override");
-        name.body.line("return \"\";");
+        GMethod getName = this.pathBindingClass.getMethod("getName").returnType(String.class).addAnnotation("@Override");
+        getName.body.line("return \"\";");
     }
 
     private void addGetType() {
-        GMethod type = this.pathBindingClass.getMethod("getType").returnType("Class<?>").addAnnotation("@Override");
-        type.body.line("return {}.class;", this.element.getSimpleName());
+        GMethod getType = this.pathBindingClass.getMethod("getType").returnType("Class<?>").addAnnotation("@Override");
+        getType.body.line("return {}.class;", this.element.getSimpleName());
     }
 
     private void generateProperties() {
