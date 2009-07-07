@@ -52,35 +52,28 @@ public class BoundProperty {
     }
 
     public String getBindingRootClassInstantiation() {
-        String name = "My" + Inflector.capitalize(this.propertyName) + "Binding";
-        if (this.type instanceof DeclaredType) {
-            List<String> dummyParams = new ArrayList<String>();
-            for (TypeMirror tm : ((DeclaredType) this.type).getTypeArguments()) {
-                if (tm instanceof WildcardType) {
-                    dummyParams.add("Object");
-                }
-            }
-            if (dummyParams.size() > 0) {
-                name += "<" + Join.commaSpace(dummyParams) + ">";
-            }
-        }
-        return name;
+        return "My" + Inflector.capitalize(this.propertyName) + "Binding" + this.optionalGenericsIfWildcards("Object");
     }
 
     public String getBindingClassFieldDeclaration() {
-        String name = "My" + Inflector.capitalize(this.propertyName) + "Binding";
+        return "My" + Inflector.capitalize(this.propertyName) + "Binding" + this.optionalGenericsIfWildcards("?");
+    }
+
+    private String optionalGenericsIfWildcards(String replace) {
         if (this.type instanceof DeclaredType) {
             List<String> dummyParams = new ArrayList<String>();
-            for (TypeMirror tm : ((DeclaredType) this.type).getTypeArguments()) {
-                if (tm instanceof WildcardType) {
-                    dummyParams.add("?");
+            if (!this.isRawType()) {
+                for (TypeMirror tm : ((DeclaredType) this.type).getTypeArguments()) {
+                    if (tm instanceof WildcardType) {
+                        dummyParams.add(replace);
+                    }
                 }
             }
             if (dummyParams.size() > 0) {
-                name += "<" + Join.commaSpace(dummyParams) + ">";
+                return "<" + Join.commaSpace(dummyParams) + ">";
             }
         }
-        return name;
+        return "";
     }
 
     public String getInnerClassDeclaration() {
