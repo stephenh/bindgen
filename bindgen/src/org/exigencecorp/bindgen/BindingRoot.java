@@ -1,6 +1,5 @@
 package org.exigencecorp.bindgen;
 
-
 /**
  * Interface for a property (field or method) binding.
  * 
