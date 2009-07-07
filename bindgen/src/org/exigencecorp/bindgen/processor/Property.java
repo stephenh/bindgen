@@ -16,20 +16,20 @@ public class Property {
 
     private static final Pattern outerClassName = Pattern.compile("\\.([A-Z]\\w+)\\.");
     protected final TypeMirror type;
-    protected ClassName2 name;
+    protected ClassName name;
 
     public Property(TypeMirror type) {
         this.type = this.boxIfNeeded(type);
-        this.name = new ClassName2(this.type.toString());
+        this.name = new ClassName(this.type.toString());
     }
 
     /** @return binding type, e.g. bindgen.java.lang.StringBinding, bindgen.app.EmployeeBinding */
-    public ClassName2 getBindingType() {
+    public ClassName getBindingType() {
         String bindingName = this.name.getWithoutGenericPart() + "Binding";
         if (this.hasGenerics() && !this.hasWildcards()) {
             bindingName += this.name.getGenericPart();
         }
-        return new ClassName2("bindgen." + this.lowerCaseOuterClassNames(bindingName));
+        return new ClassName("bindgen." + this.lowerCaseOuterClassNames(bindingName));
     }
 
     public String getBindingPathClassDeclaration() {

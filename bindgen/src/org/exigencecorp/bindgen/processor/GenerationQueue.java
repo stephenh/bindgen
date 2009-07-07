@@ -98,7 +98,7 @@ public class GenerationQueue {
             return false;
         }
         try {
-            ClassName2 bindingClassName = new Property(element.asType()).getBindingType();
+            ClassName bindingClassName = new Property(element.asType()).getBindingType();
             FileObject fo = this.getProcessingEnv().getFiler().getResource(
                 StandardLocation.SOURCE_OUTPUT,
                 bindingClassName.getPackageName(),

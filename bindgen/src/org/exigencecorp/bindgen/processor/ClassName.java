@@ -1,10 +1,10 @@
 package org.exigencecorp.bindgen.processor;
 
-public class ClassName2 {
+public class ClassName {
 
     private final String fullClassNameWithGenerics;
 
-    public ClassName2(String fullClassNameWithGenerics) {
+    public ClassName(String fullClassNameWithGenerics) {
         this.fullClassNameWithGenerics = fullClassNameWithGenerics;
     }
 

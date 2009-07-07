@@ -52,7 +52,7 @@ public class BindKeywordGenerator {
     }
 
     private void addBindMethod(String className, DeclaredType type) {
-        ClassName2 bindingType = new Property(type).getBindingType();
+        ClassName bindingType = new Property(type).getBindingType();
         if (type.getTypeArguments().size() > 0) {
             TypeVars tv = new TypeVars(type);
             GMethod method = this.bindClass.getMethod("bind({}<{}> o)", className, tv.generics);

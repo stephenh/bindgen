@@ -243,7 +243,7 @@ public class Property2 extends Property {
         String configKey = "fixRawType." + this.enclosed.toString() + "." + this.propertyName;
         String configValue = CurrentEnv.get().getOptions().get(configKey);
         if (!this.hasGenerics() && configValue != null) {
-            this.name = new ClassName2(this.type.toString() + "<" + configValue + ">");
+            this.name = new ClassName(this.type.toString() + "<" + configValue + ">");
             return true;
         }
         return false;
