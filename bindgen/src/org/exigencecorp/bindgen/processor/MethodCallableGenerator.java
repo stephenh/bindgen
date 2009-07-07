@@ -41,29 +41,33 @@ public class MethodCallableGenerator implements PropertyGenerator {
         if (this.shouldSkipAttribute(this.methodName)) {
             return false;
         }
-
-        ExecutableType method = (ExecutableType) this.method.asType();
-        for (String attempt : this.getBlockTypesToAttempt()) {
-            TypeElement attemptType = this.queue.getProcessingEnv().getElementUtils().getTypeElement(attempt);
-            if (attemptType == null) {
-                continue;
-            }
-            List<ExecutableElement> methods = ElementFilter.methodsIn(attemptType.getEnclosedElements());
-            if (methods.size() != 1) {
-                continue;
-            }
-            ExecutableElement methodToMatch = methods.get(0);
-            boolean returnMatches = this.doBlockReturnTypesMatch(method, methodToMatch);
-            boolean paramsMatch = this.doBlockParamsMatch(method, methodToMatch);
-            boolean throwsMatch = this.doBlockThrowsMatch(method, methodToMatch);
-            if (returnMatches && paramsMatch && throwsMatch) {
-                this.blockType = attemptType;
-                this.blockMethod = methodToMatch;
+        for (String classNameToAttempt : this.getBlockTypesToAttempt()) {
+            if (this.blockTypeMatchesMethod(classNameToAttempt)) {
                 return true;
             }
         }
+        return false;
+    }
 
-        return false; // none of the attempts worked
+    private boolean blockTypeMatchesMethod(String attemptClassName) {
+        TypeElement attemptType = this.queue.getProcessingEnv().getElementUtils().getTypeElement(attemptClassName);
+        if (attemptType == null) {
+            return false;
+        }
+        List<ExecutableElement> methods = ElementFilter.methodsIn(attemptType.getEnclosedElements());
+        if (methods.size() != 1) {
+            return false;
+        }
+        ExecutableElement methodToMatch = methods.get(0);
+        boolean returnMatches = this.doBlockReturnTypesMatch(methodToMatch);
+        boolean paramsMatch = this.doBlockParamsMatch(methodToMatch);
+        boolean throwsMatch = this.doBlockThrowsMatch(methodToMatch);
+        if (returnMatches && paramsMatch && throwsMatch) {
+            this.blockType = attemptType;
+            this.blockMethod = methodToMatch;
+            return true;
+        }
+        return false;
     }
 
     public void generate() {
@@ -115,25 +119,25 @@ public class MethodCallableGenerator implements PropertyGenerator {
         return null;
     }
 
-    private boolean doBlockReturnTypesMatch(ExecutableType method, ExecutableElement methodToMatch) {
-        return methodToMatch.getReturnType().equals(method.getReturnType());
+    private boolean doBlockReturnTypesMatch(ExecutableElement methodToMatch) {
+        return methodToMatch.getReturnType().equals(this.method.getReturnType());
     }
 
-    private boolean doBlockParamsMatch(ExecutableType method, ExecutableElement methodToMatch) {
-        if (methodToMatch.getParameters().size() != method.getParameterTypes().size()) {
+    private boolean doBlockParamsMatch(ExecutableElement methodToMatch) {
+        if (methodToMatch.getParameters().size() != this.getMethodAsType().getParameterTypes().size()) {
             return false;
         }
         boolean allMatch = true;
         for (int i = 0; i < methodToMatch.getParameters().size(); i++) {
-            if (!methodToMatch.getParameters().get(i).asType().equals(method.getParameterTypes().get(i))) {
+            if (!methodToMatch.getParameters().get(i).asType().equals(this.getMethodAsType().getParameterTypes().get(i))) {
                 allMatch = false;
             }
         }
         return allMatch;
     }
 
-    private boolean doBlockThrowsMatch(ExecutableType method, ExecutableElement methodToMatch) {
-        for (TypeMirror throwsType : method.getThrownTypes()) {
+    private boolean doBlockThrowsMatch(ExecutableElement methodToMatch) {
+        for (TypeMirror throwsType : this.method.getThrownTypes()) {
             boolean matchesOne = false;
             for (TypeMirror otherType : methodToMatch.getThrownTypes()) {
                 if (otherType.equals(throwsType)) {
@@ -161,6 +165,10 @@ public class MethodCallableGenerator implements PropertyGenerator {
         String configKey = "skipAttribute." + this.method.getEnclosingElement().toString() + "." + name;
         String configValue = this.queue.getProperties().getProperty(configKey);
         return "true".equals(configValue);
+    }
+
+    private ExecutableType getMethodAsType() {
+        return (ExecutableType) this.method.asType();
     }
 
 }
