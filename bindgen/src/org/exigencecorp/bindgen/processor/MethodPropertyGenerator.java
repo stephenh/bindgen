@@ -194,7 +194,7 @@ public class MethodPropertyGenerator implements PropertyGenerator {
                 break;
             }
         }
-        if (JavaKeywords.is(propertyName) || "get".equals(propertyName)) {
+        if (Util.isJavaKeyword(propertyName) || "get".equals(propertyName)) {
             propertyName = this.methodName;
         }
         return propertyName;

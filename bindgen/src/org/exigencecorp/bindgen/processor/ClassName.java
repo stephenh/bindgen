@@ -66,10 +66,6 @@ public class ClassName {
         return args;
     }
 
-    private DeclaredType getDeclaredType() {
-        return (DeclaredType) getElementUtils().getTypeElement(this.getWithoutGenericPart()).asType();
-    }
-
     /** @return "<String, String>" if the type is "com.app.Type<String, String>" or "" if no generics */
     public String getGenericPart() {
         int firstBracket = this.fullClassNameWithGenerics.indexOf("<");
@@ -100,6 +96,10 @@ public class ClassName {
 
     public boolean hasWildcards() {
         return this.getGenericPart().indexOf('?') > -1;
+    }
+
+    private DeclaredType getDeclaredType() {
+        return (DeclaredType) getElementUtils().getTypeElement(this.getWithoutGenericPart()).asType();
     }
 
 }
