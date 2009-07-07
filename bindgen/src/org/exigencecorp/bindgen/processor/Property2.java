@@ -24,14 +24,14 @@ public class Property2 {
     protected final TypeMirror type;
     protected ClassName name;
     private final String propertyName;
-    private final TypeElement enclosed;
+    private final TypeElement enclosing;
     private final Element element;
     private final boolean isFixingRawType;
 
     public Property2(TypeMirror type, Element enclosed, String propertyName) {
         this.type = Util.boxIfNeeded(type);
         this.name = new ClassName(this.type.toString());
-        this.enclosed = (TypeElement) enclosed;
+        this.enclosing = (TypeElement) enclosed.getEnclosingElement();
         this.element = getTypeUtils().asElement(this.type);
         this.propertyName = propertyName;
         this.isFixingRawType = this.fixRawTypeIfNeeded();
@@ -46,7 +46,7 @@ public class Property2 {
     }
 
     public boolean shouldSkip() {
-        String configKey = "skipAttribute." + this.enclosed.toString() + "." + this.propertyName;
+        String configKey = "skipAttribute." + this.enclosing.toString() + "." + this.propertyName;
         String configValue = getOption(configKey);
         return "true".equals(configValue);
     }
@@ -226,7 +226,7 @@ public class Property2 {
         if (this.hasWildcards()) {
             return true;
         }
-        for (TypeParameterElement e : this.enclosed.getTypeParameters()) {
+        for (TypeParameterElement e : this.enclosing.getTypeParameters()) {
             if (e.toString().equals(type)) {
                 return true;
             }
@@ -257,7 +257,7 @@ public class Property2 {
      *
      */
     private boolean fixRawTypeIfNeeded() {
-        String configKey = "fixRawType." + this.enclosed.toString() + "." + this.propertyName;
+        String configKey = "fixRawType." + this.enclosing.toString() + "." + this.propertyName;
         String configValue = getOption(configKey);
         if (!this.name.hasGenerics() && configValue != null) {
             this.name = new ClassName(this.type.toString() + "<" + configValue + ">");
