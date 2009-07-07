@@ -19,16 +19,16 @@ import joist.util.Inflector;
 import joist.util.Join;
 
 /** Given a TypeMirror type of a field/method property, provides information about its binding outer/inner class. */
-public class Property2 {
+public class BoundProperty {
 
-    protected final TypeMirror type;
-    protected ClassName name;
+    private final TypeMirror type;
     private final String propertyName;
     private final TypeElement enclosing;
     private final Element element;
     private final boolean isFixingRawType;
+    private ClassName name;
 
-    public Property2(TypeMirror type, Element enclosed, String propertyName) {
+    public BoundProperty(TypeMirror type, Element enclosed, String propertyName) {
         this.type = Util.boxIfNeeded(type);
         this.name = new ClassName(this.type.toString());
         this.enclosing = (TypeElement) enclosed.getEnclosingElement();

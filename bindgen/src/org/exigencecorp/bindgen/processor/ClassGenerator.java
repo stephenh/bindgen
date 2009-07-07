@@ -32,7 +32,7 @@ public class ClassGenerator {
     private final GenerationQueue queue;
     private final TypeElement element;
     private final TypeMirror baseElement;
-    private final Property name;
+    private final BoundClass name;
     private final List<String> foundSubBindings = new ArrayList<String>();
     private final List<String> done = new ArrayList<String>();
     private GClass pathBindingClass;
@@ -41,7 +41,7 @@ public class ClassGenerator {
     public ClassGenerator(GenerationQueue queue, TypeElement element) {
         this.queue = queue;
         this.element = element;
-        this.name = new Property(element.asType());
+        this.name = new BoundClass(element.asType());
         this.baseElement = Util.isOfTypeObjectOrNone(this.element.getSuperclass()) ? null : this.element.getSuperclass();
     }
 

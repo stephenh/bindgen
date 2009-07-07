@@ -19,14 +19,14 @@ public class MethodPropertyGenerator implements PropertyGenerator {
     private final GClass outerClass;
     private final ExecutableElement method;
     private final String methodName;
-    private final Property2 property;
+    private final BoundProperty property;
     private GClass innerClass;
 
     public MethodPropertyGenerator(GClass outerClass, ExecutableElement method) {
         this.outerClass = outerClass;
         this.method = method;
         this.methodName = this.method.getSimpleName().toString();
-        this.property = new Property2(this.method.getReturnType(), this.method, this.guessPropertyNameOrNull());
+        this.property = new BoundProperty(this.method.getReturnType(), this.method, this.guessPropertyNameOrNull());
     }
 
     @Override
