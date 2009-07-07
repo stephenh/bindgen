@@ -46,10 +46,6 @@ public class BindKeywordGenerator {
     private void addBindMethods() {
         for (String className : this.classNames) {
             TypeElement e = getElementUtils().getTypeElement(className);
-            if (e == null) {
-                this.queue.log("TypeElement not found for " + className);
-                continue;
-            }
             this.addBindMethod(className, (DeclaredType) e.asType());
         }
     }
