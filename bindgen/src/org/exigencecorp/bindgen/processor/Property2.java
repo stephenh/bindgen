@@ -25,39 +25,24 @@ public class Property2 {
     protected ClassName name;
     private final String propertyName;
     private final TypeElement enclosed;
-    private final TypeParameterElement genericElement;
-    private final TypeElement element;
+    private final Element element;
     private final boolean isFixingRawType;
 
     public Property2(TypeMirror type, Element enclosed, String propertyName) {
         this.type = Util.boxIfNeeded(type);
         this.name = new ClassName(this.type.toString());
         this.enclosed = (TypeElement) enclosed;
+        this.element = getTypeUtils().asElement(this.type);
         this.propertyName = propertyName;
         this.isFixingRawType = this.fixRawTypeIfNeeded();
-
-        Element element = getTypeUtils().asElement(this.type);
-        if (this.isTypeParameter(element)) {
-            this.genericElement = (TypeParameterElement) element;
-            this.element = null;
-        } else if (element instanceof TypeElement) {
-            this.element = (TypeElement) element;
-            this.genericElement = null;
-        } else { // we get here for Arrays, maybe other things
-            this.element = null;
-            this.genericElement = null;
-        }
     }
 
     public boolean isForGenericTypeParameter() {
-        return this.genericElement != null;
+        return this.isTypeParameter(this.element);
     }
 
     public boolean isNameless() {
-        return this.propertyName == null
-            || "get".equals(this.propertyName)
-            || "declaringClass".equals(this.propertyName)
-            || (this.element == null && this.genericElement == null);
+        return this.propertyName == null || "get".equals(this.propertyName) || "declaringClass".equals(this.propertyName) || this.element == null;
     }
 
     public boolean shouldSkip() {
@@ -205,11 +190,11 @@ public class Property2 {
     }
 
     public TypeElement getElement() {
-        return this.element;
+        return this.isTypeParameter(this.element) ? null : (TypeElement) this.element;
     }
 
     public TypeParameterElement getGenericElement() {
-        return this.genericElement;
+        return this.isTypeParameter(this.element) ? (TypeParameterElement) this.element : null;
     }
 
     public boolean isForListOrSet() {
