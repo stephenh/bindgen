@@ -117,7 +117,7 @@ public class MethodPropertyGenerator implements PropertyGenerator {
             this.property.getCastForReturnIfNeeded(),
             this.bindingClass.getSimpleClassNameWithoutGeneric(),
             this.methodName);
-        if (this.property.isFixingRawType) {
+        if (this.property.isFixingRawType()) {
             get.addAnnotation("@SuppressWarnings(\"unchecked\")");
         }
     }
@@ -129,7 +129,7 @@ public class MethodPropertyGenerator implements PropertyGenerator {
             this.property.getCastForReturnIfNeeded(),
             this.bindingClass.getSimpleClassNameWithoutGeneric(),
             this.methodName);
-        if (this.property.isFixingRawType) {
+        if (this.property.isFixingRawType()) {
             getWithRoot.addAnnotation("@SuppressWarnings(\"unchecked\")");
         }
     }

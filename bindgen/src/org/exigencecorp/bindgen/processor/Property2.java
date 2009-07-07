@@ -22,7 +22,7 @@ public class Property2 extends Property {
     private final TypeElement enclosed;
     private final TypeParameterElement genericElement;
     private final TypeElement element;
-    public final boolean isFixingRawType;
+    private final boolean isFixingRawType;
 
     public Property2(TypeMirror type, TypeElement enclosed, String propertyName) {
         super(type);
@@ -224,6 +224,10 @@ public class Property2 extends Property {
             return dt.getTypeArguments().size() != te.getTypeParameters().size();
         }
         return false;
+    }
+
+    public boolean isFixingRawType() {
+        return this.isFixingRawType;
     }
 
     /** Add generic suffixes to avoid warnings in bindings for pre-1.5 APIs.
