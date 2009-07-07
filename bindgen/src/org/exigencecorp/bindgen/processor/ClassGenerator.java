@@ -168,9 +168,7 @@ public class ClassGenerator {
 
     private void saveCode(GClass gc) {
         try {
-            JavaFileObject jfo = getFiler().createSourceFile(//
-                gc.getFullClassNameWithoutGeneric(),
-                this.getSourceElements());
+            JavaFileObject jfo = getFiler().createSourceFile(gc.getFullClassNameWithoutGeneric(), this.getSourceElements());
             Writer w = jfo.openWriter();
             w.write(gc.toCode());
             w.close();
