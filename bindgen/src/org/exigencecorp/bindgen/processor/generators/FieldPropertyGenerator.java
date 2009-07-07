@@ -31,7 +31,7 @@ public class FieldPropertyGenerator implements PropertyGenerator {
     }
 
     public boolean shouldGenerate() {
-        if (this.property.isForBinding() || this.property.shouldSkip() || this.property.isNameless()) {
+        if (this.property.shouldSkip()) {
             return false;
         }
         return true;

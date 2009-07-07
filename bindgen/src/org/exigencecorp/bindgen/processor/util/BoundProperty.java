@@ -43,14 +43,8 @@ public class BoundProperty {
         return this.isTypeParameter(this.element);
     }
 
-    public boolean isNameless() {
-        return this.propertyName == null || "get".equals(this.propertyName) || "declaringClass".equals(this.propertyName) || this.element == null;
-    }
-
     public boolean shouldSkip() {
-        String configKey = "skipAttribute." + this.enclosing.toString() + "." + this.propertyName;
-        String configValue = getOption(configKey);
-        return "true".equals(configValue);
+        return this.element == null || this.isNameless() || this.isSkipAttributeSet() || this.isForBinding();
     }
 
     public String getCastForReturnIfNeeded() {
@@ -199,14 +193,6 @@ public class BoundProperty {
         return "java.util.List".equals(this.name.getWithoutGenericPart()) || "java.util.Set".equals(this.name.getWithoutGenericPart());
     }
 
-    public boolean isForBinding() {
-        return this.name.getWithoutGenericPart().endsWith("Binding");
-    }
-
-    private boolean isTypeParameter(Element element) {
-        return element != null && element.getKind() == ElementKind.TYPE_PARAMETER;
-    }
-
     public boolean isRawType() {
         if (this.isFixingRawType) {
             return false;
@@ -260,6 +246,24 @@ public class BoundProperty {
             return true;
         }
         return false;
+    }
+
+    private boolean isForBinding() {
+        return this.name.getWithoutGenericPart().endsWith("Binding");
+    }
+
+    private boolean isNameless() {
+        return this.propertyName == null || "get".equals(this.propertyName) || "declaringClass".equals(this.propertyName);
+    }
+
+    private boolean isSkipAttributeSet() {
+        String configKey = "skipAttribute." + this.enclosing.toString() + "." + this.propertyName;
+        String configValue = getOption(configKey);
+        return "true".equals(configValue);
+    }
+
+    private boolean isTypeParameter(Element element) {
+        return element != null && element.getKind() == ElementKind.TYPE_PARAMETER;
     }
 
 }

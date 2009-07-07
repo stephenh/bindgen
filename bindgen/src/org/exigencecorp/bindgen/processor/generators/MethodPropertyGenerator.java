@@ -36,11 +36,7 @@ public class MethodPropertyGenerator implements PropertyGenerator {
     }
 
     public boolean shouldGenerate() {
-        if (this.property.isNameless()
-            || this.property.isForBinding()
-            || this.property.shouldSkip()
-            || this.methodThrowsExceptions()
-            || this.methodHasParameters()) {
+        if (this.property.shouldSkip() || this.methodThrowsExceptions() || this.methodHasParameters()) {
             return false;
         }
         return true;
