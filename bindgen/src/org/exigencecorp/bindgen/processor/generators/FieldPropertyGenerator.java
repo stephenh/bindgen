@@ -1,4 +1,4 @@
-package org.exigencecorp.bindgen.processor;
+package org.exigencecorp.bindgen.processor.generators;
 
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
@@ -9,6 +9,7 @@ import joist.sourcegen.GMethod;
 
 import org.exigencecorp.bindgen.AbstractBinding;
 import org.exigencecorp.bindgen.ContainerBinding;
+import org.exigencecorp.bindgen.processor.util.BoundProperty;
 
 public class FieldPropertyGenerator implements PropertyGenerator {
 

@@ -1,4 +1,4 @@
-package org.exigencecorp.bindgen.processor;
+package org.exigencecorp.bindgen.processor.util;
 
 import java.util.List;
 

@@ -1,4 +1,4 @@
-package org.exigencecorp.bindgen.processor;
+package org.exigencecorp.bindgen.processor.util;
 
 import static org.exigencecorp.bindgen.processor.CurrentEnv.getOption;
 import static org.exigencecorp.bindgen.processor.CurrentEnv.getTypeUtils;

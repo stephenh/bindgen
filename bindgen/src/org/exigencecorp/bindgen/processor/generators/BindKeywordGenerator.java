@@ -1,4 +1,4 @@
-package org.exigencecorp.bindgen.processor;
+package org.exigencecorp.bindgen.processor.generators;
 
 import static org.exigencecorp.bindgen.processor.CurrentEnv.getElementUtils;
 import static org.exigencecorp.bindgen.processor.CurrentEnv.getFiler;
@@ -20,6 +20,10 @@ import javax.tools.FileObject;
 import javax.tools.JavaFileObject;
 import javax.tools.StandardLocation;
 import javax.tools.Diagnostic.Kind;
+
+import org.exigencecorp.bindgen.processor.GenerationQueue;
+import org.exigencecorp.bindgen.processor.util.BoundClass;
+import org.exigencecorp.bindgen.processor.util.ClassName;
 
 import joist.sourcegen.GClass;
 import joist.sourcegen.GMethod;

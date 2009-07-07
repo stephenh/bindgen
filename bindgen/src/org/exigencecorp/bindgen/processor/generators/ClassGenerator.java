@@ -1,4 +1,4 @@
-package org.exigencecorp.bindgen.processor;
+package org.exigencecorp.bindgen.processor.generators;
 
 import static org.exigencecorp.bindgen.processor.CurrentEnv.getFiler;
 import static org.exigencecorp.bindgen.processor.CurrentEnv.getMessager;
@@ -26,6 +26,10 @@ import joist.sourcegen.GMethod;
 import joist.util.Make;
 
 import org.exigencecorp.bindgen.Binding;
+import org.exigencecorp.bindgen.processor.BindgenAnnotationProcessor;
+import org.exigencecorp.bindgen.processor.GenerationQueue;
+import org.exigencecorp.bindgen.processor.util.BoundClass;
+import org.exigencecorp.bindgen.processor.util.Util;
 
 public class ClassGenerator {
 

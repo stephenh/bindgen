@@ -15,6 +15,11 @@ import javax.tools.FileObject;
 import javax.tools.StandardLocation;
 import javax.tools.Diagnostic.Kind;
 
+import org.exigencecorp.bindgen.processor.generators.BindKeywordGenerator;
+import org.exigencecorp.bindgen.processor.generators.ClassGenerator;
+import org.exigencecorp.bindgen.processor.util.BoundClass;
+import org.exigencecorp.bindgen.processor.util.ClassName;
+
 public class GenerationQueue {
 
     // From what I can tell, both Eclipse and javac will use the same processor across all of the rounds, so this should be cumulative

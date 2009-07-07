@@ -1,4 +1,4 @@
-package org.exigencecorp.bindgen.processor;
+package org.exigencecorp.bindgen.processor.generators;
 
 import static org.exigencecorp.bindgen.processor.CurrentEnv.getElementUtils;
 import static org.exigencecorp.bindgen.processor.CurrentEnv.getOption;
