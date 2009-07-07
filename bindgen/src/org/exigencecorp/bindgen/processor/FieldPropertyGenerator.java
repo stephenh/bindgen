@@ -87,7 +87,7 @@ public class FieldPropertyGenerator implements PropertyGenerator {
     }
 
     private void addOuterClassBindingField() {
-        GField f = this.bindingClass.getField(this.property.getName()).type(this.property.getBindingClassFieldDeclaration(this.property.getName()));
+        GField f = this.bindingClass.getField(this.property.getName()).type(this.property.getBindingClassFieldDeclaration());
         if (this.property.isRawType()) {
             f.addAnnotation("@SuppressWarnings(\"unchecked\")");
         }
@@ -101,9 +101,7 @@ public class FieldPropertyGenerator implements PropertyGenerator {
             fieldGet.returnType(this.property.getBindingTypeForPathWithR());
         }
         fieldGet.body.line("if (this.{} == null) {", this.property.getName());
-        fieldGet.body.line("    this.{} = new {}();",//
-            this.property.getName(),
-            this.property.getBindingRootClassInstantiation(this.property.getName()));
+        fieldGet.body.line("    this.{} = new {}();", this.property.getName(), this.property.getBindingRootClassInstantiation());
         fieldGet.body.line("}");
         fieldGet.body.line("return this.{};", this.property.getName());
         if (this.property.isRawType()) {
@@ -112,7 +110,7 @@ public class FieldPropertyGenerator implements PropertyGenerator {
     }
 
     private void addInnerClass() {
-        this.innerClass = this.bindingClass.getInnerClass(this.property.getInnerClass(this.property.getName())).notStatic();
+        this.innerClass = this.bindingClass.getInnerClass(this.property.getInnerClass()).notStatic();
         if (this.property.isForGenericTypeParameter()) {
             this.innerClass.baseClassName("{}<R, {}>", AbstractBinding.class.getName(), this.property.getGenericElement());
             this.innerClass.getMethod("getType").returnType("Class<?>").body.line("return null;");
