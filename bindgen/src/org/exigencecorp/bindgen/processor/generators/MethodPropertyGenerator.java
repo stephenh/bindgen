@@ -27,7 +27,7 @@ public class MethodPropertyGenerator implements PropertyGenerator {
         this.outerClass = outerClass;
         this.method = method;
         this.methodName = this.method.getSimpleName().toString();
-        this.property = new BoundProperty(this.method.getReturnType(), this.method, this.guessPropertyNameOrNull());
+        this.property = new BoundProperty(this.method, this.method.getReturnType(), this.guessPropertyNameOrNull());
     }
 
     @Override

@@ -21,7 +21,7 @@ public class FieldPropertyGenerator implements PropertyGenerator {
     public FieldPropertyGenerator(GClass outerClass, Element field) {
         this.outerClass = outerClass;
         this.field = field;
-        this.property = new BoundProperty(this.field.asType(), this.field, this.field.getSimpleName().toString());
+        this.property = new BoundProperty(this.field, this.field.asType(), this.field.getSimpleName().toString());
         this.isFinal = this.field.getModifiers().contains(javax.lang.model.element.Modifier.FINAL);
     }
 

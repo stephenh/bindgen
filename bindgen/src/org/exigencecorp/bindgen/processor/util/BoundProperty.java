@@ -23,19 +23,19 @@ import org.exigencecorp.bindgen.AbstractBinding;
 /** Given a TypeMirror type of a field/method property, provides information about its binding outer/inner class. */
 public class BoundProperty {
 
-    private final TypeMirror type;
-    private final String propertyName;
     private final TypeElement enclosing;
+    private final TypeMirror type;
     private final Element element;
+    private final String propertyName;
     private final boolean isFixingRawType;
     private ClassName name;
 
-    public BoundProperty(TypeMirror type, Element enclosed, String propertyName) {
-        this.type = Util.boxIfNeeded(type);
-        this.name = new ClassName(this.type.toString());
+    public BoundProperty(Element enclosed, TypeMirror type, String propertyName) {
         this.enclosing = (TypeElement) enclosed.getEnclosingElement();
+        this.type = Util.boxIfNeeded(type);
         this.element = getTypeUtils().asElement(this.type);
         this.propertyName = propertyName;
+        this.name = new ClassName(this.type.toString());
         this.isFixingRawType = this.fixRawTypeIfNeeded();
     }
 
