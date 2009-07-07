@@ -1,27 +1,18 @@
 package org.exigencecorp.bindgen.processor;
 
-import static org.exigencecorp.bindgen.processor.CurrentEnv.getTypeUtils;
-
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 import javax.lang.model.type.DeclaredType;
-import javax.lang.model.type.PrimitiveType;
 import javax.lang.model.type.TypeMirror;
-
-import joist.util.Inflector;
 
 import org.exigencecorp.bindgen.AbstractBinding;
 
 /** Given a TypeMirror type of a field/method property, provides information about its binding outer/inner class. */
 public class Property {
 
-    private static final Pattern outerClassName = Pattern.compile("\\.([A-Z]\\w+)\\.");
     protected final TypeMirror type;
     protected ClassName name;
 
     public Property(TypeMirror type) {
-        this.type = this.boxIfNeeded(type);
+        this.type = Util.boxIfNeeded(type);
         this.name = new ClassName(this.type.toString());
     }
 
@@ -31,7 +22,7 @@ public class Property {
         if (this.hasGenerics() && !this.hasWildcards()) {
             bindingName += this.name.getGenericPart();
         }
-        return new ClassName("bindgen." + this.lowerCaseOuterClassNames(bindingName));
+        return new ClassName("bindgen." + Util.lowerCaseOuterClassNames(bindingName));
     }
 
     public String getBindingPathClassDeclaration() {
@@ -85,32 +76,4 @@ public class Property {
         return this.name.get();
     }
 
-    // Make this go away
-    public String getGenericPartWithoutBrackets() {
-        return this.name.getGenericPartWithoutBrackets();
-    }
-
-    private TypeMirror boxIfNeeded(TypeMirror type) {
-        if (type instanceof PrimitiveType) {
-            // double check--Eclipse worked fine but javac is letting non-primitive types in here
-            if (type.toString().indexOf('.') == -1) {
-                try {
-                    return getTypeUtils().boxedClass((PrimitiveType) type).asType();
-                } catch (NullPointerException npe) {
-                    return type; // it is probably a type parameter, e.g. T
-                }
-            }
-        }
-        return type;
-    }
-
-    // Watch for package.Foo.Inner -> package.foo.Inner
-    protected String lowerCaseOuterClassNames(String className) {
-        Matcher m = outerClassName.matcher(className);
-        while (m.find()) {
-            className = m.replaceFirst("." + Inflector.uncapitalize(m.group(1)) + ".");
-            m = outerClassName.matcher(className);
-        }
-        return className;
-    }
 }

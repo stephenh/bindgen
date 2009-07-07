@@ -19,8 +19,10 @@ import joist.util.Inflector;
 import joist.util.Join;
 
 /** Given a TypeMirror type of a field/method property, provides information about its binding outer/inner class. */
-public class Property2 extends Property {
+public class Property2 {
 
+    protected final TypeMirror type;
+    protected ClassName name;
     private final String propertyName;
     private final TypeElement enclosed;
     private final TypeParameterElement genericElement;
@@ -28,7 +30,8 @@ public class Property2 extends Property {
     private final boolean isFixingRawType;
 
     public Property2(TypeMirror type, Element enclosed, String propertyName) {
-        super(type);
+        this.type = Util.boxIfNeeded(type);
+        this.name = new ClassName(this.type.toString());
         this.enclosed = (TypeElement) enclosed;
         this.propertyName = propertyName;
         this.isFixingRawType = this.fixRawTypeIfNeeded();
@@ -117,7 +120,7 @@ public class Property2 extends Property {
             bindingName += "<R>";
         }
         bindingName = bindingName.replaceAll(" super \\w+", ""); // for Class.getSuperClass()
-        return "bindgen." + this.lowerCaseOuterClassNames(bindingName);
+        return "bindgen." + Util.lowerCaseOuterClassNames(bindingName);
     }
 
     public String getInnerClass() {
@@ -145,7 +148,7 @@ public class Property2 extends Property {
     }
 
     public String getInnerClassSuperClass() {
-        String superName = this.lowerCaseOuterClassNames("bindgen." + this.name.getWithoutGenericPart() + "BindingPath");
+        String superName = Util.lowerCaseOuterClassNames("bindgen." + this.name.getWithoutGenericPart() + "BindingPath");
         DeclaredType dt = (DeclaredType) this.type;
         TypeElement te = (TypeElement) getTypeUtils().asElement(dt);
         if (this.isRawType() || this.hasGenerics()) {
@@ -192,6 +195,11 @@ public class Property2 extends Property {
         return this.get();
     }
 
+    // Make this go away
+    public String getGenericPartWithoutBrackets() {
+        return this.name.getGenericPartWithoutBrackets();
+    }
+
     public String getName() {
         return this.propertyName;
     }
@@ -230,6 +238,19 @@ public class Property2 extends Property {
 
     public boolean isFixingRawType() {
         return this.isFixingRawType;
+    }
+
+    /** @return "com.app.Type<String, String>" if the type is "com.app.Type<String, String>" */
+    public String get() {
+        return this.name.get();
+    }
+
+    public boolean hasGenerics() {
+        return this.name.getGenericPart().length() > 0;
+    }
+
+    public boolean hasWildcards() {
+        return this.name.getGenericPart().indexOf('?') > -1;
     }
 
     /** Add generic suffixes to avoid warnings in bindings for pre-1.5 APIs.
