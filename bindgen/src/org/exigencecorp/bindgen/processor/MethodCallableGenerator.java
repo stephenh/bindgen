@@ -51,18 +51,14 @@ public class MethodCallableGenerator implements PropertyGenerator {
 
     private boolean blockTypeMatchesMethod(String attemptClassName) {
         TypeElement attemptType = this.queue.getProcessingEnv().getElementUtils().getTypeElement(attemptClassName);
-        if (attemptType == null) {
-            return false;
-        }
         List<ExecutableElement> methods = ElementFilter.methodsIn(attemptType.getEnclosedElements());
         if (methods.size() != 1) {
-            return false;
+            return false; // We only like classes with 1 method
         }
         ExecutableElement methodToMatch = methods.get(0);
-        boolean returnMatches = this.doBlockReturnTypesMatch(methodToMatch);
-        boolean paramsMatch = this.doBlockParamsMatch(methodToMatch);
-        boolean throwsMatch = this.doBlockThrowsMatch(methodToMatch);
-        if (returnMatches && paramsMatch && throwsMatch) {
+        if (this.doBlockReturnTypesMatch(methodToMatch) //
+            && this.doBlockParamsMatch(methodToMatch)
+            && this.doBlockThrowsMatch(methodToMatch)) {
             this.blockType = attemptType;
             this.blockMethod = methodToMatch;
             return true;
