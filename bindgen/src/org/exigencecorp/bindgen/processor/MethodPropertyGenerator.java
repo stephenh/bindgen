@@ -18,15 +18,15 @@ import org.exigencecorp.bindgen.ContainerBinding;
 public class MethodPropertyGenerator implements PropertyGenerator {
 
     private final GenerationQueue queue;
-    private final GClass bindingClass;
+    private final GClass outerClass;
     private final ExecutableElement method;
     private final String methodName;
     private final Property2 property;
     private GClass innerClass;
 
-    public MethodPropertyGenerator(GenerationQueue queue, GClass bindingClass, ExecutableElement method) {
+    public MethodPropertyGenerator(GenerationQueue queue, GClass outerClass, ExecutableElement method) {
         this.queue = queue;
-        this.bindingClass = bindingClass;
+        this.outerClass = outerClass;
         this.method = method;
         this.methodName = this.method.getSimpleName().toString();
         this.property = new Property2(//
@@ -65,7 +65,7 @@ public class MethodPropertyGenerator implements PropertyGenerator {
     }
 
     private void addOuterClassGet() {
-        GMethod fieldGet = this.bindingClass.getMethod(this.property.getName() + "()");
+        GMethod fieldGet = this.outerClass.getMethod(this.property.getName() + "()");
         if (this.property.isForGenericTypeParameter()) {
             fieldGet.returnType(this.property.getInnerClass());
         } else {
@@ -81,14 +81,14 @@ public class MethodPropertyGenerator implements PropertyGenerator {
     }
 
     private void addOuterClassBindingField() {
-        GField f = this.bindingClass.getField(this.property.getName()).type(this.property.getBindingClassFieldDeclaration());
+        GField f = this.outerClass.getField(this.property.getName()).type(this.property.getBindingClassFieldDeclaration());
         if (this.property.isRawType()) {
             f.addAnnotation("@SuppressWarnings(\"unchecked\")");
         }
     }
 
     private void addInnerClass() {
-        this.innerClass = this.bindingClass.getInnerClass(this.property.getInnerClass()).notStatic();
+        this.innerClass = this.outerClass.getInnerClass(this.property.getInnerClass()).notStatic();
         if (this.property.isForGenericTypeParameter()) {
             this.innerClass.baseClassName("{}<R, {}>", AbstractBinding.class.getName(), this.property.getGenericElement());
             this.innerClass.getMethod("getType").returnType("Class<?>").body.line("return null;");
@@ -107,7 +107,7 @@ public class MethodPropertyGenerator implements PropertyGenerator {
 
     private void addInnerClassParent() {
         GMethod getParent = this.innerClass.getMethod("getParentBinding").returnType("Binding<?>").addAnnotation("@Override");
-        getParent.body.line("return {}.this;", this.bindingClass.getSimpleClassNameWithoutGeneric());
+        getParent.body.line("return {}.this;", this.outerClass.getSimpleClassNameWithoutGeneric());
     }
 
     private void addInnerClassGet() {
@@ -115,7 +115,7 @@ public class MethodPropertyGenerator implements PropertyGenerator {
         get.returnType(this.property.getSetType()).addAnnotation("@Override");
         get.body.line("return {}{}.this.get().{}();",//
             this.property.getCastForReturnIfNeeded(),
-            this.bindingClass.getSimpleClassNameWithoutGeneric(),
+            this.outerClass.getSimpleClassNameWithoutGeneric(),
             this.methodName);
         if (this.property.isFixingRawType()) {
             get.addAnnotation("@SuppressWarnings(\"unchecked\")");
@@ -127,7 +127,7 @@ public class MethodPropertyGenerator implements PropertyGenerator {
         getWithRoot.argument("R", "root").returnType(this.property.getSetType()).addAnnotation("@Override");
         getWithRoot.body.line("return {}{}.this.getWithRoot(root).{}();",//
             this.property.getCastForReturnIfNeeded(),
-            this.bindingClass.getSimpleClassNameWithoutGeneric(),
+            this.outerClass.getSimpleClassNameWithoutGeneric(),
             this.methodName);
         if (this.property.isFixingRawType()) {
             getWithRoot.addAnnotation("@SuppressWarnings(\"unchecked\")");
@@ -141,7 +141,7 @@ public class MethodPropertyGenerator implements PropertyGenerator {
             return;
         }
         set.body.line("{}.this.get().{}({});",//
-            this.bindingClass.getSimpleClassNameWithoutGeneric(),
+            this.outerClass.getSimpleClassNameWithoutGeneric(),
             this.getSetterName(),
             this.property.getName());
     }
@@ -153,7 +153,7 @@ public class MethodPropertyGenerator implements PropertyGenerator {
             return;
         }
         setWithRoot.body.line("{}.this.getWithRoot(root).{}({});",//
-            this.bindingClass.getSimpleClassNameWithoutGeneric(),
+            this.outerClass.getSimpleClassNameWithoutGeneric(),
             this.getSetterName(),
             this.property.getName());
     }

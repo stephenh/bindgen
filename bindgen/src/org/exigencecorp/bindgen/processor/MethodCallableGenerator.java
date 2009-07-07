@@ -19,15 +19,15 @@ import org.exigencecorp.bindgen.NamedBinding;
 public class MethodCallableGenerator implements PropertyGenerator {
 
     private final GenerationQueue queue;
-    private final GClass bindingClass;
+    private final GClass outerClass;
     private final ExecutableElement enclosed;
     private final String methodName;
     private TypeElement blockType;
     private ExecutableElement blockMethod;
 
-    public MethodCallableGenerator(GenerationQueue queue, GClass bindingClass, ExecutableElement enclosed) {
+    public MethodCallableGenerator(GenerationQueue queue, GClass outerClass, ExecutableElement enclosed) {
         this.queue = queue;
-        this.bindingClass = bindingClass;
+        this.outerClass = outerClass;
         this.enclosed = enclosed;
         this.methodName = this.enclosed.getSimpleName().toString();
     }
@@ -69,8 +69,8 @@ public class MethodCallableGenerator implements PropertyGenerator {
     public void generate() {
         String methodName = this.enclosed.getSimpleName().toString();
 
-        this.bindingClass.getField(methodName).type(this.blockType.getQualifiedName().toString());
-        GClass fieldClass = this.bindingClass.getInnerClass("My{}Binding", Inflector.capitalize(methodName)).notStatic();
+        this.outerClass.getField(methodName).type(this.blockType.getQualifiedName().toString());
+        GClass fieldClass = this.outerClass.getInnerClass("My{}Binding", Inflector.capitalize(methodName)).notStatic();
         fieldClass.implementsInterface(this.blockType.getQualifiedName().toString());
         fieldClass.implementsInterface(NamedBinding.class);
 
@@ -87,7 +87,7 @@ public class MethodCallableGenerator implements PropertyGenerator {
             arguments = arguments.substring(0, arguments.length() - 2); // remove last ", "
         }
 
-        fieldClassRun.body.line("{}{}.this.get().{}({});", returnPrefix, this.bindingClass.getSimpleClassNameWithoutGeneric(), methodName, arguments);
+        fieldClassRun.body.line("{}{}.this.get().{}({});", returnPrefix, this.outerClass.getSimpleClassNameWithoutGeneric(), methodName, arguments);
         // Add the parameters
         for (VariableElement foo : this.blockMethod.getParameters()) {
             fieldClassRun.argument(foo.asType().toString(), foo.getSimpleName().toString());
@@ -100,7 +100,7 @@ public class MethodCallableGenerator implements PropertyGenerator {
         GMethod fieldClassName = fieldClass.getMethod("getName").returnType(String.class);
         fieldClassName.body.line("return \"{}\";", methodName);
 
-        GMethod fieldGet = this.bindingClass.getMethod(methodName).returnType(this.blockType.getQualifiedName().toString());
+        GMethod fieldGet = this.outerClass.getMethod(methodName).returnType(this.blockType.getQualifiedName().toString());
         fieldGet.body.line("if (this.{} == null) {", methodName);
         fieldGet.body.line("    this.{} = new My{}Binding();", methodName, Inflector.capitalize(methodName));
         fieldGet.body.line("}");

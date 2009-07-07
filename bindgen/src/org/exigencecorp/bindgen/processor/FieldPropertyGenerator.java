@@ -14,15 +14,15 @@ import org.exigencecorp.bindgen.ContainerBinding;
 public class FieldPropertyGenerator implements PropertyGenerator {
 
     private final GenerationQueue queue;
-    private final GClass bindingClass;
+    private final GClass outerClass;
     private final Element field;
     private final Property2 property;
     private final boolean isFinal;
     private GClass innerClass;
 
-    public FieldPropertyGenerator(GenerationQueue queue, GClass bindingClass, Element field) {
+    public FieldPropertyGenerator(GenerationQueue queue, GClass outerClass, Element field) {
         this.queue = queue;
-        this.bindingClass = bindingClass;
+        this.outerClass = outerClass;
         this.field = field;
         this.property = new Property2(//
             this.queue.boxIfNeeded(this.field.asType()),
@@ -57,14 +57,14 @@ public class FieldPropertyGenerator implements PropertyGenerator {
     }
 
     private void addOuterClassBindingField() {
-        GField f = this.bindingClass.getField(this.property.getName()).type(this.property.getBindingClassFieldDeclaration());
+        GField f = this.outerClass.getField(this.property.getName()).type(this.property.getBindingClassFieldDeclaration());
         if (this.property.isRawType()) {
             f.addAnnotation("@SuppressWarnings(\"unchecked\")");
         }
     }
 
     private void addOuterClassGet() {
-        GMethod fieldGet = this.bindingClass.getMethod(this.property.getName() + "()");
+        GMethod fieldGet = this.outerClass.getMethod(this.property.getName() + "()");
         if (this.property.isForGenericTypeParameter()) {
             fieldGet.returnType(this.property.getInnerClass());
         } else {
@@ -80,7 +80,7 @@ public class FieldPropertyGenerator implements PropertyGenerator {
     }
 
     private void addInnerClass() {
-        this.innerClass = this.bindingClass.getInnerClass(this.property.getInnerClass()).notStatic();
+        this.innerClass = this.outerClass.getInnerClass(this.property.getInnerClass()).notStatic();
         if (this.property.isForGenericTypeParameter()) {
             this.innerClass.baseClassName("{}<R, {}>", AbstractBinding.class.getName(), this.property.getGenericElement());
             this.innerClass.getMethod("getType").returnType("Class<?>").body.line("return null;");
@@ -99,14 +99,14 @@ public class FieldPropertyGenerator implements PropertyGenerator {
 
     private void addInnerClassGetParent() {
         GMethod getParent = this.innerClass.getMethod("getParentBinding").returnType("Binding<?>").addAnnotation("@Override");
-        getParent.body.line("return {}.this;", this.bindingClass.getSimpleClassNameWithoutGeneric());
+        getParent.body.line("return {}.this;", this.outerClass.getSimpleClassNameWithoutGeneric());
     }
 
     private void addInnerClassGet() {
         GMethod get = this.innerClass.getMethod("get").returnType(this.property.getSetType()).addAnnotation("@Override");
         get.body.line("return {}{}.this.get().{};",//
             this.property.getCastForReturnIfNeeded(),
-            this.bindingClass.getSimpleClassNameWithoutGeneric(),
+            this.outerClass.getSimpleClassNameWithoutGeneric(),
             this.property.getName());
         if (this.property.isFixingRawType()) {
             get.addAnnotation("@SuppressWarnings(\"unchecked\")");
@@ -118,7 +118,7 @@ public class FieldPropertyGenerator implements PropertyGenerator {
         getWithRoot.argument("R", "root").returnType(this.property.getSetType()).addAnnotation("@Override");
         getWithRoot.body.line("return {}{}.this.getWithRoot(root).{};",//
             this.property.getCastForReturnIfNeeded(),
-            this.bindingClass.getSimpleClassNameWithoutGeneric(),
+            this.outerClass.getSimpleClassNameWithoutGeneric(),
             this.property.getName());
         if (this.property.isFixingRawType()) {
             getWithRoot.addAnnotation("@SuppressWarnings(\"unchecked\")");
@@ -132,7 +132,7 @@ public class FieldPropertyGenerator implements PropertyGenerator {
             return;
         }
         set.body.line("{}.this.get().{} = {};",//
-            this.bindingClass.getSimpleClassNameWithoutGeneric(),
+            this.outerClass.getSimpleClassNameWithoutGeneric(),
             this.property.getName(),
             this.property.getName());
     }
@@ -145,7 +145,7 @@ public class FieldPropertyGenerator implements PropertyGenerator {
         }
         setWithRoot.body.line(
             "{}.this.getWithRoot(root).{} = {};",
-            this.bindingClass.getSimpleClassNameWithoutGeneric(),
+            this.outerClass.getSimpleClassNameWithoutGeneric(),
             this.property.getName(),
             this.property.getName());
     }
