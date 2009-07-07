@@ -15,6 +15,7 @@ import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.type.WildcardType;
 
+import joist.util.Copy;
 import joist.util.Inflector;
 import joist.util.Join;
 
@@ -51,14 +52,6 @@ public class BoundProperty {
         return this.hasWildcards() ? "(" + this.getSetType() + ") " : "";
     }
 
-    public String getBindingRootClassInstantiation() {
-        return "My" + Inflector.capitalize(this.propertyName) + "Binding" + this.optionalGenericsIfWildcards("Object");
-    }
-
-    public String getBindingClassFieldDeclaration() {
-        return "My" + Inflector.capitalize(this.propertyName) + "Binding" + this.optionalGenericsIfWildcards("?");
-    }
-
     private String optionalGenericsIfWildcards(String replace) {
         if (this.type instanceof DeclaredType) {
             List<String> dummyParams = new ArrayList<String>();
@@ -74,6 +67,14 @@ public class BoundProperty {
             }
         }
         return "";
+    }
+
+    public String getBindingRootClassInstantiation() {
+        return "My" + Inflector.capitalize(this.propertyName) + "Binding" + this.optionalGenericsIfWildcards("Object");
+    }
+
+    public String getBindingClassFieldDeclaration() {
+        return "My" + Inflector.capitalize(this.propertyName) + "Binding" + this.optionalGenericsIfWildcards("?");
     }
 
     public String getInnerClassDeclaration() {
@@ -102,48 +103,40 @@ public class BoundProperty {
         if (this.isForGenericTypeParameter()) {
             return AbstractBinding.class.getName() + "<R, " + this.getGenericElement() + ">";
         }
+
         String superName = Util.lowerCaseOuterClassNames("bindgen." + this.name.getWithoutGenericPart() + "BindingPath");
+        List<String> typeArgs = Copy.list("R");
         if (this.isRawType() || this.name.hasGenerics()) {
-            List<String> dummyParams = new ArrayList<String>();
-            dummyParams.add("R");
             if (this.isRawType()) {
                 for (TypeParameterElement tpe : this.getElement().getTypeParameters()) {
-                    dummyParams.add(tpe.toString());
+                    typeArgs.add(tpe.toString());
                 }
             } else if (!this.isFixingRawType) {
                 for (TypeMirror tm : ((DeclaredType) this.type).getTypeArguments()) {
                     if (tm instanceof WildcardType) {
-                        dummyParams.add("U" + (dummyParams.size() - 1));
+                        typeArgs.add("U" + (typeArgs.size() - 1));
                     } else {
-                        dummyParams.add(tm.toString());
+                        typeArgs.add(tm.toString());
                     }
                 }
             } else {
-                dummyParams.add(this.name.getGenericPartWithoutBrackets());
+                typeArgs.add(this.name.getGenericPartWithoutBrackets());
             }
-            superName += "<" + Join.commaSpace(dummyParams) + ">";
-        } else {
-            superName += "<R>";
         }
-        return superName;
+        return superName + "<" + Join.commaSpace(typeArgs) + ">";
     }
 
     public String getBindingTypeForPathWithR() {
-        String bindingName = this.name.getWithoutGenericPart() + "BindingPath";
+        String bindingName = Util.lowerCaseOuterClassNames("bindgen." + this.name.getWithoutGenericPart() + "BindingPath");
+        List<String> typeArgs = Copy.list("R");
         if (this.isRawType()) {
-            List<String> foo = new ArrayList<String>();
-            foo.add("R");
             for (int i = 0; i < this.getElement().getTypeParameters().size(); i++) {
-                foo.add("?");
+                typeArgs.add("?");
             }
-            bindingName += "<" + Join.commaSpace(foo) + ">";
         } else if (this.name.hasGenerics()) {
-            bindingName += this.name.getGenericPart().replaceFirst("<", "<R, ");
-        } else {
-            bindingName += "<R>";
+            typeArgs.add(this.name.getGenericPartWithoutBrackets());
         }
-        bindingName = bindingName.replaceAll(" super \\w+", ""); // for Class.getSuperClass()
-        return "bindgen." + Util.lowerCaseOuterClassNames(bindingName);
+        return (bindingName + "<" + Join.commaSpace(typeArgs) + ">").replaceAll(" super \\w+", ""); // for Class.getSuperClass()
     }
 
     /** @return the type appropriate for setter/return arguments. */
