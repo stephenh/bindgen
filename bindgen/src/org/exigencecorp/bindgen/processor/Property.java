@@ -19,11 +19,8 @@ public class Property {
 
     /** @return binding type, e.g. bindgen.java.lang.StringBinding, bindgen.app.EmployeeBinding */
     public ClassName getBindingType() {
-        String bindingName = this.name.getWithoutGenericPart() + "Binding";
-        if (this.name.hasGenerics() && !this.name.hasWildcards()) {
-            bindingName += this.name.getGenericPart();
-        }
-        return new ClassName("bindgen." + Util.lowerCaseOuterClassNames(bindingName));
+        String bindingName = "bindgen." + this.name.getWithoutGenericPart() + "Binding" + this.name.getGenericPart();
+        return new ClassName(Util.lowerCaseOuterClassNames(bindingName));
     }
 
     public String getBindingPathClassDeclaration() {
