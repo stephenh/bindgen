@@ -20,16 +20,16 @@ public class MethodCallableGenerator implements PropertyGenerator {
 
     private final GenerationQueue queue;
     private final GClass outerClass;
-    private final ExecutableElement enclosed;
+    private final ExecutableElement method;
     private final String methodName;
     private TypeElement blockType;
     private ExecutableElement blockMethod;
 
-    public MethodCallableGenerator(GenerationQueue queue, GClass outerClass, ExecutableElement enclosed) {
+    public MethodCallableGenerator(GenerationQueue queue, GClass outerClass, ExecutableElement method) {
         this.queue = queue;
         this.outerClass = outerClass;
-        this.enclosed = enclosed;
-        this.methodName = this.enclosed.getSimpleName().toString();
+        this.method = method;
+        this.methodName = this.method.getSimpleName().toString();
     }
 
     @Override
@@ -42,7 +42,7 @@ public class MethodCallableGenerator implements PropertyGenerator {
             return false;
         }
 
-        ExecutableType method = (ExecutableType) this.enclosed.asType();
+        ExecutableType method = (ExecutableType) this.method.asType();
         for (String attempt : this.getBlockTypesToAttempt()) {
             TypeElement attemptType = this.queue.getProcessingEnv().getElementUtils().getTypeElement(attempt);
             if (attemptType == null) {
@@ -67,7 +67,7 @@ public class MethodCallableGenerator implements PropertyGenerator {
     }
 
     public void generate() {
-        String methodName = this.enclosed.getSimpleName().toString();
+        String methodName = this.method.getSimpleName().toString();
 
         this.outerClass.getField(methodName).type(this.blockType.getQualifiedName().toString());
         GClass fieldClass = this.outerClass.getInnerClass("My{}Binding", Inflector.capitalize(methodName)).notStatic();
@@ -93,7 +93,7 @@ public class MethodCallableGenerator implements PropertyGenerator {
             fieldClassRun.argument(foo.asType().toString(), foo.getSimpleName().toString());
         }
         // Add throws
-        for (TypeMirror type : this.enclosed.getThrownTypes()) {
+        for (TypeMirror type : this.method.getThrownTypes()) {
             fieldClassRun.addThrows(type.toString());
         }
 
@@ -158,7 +158,7 @@ public class MethodCallableGenerator implements PropertyGenerator {
     }
 
     private boolean shouldSkipAttribute(String name) {
-        String configKey = "skipAttribute." + this.enclosed.getEnclosingElement().toString() + "." + name;
+        String configKey = "skipAttribute." + this.method.getEnclosingElement().toString() + "." + name;
         String configValue = this.queue.getProperties().getProperty(configKey);
         return "true".equals(configValue);
     }
