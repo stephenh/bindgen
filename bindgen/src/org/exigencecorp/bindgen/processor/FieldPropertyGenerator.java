@@ -3,9 +3,7 @@ package org.exigencecorp.bindgen.processor;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.Element;
-import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.TypeParameterElement;
 import javax.lang.model.type.DeclaredType;
@@ -26,21 +24,20 @@ public class FieldPropertyGenerator implements PropertyGenerator {
 
     private final GenerationQueue queue;
     private final GClass bindingClass;
-    private final Element enclosed;
-    private final String propertyName;
-    private Property propertyType;
-    private TypeElement propertyTypeElement;
-    private TypeParameterElement propertyGenericElement;
+    private final Element field;
+    private final Property2 property;
     private boolean isFinal = false;
     private GClass innerClass;
 
-    public FieldPropertyGenerator(GenerationQueue queue, GClass bindingClass, Element enclosed) {
+    public FieldPropertyGenerator(GenerationQueue queue, GClass bindingClass, Element field) {
         this.queue = queue;
         this.bindingClass = bindingClass;
-        this.enclosed = enclosed;
-        this.propertyType = new Property(this.queue.boxIfNeeded(this.enclosed.asType()));
-        this.propertyName = this.enclosed.getSimpleName().toString();
-        this.isFinal = this.enclosed.getModifiers().contains(javax.lang.model.element.Modifier.FINAL);
+        this.field = field;
+        this.property = new Property2(//
+            this.queue.boxIfNeeded(this.field.asType()),
+            (TypeElement) this.field.getEnclosingElement(),
+            this.field.getSimpleName().toString());
+        this.isFinal = this.field.getModifiers().contains(javax.lang.model.element.Modifier.FINAL);
     }
 
     @Override
@@ -49,28 +46,9 @@ public class FieldPropertyGenerator implements PropertyGenerator {
     }
 
     public boolean shouldGenerate() {
-        if (this.propertyType.isForBinding() || this.shouldSkipAttribute(this.propertyName) || "get".equals(this.propertyName)) {
+        if (this.property.isForBinding() || this.property.shouldSkip() || this.property.isNameless()) {
             return false;
         }
-
-        TypeMirror fieldType = this.queue.boxIfNeeded(this.enclosed.asType());
-        if (fieldType == null) {
-            return false; // Skip methods we (javac) could not box appropriately
-        }
-
-        Element fieldTypeAsElement = this.getProcessingEnv().getTypeUtils().asElement(fieldType);
-        if (fieldTypeAsElement != null && fieldTypeAsElement.getKind() == ElementKind.TYPE_PARAMETER) {
-            this.propertyGenericElement = (TypeParameterElement) fieldTypeAsElement;
-            this.propertyType = new Property(this.propertyGenericElement.asType());
-            this.propertyTypeElement = null;
-        } else if (fieldTypeAsElement instanceof TypeElement) {
-            this.propertyTypeElement = (TypeElement) fieldTypeAsElement;
-        } else {
-            return false;
-        }
-
-        this.propertyType.fixRawTypeIfNeeded((TypeElement) this.enclosed.getEnclosingElement(), this.propertyName);
-
         return true;
     }
 
@@ -88,9 +66,9 @@ public class FieldPropertyGenerator implements PropertyGenerator {
     }
 
     private String getInnerClassName() {
-        String name = "My" + Inflector.capitalize(this.propertyName) + "Binding";
+        String name = "My" + Inflector.capitalize(this.property.getName()) + "Binding";
 
-        TypeMirror returnType = this.enclosed.asType();
+        TypeMirror returnType = this.field.asType();
 
         if (returnType.getKind() == TypeKind.DECLARED) {
             List<String> dummyParams = new ArrayList<String>();
@@ -109,36 +87,38 @@ public class FieldPropertyGenerator implements PropertyGenerator {
     }
 
     private void addOuterClassBindingField() {
-        GField f = this.bindingClass.getField(this.propertyName).type(this.propertyType.getBindingClassFieldDeclaration(this.propertyName));
-        if (this.propertyType.isRawType()) {
+        GField f = this.bindingClass.getField(this.property.getName()).type(this.property.getBindingClassFieldDeclaration(this.property.getName()));
+        if (this.property.isRawType()) {
             f.addAnnotation("@SuppressWarnings(\"unchecked\")");
         }
     }
 
     private void addOuterClassGet() {
-        GMethod fieldGet = this.bindingClass.getMethod(this.propertyName + "()");
-        if (this.propertyGenericElement != null) {
+        GMethod fieldGet = this.bindingClass.getMethod(this.property.getName() + "()");
+        if (this.property.isForGenericTypeParameter()) {
             fieldGet.returnType(this.getInnerClassName());
         } else {
-            fieldGet.returnType(this.propertyType.getBindingTypeForPathWithR());
+            fieldGet.returnType(this.property.getBindingTypeForPathWithR());
         }
-        fieldGet.body.line("if (this.{} == null) {", this.propertyName);
-        fieldGet.body.line("    this.{} = new {}();", this.propertyName, this.propertyType.getBindingRootClassInstantiation(this.propertyName));
+        fieldGet.body.line("if (this.{} == null) {", this.property.getName());
+        fieldGet.body.line("    this.{} = new {}();",//
+            this.property.getName(),
+            this.property.getBindingRootClassInstantiation(this.property.getName()));
         fieldGet.body.line("}");
-        fieldGet.body.line("return this.{};", this.propertyName);
-        if (this.propertyType.isRawType()) {
+        fieldGet.body.line("return this.{};", this.property.getName());
+        if (this.property.isRawType()) {
             fieldGet.addAnnotation("@SuppressWarnings(\"unchecked\")");
         }
     }
 
     private void addInnerClass() {
-        this.innerClass = this.bindingClass.getInnerClass(this.propertyType.getInnerClass(this.propertyName)).notStatic();
-        if (this.propertyGenericElement != null) {
-            this.innerClass.baseClassName("{}<R, {}>", AbstractBinding.class.getName(), this.propertyGenericElement);
+        this.innerClass = this.bindingClass.getInnerClass(this.property.getInnerClass(this.property.getName())).notStatic();
+        if (this.property.isForGenericTypeParameter()) {
+            this.innerClass.baseClassName("{}<R, {}>", AbstractBinding.class.getName(), this.property.getGenericElement());
             this.innerClass.getMethod("getType").returnType("Class<?>").body.line("return null;");
         } else {
-            this.innerClass.baseClassName(this.propertyType.getInnerClassSuperClass());
-            if (this.propertyType.hasWildcards() || this.propertyType.isRawType()) {
+            this.innerClass.baseClassName(this.property.getInnerClassSuperClass());
+            if (this.property.hasWildcards() || this.property.isRawType()) {
                 this.innerClass.addAnnotation("@SuppressWarnings(\"unchecked\")");
             }
         }
@@ -146,7 +126,7 @@ public class FieldPropertyGenerator implements PropertyGenerator {
 
     private void addInnerClassGetName() {
         GMethod getName = this.innerClass.getMethod("getName").returnType(String.class).addAnnotation("@Override");
-        getName.body.line("return \"{}\";", this.propertyName);
+        getName.body.line("return \"{}\";", this.property.getName());
     }
 
     private void addInnerClassGetParent() {
@@ -155,42 +135,42 @@ public class FieldPropertyGenerator implements PropertyGenerator {
     }
 
     private void addInnerClassGet() {
-        GMethod get = this.innerClass.getMethod("get").returnType(this.propertyType.getSetType()).addAnnotation("@Override");
+        GMethod get = this.innerClass.getMethod("get").returnType(this.property.getSetType()).addAnnotation("@Override");
         get.body.line("return {}{}.this.get().{};",//
-            this.propertyType.getCastForReturnIfNeeded(),
+            this.property.getCastForReturnIfNeeded(),
             this.bindingClass.getSimpleClassNameWithoutGeneric(),
-            this.propertyName);
-        if (this.propertyType.isFixingRawType) {
+            this.property.getName());
+        if (this.property.isFixingRawType) {
             get.addAnnotation("@SuppressWarnings(\"unchecked\")");
         }
     }
 
     private void addInnerClassGetWithRoot() {
         GMethod getWithRoot = this.innerClass.getMethod("getWithRoot");
-        getWithRoot.argument("R", "root").returnType(this.propertyType.getSetType()).addAnnotation("@Override");
+        getWithRoot.argument("R", "root").returnType(this.property.getSetType()).addAnnotation("@Override");
         getWithRoot.body.line("return {}{}.this.getWithRoot(root).{};",//
-            this.propertyType.getCastForReturnIfNeeded(),
+            this.property.getCastForReturnIfNeeded(),
             this.bindingClass.getSimpleClassNameWithoutGeneric(),
-            this.propertyName);
-        if (this.propertyType.isFixingRawType) {
+            this.property.getName());
+        if (this.property.isFixingRawType) {
             getWithRoot.addAnnotation("@SuppressWarnings(\"unchecked\")");
         }
     }
 
     private void addInnerClassSet() {
-        GMethod set = this.innerClass.getMethod("set").argument(this.propertyType.getSetType(), this.propertyName);
+        GMethod set = this.innerClass.getMethod("set").argument(this.property.getSetType(), this.property.getName());
         if (this.isFinal) {
             set.body.line("throw new RuntimeException(this.getName() + \" is read only\");");
             return;
         }
         set.body.line("{}.this.get().{} = {};",//
             this.bindingClass.getSimpleClassNameWithoutGeneric(),
-            this.propertyName,
-            this.propertyName);
+            this.property.getName(),
+            this.property.getName());
     }
 
     private void addInnerClassSetWithRoot() {
-        GMethod setWithRoot = this.innerClass.getMethod("setWithRoot(R root, {} {})", this.propertyType.getSetType(), this.propertyName);
+        GMethod setWithRoot = this.innerClass.getMethod("setWithRoot(R root, {} {})", this.property.getSetType(), this.property.getName());
         if (this.isFinal) {
             setWithRoot.body.line("throw new RuntimeException(this.getName() + \" is read only\");");
             return;
@@ -198,13 +178,13 @@ public class FieldPropertyGenerator implements PropertyGenerator {
         setWithRoot.body.line(
             "{}.this.getWithRoot(root).{} = {};",
             this.bindingClass.getSimpleClassNameWithoutGeneric(),
-            this.propertyName,
-            this.propertyName);
+            this.property.getName(),
+            this.property.getName());
     }
 
     private void addInnerClassGetContainedTypeIfNeeded() {
-        if (this.propertyType.isForListOrSet()) {
-            String contained = this.propertyType.getGenericPartWithoutBrackets();
+        if (this.property.isForListOrSet()) {
+            String contained = this.property.getGenericPartWithoutBrackets();
             if (!this.matchesTypeParameterOfParent(contained)) {
                 this.innerClass.implementsInterface(ContainerBinding.class);
                 GMethod containedType = this.innerClass.getMethod("getContainedType").returnType("Class<?>").addAnnotation("@Override");
@@ -214,10 +194,10 @@ public class FieldPropertyGenerator implements PropertyGenerator {
     }
 
     private boolean matchesTypeParameterOfParent(String type) {
-        if (this.propertyType.hasWildcards()) {
+        if (this.property.hasWildcards()) {
             return true;
         }
-        for (TypeParameterElement e : ((TypeElement) this.enclosed.getEnclosingElement()).getTypeParameters()) {
+        for (TypeParameterElement e : ((TypeElement) this.field.getEnclosingElement()).getTypeParameters()) {
             if (e.toString().equals(type)) {
                 return true;
             }
@@ -225,22 +205,12 @@ public class FieldPropertyGenerator implements PropertyGenerator {
         return false;
     }
 
-    private ProcessingEnvironment getProcessingEnv() {
-        return this.queue.getProcessingEnv();
-    }
-
-    private boolean shouldSkipAttribute(String name) {
-        String configKey = "skipAttribute." + this.enclosed.getEnclosingElement().toString() + "." + name;
-        String configValue = this.queue.getProperties().getProperty(configKey);
-        return "true".equals(configValue);
-    }
-
     public TypeElement getPropertyTypeElement() {
-        return this.propertyTypeElement;
+        return this.property.getElement();
     }
 
     public String getPropertyName() {
-        return this.propertyName;
+        return this.property.getName();
     }
 
 }

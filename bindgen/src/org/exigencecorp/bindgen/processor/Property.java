@@ -19,8 +19,8 @@ import joist.util.Join;
 public class Property {
 
     private static final Pattern outerClassName = Pattern.compile("\\.([A-Z]\\w+)\\.");
-    private final TypeMirror type;
-    private final ClassName2 name;
+    protected final TypeMirror type;
+    protected ClassName2 name;
     public boolean isFixingRawType = false;
 
     public Property(TypeMirror type) {
@@ -200,24 +200,6 @@ public class Property {
         return this.get();
     }
 
-    /** Add generic suffixes to avoid warnings in bindings for pre-1.5 APIs.
-     *
-     * This is for old pre-1.5 APIs that use, say, Enumeration. We upgrade it
-     * to something like Enumeration<String> based on the user configuration,
-     * e.g.:
-     *
-     * <code>fixRawType.javax.servlet.http.HttpServletRequest.attributeNames=String</code>
-     *
-     */
-    public void fixRawTypeIfNeeded(TypeElement enclosed, String propertyName) {
-        String configKey = "fixRawType." + enclosed.toString() + "." + propertyName;
-        String configValue = CurrentEnv.get().getOptions().get(configKey);
-        if (!this.hasGenerics() && configValue != null) {
-            this.appendGenericType(configValue);
-            this.isFixingRawType = true;
-        }
-    }
-
     public String getCastForReturnIfNeeded() {
         return this.hasWildcards() ? "(" + this.getSetType() + ") " : "";
     }
@@ -250,10 +232,6 @@ public class Property {
     /** @return "com.app.Type<String, String>" if the type is "com.app.Type<String, String>" */
     public String toString() {
         return this.name.get();
-    }
-
-    public void appendGenericType(String type) {
-        this.fullClassNameWithGenerics += "<" + type + ">";
     }
 
     public boolean isForListOrSet() {

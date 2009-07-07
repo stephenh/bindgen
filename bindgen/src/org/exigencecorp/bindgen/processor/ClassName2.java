@@ -12,6 +12,10 @@ public class ClassName2 {
         return this.fullClassNameWithGenerics;
     }
 
+    public String toString() {
+        return this.get();
+    }
+
     /** @return "Type" if the type is "com.app.Type<String, String>" */
     public String getSimpleName() {
         String p = this.getWithoutGenericPart();
