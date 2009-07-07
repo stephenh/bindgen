@@ -2,7 +2,6 @@ package org.exigencecorp.bindgen.processor;
 
 import java.util.List;
 
-import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
 
 import joist.util.Join;
@@ -12,12 +11,10 @@ import org.exigencecorp.bindgen.AbstractBinding;
 /** Given a TypeMirror type of a field/method property, provides information about its binding outer/inner class. */
 public class Property {
 
-    protected final TypeMirror type;
-    protected final ClassName name;
+    private final ClassName name;
 
     public Property(TypeMirror type) {
-        this.type = Util.boxIfNeeded(type);
-        this.name = new ClassName(this.type.toString());
+        this.name = new ClassName(Util.boxIfNeeded(type).toString());
     }
 
     /** @return binding type, e.g. bindgen.java.lang.StringBinding, bindgen.app.EmployeeBinding */
@@ -40,11 +37,11 @@ public class Property {
     }
 
     public String getBindingRootClassDeclaration() {
-        DeclaredType dt = (DeclaredType) this.type;
-        if (dt.getTypeArguments().size() == 0) {
+        List<String> typeArgs = this.name.getGenericsWithBounds();
+        if (typeArgs.size() == 0) {
             return this.getBindingType().getWithoutGenericPart();
         } else {
-            return this.getBindingType().getWithoutGenericPart() + "<" + Join.commaSpace(this.name.getGenericsWithBounds()) + ">";
+            return this.getBindingType().getWithoutGenericPart() + "<" + Join.commaSpace(typeArgs) + ">";
         }
     }
 
