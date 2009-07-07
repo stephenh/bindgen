@@ -100,7 +100,7 @@ public class ClassName {
     public String getBindingTypeForPathWithR() {
         String bindingName = this.getWithoutGenericPart() + "BindingPath";
 
-        if (this.isRawType() && !this.isFixingRawType) {
+        if (this.isRawType()) {
             List<String> foo = new ArrayList<String>();
             foo.add("R");
             TypeElement e = (TypeElement) CurrentEnv.get().getTypeUtils().asElement(this.type);
@@ -125,7 +125,7 @@ public class ClassName {
         if (this.type.getKind() == TypeKind.DECLARED) {
             List<String> dummyParams = new ArrayList<String>();
             DeclaredType dt = (DeclaredType) this.type;
-            if (!this.isRawType() || this.isFixingRawType) {
+            if (!this.isRawType()) {
                 for (TypeMirror tm : dt.getTypeArguments()) {
                     if (tm instanceof WildcardType) {
                         dummyParams.add("U" + dummyParams.size());
@@ -151,11 +151,11 @@ public class ClassName {
         DeclaredType dt = (DeclaredType) this.type;
         TypeElement te = (TypeElement) CurrentEnv.get().getTypeUtils().asElement(dt);
 
-        if ((this.isRawType() && !this.isFixingRawType) || this.hasGenerics()) {
+        if (this.isRawType() || this.hasGenerics()) {
             List<String> dummyParams = new ArrayList<String>();
             dummyParams.add("R");
 
-            if (this.isRawType() && !this.isFixingRawType) {
+            if (this.isRawType()) {
                 for (TypeParameterElement tpe : te.getTypeParameters()) {
                     dummyParams.add(tpe.toString());
                 }
