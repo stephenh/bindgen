@@ -18,21 +18,19 @@ public class Property2 extends Property {
         super(type);
         this.enclosed = enclosed;
         this.propertyName = propertyName;
+        this.fixRawTypeIfNeeded();
 
         Element element = CurrentEnv.get().getTypeUtils().asElement(type);
-        if (element != null && element.getKind() == ElementKind.TYPE_PARAMETER) {
+        if (this.isTypeParameter(element)) {
             this.genericElement = (TypeParameterElement) element;
-            // this.propertyType = new Property(this.propertyGenericElement.asType());
             this.element = null;
         } else if (element instanceof TypeElement) {
             this.element = (TypeElement) element;
             this.genericElement = null;
-        } else {
+        } else { // we get here for Arrays, maybe other things
             this.element = null;
             this.genericElement = null;
         }
-
-        this.fixRawTypeIfNeeded();
     }
 
     public boolean isForGenericTypeParameter() {
@@ -63,6 +61,10 @@ public class Property2 extends Property {
 
     public TypeParameterElement getGenericElement() {
         return this.genericElement;
+    }
+
+    private boolean isTypeParameter(Element element) {
+        return element != null && element.getKind() == ElementKind.TYPE_PARAMETER;
     }
 
     /** Add generic suffixes to avoid warnings in bindings for pre-1.5 APIs.
