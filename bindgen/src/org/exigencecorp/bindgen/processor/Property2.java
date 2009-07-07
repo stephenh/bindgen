@@ -221,6 +221,19 @@ public class Property2 {
         return false;
     }
 
+    public boolean matchesTypeParameterOfParent() {
+        String type = this.getGenericPartWithoutBrackets();
+        if (this.hasWildcards()) {
+            return true;
+        }
+        for (TypeParameterElement e : this.enclosed.getTypeParameters()) {
+            if (e.toString().equals(type)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     public boolean isFixingRawType() {
         return this.isFixingRawType;
     }

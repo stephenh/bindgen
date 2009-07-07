@@ -4,7 +4,6 @@ import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
-import javax.lang.model.element.TypeParameterElement;
 import javax.lang.model.type.ExecutableType;
 
 import joist.sourcegen.GClass;
@@ -154,26 +153,11 @@ public class MethodPropertyGenerator implements PropertyGenerator {
     }
 
     private void addInnerClassGetContainedTypeIfNeeded() {
-        if (this.property.isForListOrSet()) {
-            String contained = this.property.getGenericPartWithoutBrackets();
-            if (!this.matchesTypeParameterOfParent(contained)) {
-                this.innerClass.implementsInterface(ContainerBinding.class);
-                GMethod containedType = this.innerClass.getMethod("getContainedType").returnType("Class<?>").addAnnotation("@Override");
-                containedType.body.line("return {}.class;", contained);
-            }
+        if (this.property.isForListOrSet() && !this.property.matchesTypeParameterOfParent()) {
+            this.innerClass.implementsInterface(ContainerBinding.class);
+            GMethod getContainedType = this.innerClass.getMethod("getContainedType").returnType("Class<?>").addAnnotation("@Override");
+            getContainedType.body.line("return {}.class;", this.property.getGenericPartWithoutBrackets());
         }
-    }
-
-    private boolean matchesTypeParameterOfParent(String type) {
-        if (this.property.hasWildcards()) {
-            return true;
-        }
-        for (TypeParameterElement e : ((TypeElement) this.method.getEnclosingElement()).getTypeParameters()) {
-            if (e.toString().equals(type)) {
-                return true;
-            }
-        }
-        return false;
     }
 
     private boolean hasSetter() {

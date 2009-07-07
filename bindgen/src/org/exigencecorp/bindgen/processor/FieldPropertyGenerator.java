@@ -2,7 +2,6 @@ package org.exigencecorp.bindgen.processor;
 
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
-import javax.lang.model.element.TypeParameterElement;
 
 import joist.sourcegen.GClass;
 import joist.sourcegen.GField;
@@ -146,26 +145,11 @@ public class FieldPropertyGenerator implements PropertyGenerator {
     }
 
     private void addInnerClassGetContainedTypeIfNeeded() {
-        if (this.property.isForListOrSet()) {
-            String contained = this.property.getGenericPartWithoutBrackets();
-            if (!this.matchesTypeParameterOfParent(contained)) {
-                this.innerClass.implementsInterface(ContainerBinding.class);
-                GMethod containedType = this.innerClass.getMethod("getContainedType").returnType("Class<?>").addAnnotation("@Override");
-                containedType.body.line("return {}.class;", contained);
-            }
+        if (this.property.isForListOrSet() && !this.property.matchesTypeParameterOfParent()) {
+            this.innerClass.implementsInterface(ContainerBinding.class);
+            GMethod getContainedType = this.innerClass.getMethod("getContainedType").returnType("Class<?>").addAnnotation("@Override");
+            getContainedType.body.line("return {}.class;", this.property.getGenericPartWithoutBrackets());
         }
-    }
-
-    private boolean matchesTypeParameterOfParent(String type) {
-        if (this.property.hasWildcards()) {
-            return true;
-        }
-        for (TypeParameterElement e : ((TypeElement) this.field.getEnclosingElement()).getTypeParameters()) {
-            if (e.toString().equals(type)) {
-                return true;
-            }
-        }
-        return false;
     }
 
     public TypeElement getPropertyTypeElement() {
