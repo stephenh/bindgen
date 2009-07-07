@@ -28,15 +28,8 @@ public class Util {
     }
 
     public static TypeMirror boxIfNeeded(TypeMirror type) {
-        if (type instanceof PrimitiveType) {
-            // double check--Eclipse worked fine but javac is letting non-primitive types in here
-            if (type.toString().indexOf('.') == -1) {
-                try {
-                    return getTypeUtils().boxedClass((PrimitiveType) type).asType();
-                } catch (NullPointerException npe) {
-                    return type; // it is probably a type parameter, e.g. T
-                }
-            }
+        if (type.getKind().isPrimitive()) {
+            return getTypeUtils().boxedClass((PrimitiveType) type).asType();
         }
         return type;
     }
