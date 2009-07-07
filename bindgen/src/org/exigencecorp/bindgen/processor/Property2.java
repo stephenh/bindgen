@@ -99,7 +99,7 @@ public class Property2 {
                 foo.add("?");
             }
             bindingName += "<" + Join.commaSpace(foo) + ">";
-        } else if (this.hasGenerics()) {
+        } else if (this.name.hasGenerics()) {
             bindingName += this.name.getGenericPart().replaceFirst("<", "<R, ");
         } else {
             bindingName += "<R>";
@@ -136,7 +136,7 @@ public class Property2 {
         String superName = Util.lowerCaseOuterClassNames("bindgen." + this.name.getWithoutGenericPart() + "BindingPath");
         DeclaredType dt = (DeclaredType) this.type;
         TypeElement te = (TypeElement) getTypeUtils().asElement(dt);
-        if (this.isRawType() || this.hasGenerics()) {
+        if (this.isRawType() || this.name.hasGenerics()) {
             List<String> dummyParams = new ArrayList<String>();
             dummyParams.add("R");
             if (this.isRawType()) {
@@ -230,12 +230,8 @@ public class Property2 {
         return this.name.get();
     }
 
-    public boolean hasGenerics() {
-        return this.name.getGenericPart().length() > 0;
-    }
-
     public boolean hasWildcards() {
-        return this.name.getGenericPart().indexOf('?') > -1;
+        return this.name.hasWildcards();
     }
 
     /** Add generic suffixes to avoid warnings in bindings for pre-1.5 APIs.
@@ -250,7 +246,7 @@ public class Property2 {
     private boolean fixRawTypeIfNeeded() {
         String configKey = "fixRawType." + this.enclosed.toString() + "." + this.propertyName;
         String configValue = getOption(configKey);
-        if (!this.hasGenerics() && configValue != null) {
+        if (!this.name.hasGenerics() && configValue != null) {
             this.name = new ClassName(this.type.toString() + "<" + configValue + ">");
             return true;
         }

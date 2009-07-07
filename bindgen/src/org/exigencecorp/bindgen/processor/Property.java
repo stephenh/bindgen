@@ -19,7 +19,7 @@ public class Property {
     /** @return binding type, e.g. bindgen.java.lang.StringBinding, bindgen.app.EmployeeBinding */
     public ClassName getBindingType() {
         String bindingName = this.name.getWithoutGenericPart() + "Binding";
-        if (this.hasGenerics() && !this.hasWildcards()) {
+        if (this.name.hasGenerics() && !this.name.hasWildcards()) {
             bindingName += this.name.getGenericPart();
         }
         return new ClassName("bindgen." + Util.lowerCaseOuterClassNames(bindingName));
@@ -56,14 +56,6 @@ public class Property {
             name = this.getBindingType().getWithoutGenericPart() + "Path<R, " + new TypeVars(dt).generics + ">";
         }
         return name.replaceFirst("<R", "<" + this.get());
-    }
-
-    public boolean hasGenerics() {
-        return this.name.getGenericPart().length() > 0;
-    }
-
-    public boolean hasWildcards() {
-        return this.name.getGenericPart().indexOf('?') > -1;
     }
 
     /** @return "com.app.Type<String, String>" if the type is "com.app.Type<String, String>" */

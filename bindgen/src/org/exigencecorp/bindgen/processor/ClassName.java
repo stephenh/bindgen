@@ -62,4 +62,12 @@ public class ClassName {
         return this.fullClassNameWithGenerics;
     }
 
+    public boolean hasGenerics() {
+        return this.getGenericPart().length() > 0;
+    }
+
+    public boolean hasWildcards() {
+        return this.getGenericPart().indexOf('?') > -1;
+    }
+
 }
