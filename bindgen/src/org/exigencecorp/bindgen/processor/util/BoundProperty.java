@@ -89,39 +89,18 @@ public class BoundProperty {
         return name;
     }
 
-    public String getBindingTypeForPathWithR() {
-        String bindingName = this.name.getWithoutGenericPart() + "BindingPath";
-        if (this.isRawType()) {
-            List<String> foo = new ArrayList<String>();
-            foo.add("R");
-            TypeElement e = (TypeElement) getTypeUtils().asElement(this.type);
-            for (int i = 0; i < e.getTypeParameters().size(); i++) {
-                foo.add("?");
-            }
-            bindingName += "<" + Join.commaSpace(foo) + ">";
-        } else if (this.name.hasGenerics()) {
-            bindingName += this.name.getGenericPart().replaceFirst("<", "<R, ");
-        } else {
-            bindingName += "<R>";
-        }
-        bindingName = bindingName.replaceAll(" super \\w+", ""); // for Class.getSuperClass()
-        return "bindgen." + Util.lowerCaseOuterClassNames(bindingName);
-    }
-
-    public String getInnerClass() {
+    public String getInnerClassDeclaration() {
         String name = "My" + Inflector.capitalize(this.propertyName) + "Binding";
         if (this.type.getKind() == TypeKind.DECLARED) {
             List<String> dummyParams = new ArrayList<String>();
-            DeclaredType dt = (DeclaredType) this.type;
             if (!this.isRawType()) {
-                for (TypeMirror tm : dt.getTypeArguments()) {
+                for (TypeMirror tm : ((DeclaredType) this.type).getTypeArguments()) {
                     if (tm instanceof WildcardType) {
                         dummyParams.add("U" + dummyParams.size());
                     }
                 }
             } else {
-                TypeElement e = (TypeElement) getTypeUtils().asElement(dt);
-                for (TypeParameterElement tpe : e.getTypeParameters()) {
+                for (TypeParameterElement tpe : this.getElement().getTypeParameters()) {
                     dummyParams.add(tpe.toString());
                 }
             }
@@ -136,19 +115,16 @@ public class BoundProperty {
         if (this.isForGenericTypeParameter()) {
             return AbstractBinding.class.getName() + "<R, " + this.getGenericElement() + ">";
         }
-
         String superName = Util.lowerCaseOuterClassNames("bindgen." + this.name.getWithoutGenericPart() + "BindingPath");
-        DeclaredType dt = (DeclaredType) this.type;
-        TypeElement te = (TypeElement) getTypeUtils().asElement(dt);
         if (this.isRawType() || this.name.hasGenerics()) {
             List<String> dummyParams = new ArrayList<String>();
             dummyParams.add("R");
             if (this.isRawType()) {
-                for (TypeParameterElement tpe : te.getTypeParameters()) {
+                for (TypeParameterElement tpe : this.getElement().getTypeParameters()) {
                     dummyParams.add(tpe.toString());
                 }
             } else if (!this.isFixingRawType) {
-                for (TypeMirror tm : dt.getTypeArguments()) {
+                for (TypeMirror tm : ((DeclaredType) this.type).getTypeArguments()) {
                     if (tm instanceof WildcardType) {
                         dummyParams.add("U" + (dummyParams.size() - 1));
                     } else {
@@ -163,6 +139,24 @@ public class BoundProperty {
             superName += "<R>";
         }
         return superName;
+    }
+
+    public String getBindingTypeForPathWithR() {
+        String bindingName = this.name.getWithoutGenericPart() + "BindingPath";
+        if (this.isRawType()) {
+            List<String> foo = new ArrayList<String>();
+            foo.add("R");
+            for (int i = 0; i < this.getElement().getTypeParameters().size(); i++) {
+                foo.add("?");
+            }
+            bindingName += "<" + Join.commaSpace(foo) + ">";
+        } else if (this.name.hasGenerics()) {
+            bindingName += this.name.getGenericPart().replaceFirst("<", "<R, ");
+        } else {
+            bindingName += "<R>";
+        }
+        bindingName = bindingName.replaceAll(" super \\w+", ""); // for Class.getSuperClass()
+        return "bindgen." + Util.lowerCaseOuterClassNames(bindingName);
     }
 
     /** @return the type appropriate for setter/return arguments. */
@@ -218,9 +212,7 @@ public class BoundProperty {
             return false;
         }
         if (this.type.getKind() == TypeKind.DECLARED) {
-            DeclaredType dt = (DeclaredType) this.type;
-            TypeElement te = (TypeElement) getTypeUtils().asElement(dt);
-            return dt.getTypeArguments().size() != te.getTypeParameters().size();
+            return ((DeclaredType) this.type).getTypeArguments().size() != this.getElement().getTypeParameters().size();
         }
         return false;
     }

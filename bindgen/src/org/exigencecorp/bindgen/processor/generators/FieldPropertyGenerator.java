@@ -60,7 +60,7 @@ public class FieldPropertyGenerator implements PropertyGenerator {
     private void addOuterClassGet() {
         GMethod fieldGet = this.outerClass.getMethod(this.property.getName() + "()");
         if (this.property.isForGenericTypeParameter()) {
-            fieldGet.returnType(this.property.getInnerClass());
+            fieldGet.returnType(this.property.getInnerClassDeclaration());
         } else {
             fieldGet.returnType(this.property.getBindingTypeForPathWithR());
         }
@@ -74,7 +74,7 @@ public class FieldPropertyGenerator implements PropertyGenerator {
     }
 
     private void addInnerClass() {
-        this.innerClass = this.outerClass.getInnerClass(this.property.getInnerClass()).notStatic();
+        this.innerClass = this.outerClass.getInnerClass(this.property.getInnerClassDeclaration()).notStatic();
         this.innerClass.baseClassName(this.property.getInnerClassSuperClass());
         if (this.property.hasWildcards() || this.property.isRawType()) {
             this.innerClass.addAnnotation("@SuppressWarnings(\"unchecked\")");
