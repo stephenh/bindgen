@@ -1,5 +1,8 @@
 package org.exigencecorp.bindgen.processor;
 
+import static org.exigencecorp.bindgen.processor.CurrentEnv.getElementUtils;
+import static org.exigencecorp.bindgen.processor.CurrentEnv.getOption;
+
 import java.util.List;
 
 import javax.lang.model.element.ExecutableElement;
@@ -18,7 +21,6 @@ import org.exigencecorp.bindgen.NamedBinding;
 
 public class MethodCallableGenerator implements PropertyGenerator {
 
-    private final GenerationQueue queue;
     private final GClass outerClass;
     private final ExecutableElement method;
     private final String methodName;
@@ -26,8 +28,7 @@ public class MethodCallableGenerator implements PropertyGenerator {
     private ExecutableElement blockMethod;
     private GClass innerClass;
 
-    public MethodCallableGenerator(GenerationQueue queue, GClass outerClass, ExecutableElement method) {
-        this.queue = queue;
+    public MethodCallableGenerator(GClass outerClass, ExecutableElement method) {
         this.outerClass = outerClass;
         this.method = method;
         this.methodName = this.method.getSimpleName().toString();
@@ -59,7 +60,7 @@ public class MethodCallableGenerator implements PropertyGenerator {
     }
 
     private boolean blockTypeMatchesMethod(String attemptClassName) {
-        TypeElement attemptType = this.queue.getProcessingEnv().getElementUtils().getTypeElement(attemptClassName);
+        TypeElement attemptType = getElementUtils().getTypeElement(attemptClassName);
         List<ExecutableElement> methods = ElementFilter.methodsIn(attemptType.getEnclosedElements());
         if (methods.size() != 1) {
             return false; // We only like classes with 1 method
@@ -179,7 +180,7 @@ public class MethodCallableGenerator implements PropertyGenerator {
     }
 
     private String[] getBlockTypesToAttempt() {
-        String attempts = this.queue.getProperties().getProperty("blockTypes");
+        String attempts = getOption("blockTypes");
         if (attempts == null) {
             attempts = "java.lang.Runnable";
         } else {
@@ -190,7 +191,7 @@ public class MethodCallableGenerator implements PropertyGenerator {
 
     private boolean shouldSkipAttribute(String name) {
         String configKey = "skipAttribute." + this.method.getEnclosingElement().toString() + "." + name;
-        String configValue = this.queue.getProperties().getProperty(configKey);
+        String configValue = getOption(configKey);
         return "true".equals(configValue);
     }
 

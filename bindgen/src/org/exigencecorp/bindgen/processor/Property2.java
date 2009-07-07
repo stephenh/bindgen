@@ -1,5 +1,8 @@
 package org.exigencecorp.bindgen.processor;
 
+import static org.exigencecorp.bindgen.processor.CurrentEnv.getOption;
+import static org.exigencecorp.bindgen.processor.CurrentEnv.getTypeUtils;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -30,7 +33,7 @@ public class Property2 extends Property {
         this.propertyName = propertyName;
         this.isFixingRawType = this.fixRawTypeIfNeeded();
 
-        Element element = CurrentEnv.get().getTypeUtils().asElement(this.type);
+        Element element = getTypeUtils().asElement(this.type);
         if (this.isTypeParameter(element)) {
             this.genericElement = (TypeParameterElement) element;
             this.element = null;
@@ -51,13 +54,12 @@ public class Property2 extends Property {
         return this.propertyName == null
             || "get".equals(this.propertyName)
             || "declaringClass".equals(this.propertyName)
-            || "getClass".equals(this.propertyName)
             || (this.element == null && this.genericElement == null);
     }
 
     public boolean shouldSkip() {
         String configKey = "skipAttribute." + this.enclosed.toString() + "." + this.propertyName;
-        String configValue = CurrentEnv.get().getOptions().get(configKey);
+        String configValue = getOption(configKey);
         return "true".equals(configValue);
     }
 
@@ -104,7 +106,7 @@ public class Property2 extends Property {
         if (this.isRawType()) {
             List<String> foo = new ArrayList<String>();
             foo.add("R");
-            TypeElement e = (TypeElement) CurrentEnv.get().getTypeUtils().asElement(this.type);
+            TypeElement e = (TypeElement) getTypeUtils().asElement(this.type);
             for (int i = 0; i < e.getTypeParameters().size(); i++) {
                 foo.add("?");
             }
@@ -130,7 +132,7 @@ public class Property2 extends Property {
                     }
                 }
             } else {
-                TypeElement e = (TypeElement) CurrentEnv.get().getTypeUtils().asElement(dt);
+                TypeElement e = (TypeElement) getTypeUtils().asElement(dt);
                 for (TypeParameterElement tpe : e.getTypeParameters()) {
                     dummyParams.add(tpe.toString());
                 }
@@ -145,7 +147,7 @@ public class Property2 extends Property {
     public String getInnerClassSuperClass() {
         String superName = this.lowerCaseOuterClassNames("bindgen." + this.name.getWithoutGenericPart() + "BindingPath");
         DeclaredType dt = (DeclaredType) this.type;
-        TypeElement te = (TypeElement) CurrentEnv.get().getTypeUtils().asElement(dt);
+        TypeElement te = (TypeElement) getTypeUtils().asElement(dt);
         if (this.isRawType() || this.hasGenerics()) {
             List<String> dummyParams = new ArrayList<String>();
             dummyParams.add("R");
@@ -220,7 +222,7 @@ public class Property2 extends Property {
         }
         if (this.type.getKind() == TypeKind.DECLARED) {
             DeclaredType dt = (DeclaredType) this.type;
-            TypeElement te = (TypeElement) CurrentEnv.get().getTypeUtils().asElement(dt);
+            TypeElement te = (TypeElement) getTypeUtils().asElement(dt);
             return dt.getTypeArguments().size() != te.getTypeParameters().size();
         }
         return false;
@@ -241,7 +243,7 @@ public class Property2 extends Property {
      */
     private boolean fixRawTypeIfNeeded() {
         String configKey = "fixRawType." + this.enclosed.toString() + "." + this.propertyName;
-        String configValue = CurrentEnv.get().getOptions().get(configKey);
+        String configValue = getOption(configKey);
         if (!this.hasGenerics() && configValue != null) {
             this.name = new ClassName(this.type.toString() + "<" + configValue + ">");
             return true;

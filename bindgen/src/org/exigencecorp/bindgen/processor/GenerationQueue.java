@@ -1,14 +1,15 @@
 package org.exigencecorp.bindgen.processor;
 
+import static org.exigencecorp.bindgen.processor.CurrentEnv.getFiler;
+import static org.exigencecorp.bindgen.processor.CurrentEnv.getMessager;
+import static org.exigencecorp.bindgen.processor.CurrentEnv.getOption;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
-import java.util.Properties;
 import java.util.Set;
 
-import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.TypeElement;
 import javax.tools.FileObject;
 import javax.tools.StandardLocation;
@@ -16,8 +17,6 @@ import javax.tools.Diagnostic.Kind;
 
 public class GenerationQueue {
 
-    private final ProcessingEnvironment processingEnv;
-    private final Properties properties = new Properties();
     // From what I can tell, both Eclipse and javac will use the same processor across all of the rounds, so this should be cumulative
     private final Set<String> written = new HashSet<String>();
     private final List<TypeElement> queue = new ArrayList<TypeElement>();
@@ -25,10 +24,7 @@ public class GenerationQueue {
     private final boolean skipExistingBindingCheck;
     private final boolean skipBindKeyword;
 
-    public GenerationQueue(ProcessingEnvironment processingEnv) {
-        this.processingEnv = processingEnv;
-        this.addDefaultProperties();
-        this.addProcessingEnvProperties();
+    public GenerationQueue() {
         this.log = this.isEnabled("bindgen.log");
         this.skipExistingBindingCheck = this.isEnabled("bindgen.skipExistingBindingCheck");
         this.skipBindKeyword = this.isEnabled("bindgen.skipBindKeyword");
@@ -68,14 +64,6 @@ public class GenerationQueue {
         }
     }
 
-    public Properties getProperties() {
-        return this.properties;
-    }
-
-    public ProcessingEnvironment getProcessingEnv() {
-        return this.processingEnv;
-    }
-
     private void enqueue(TypeElement element) {
         this.queue.add(element);
         this.written.add(element.toString());
@@ -99,46 +87,19 @@ public class GenerationQueue {
         }
         try {
             ClassName bindingClassName = new Property(element.asType()).getBindingType();
-            FileObject fo = this.getProcessingEnv().getFiler().getResource(
+            FileObject fo = getFiler().getResource(
                 StandardLocation.SOURCE_OUTPUT,
                 bindingClassName.getPackageName(),
                 bindingClassName.getSimpleName() + ".java");
             return fo.getLastModified() > 0; // exists already
         } catch (IOException io) {
-            this.processingEnv.getMessager().printMessage(Kind.ERROR, io.getMessage());
+            getMessager().printMessage(Kind.ERROR, io.getMessage());
             return false;
         }
     }
 
-    // Default properties--this is ugly, but I could not get a bindgen.properties to be found on the classpath
-    private void addDefaultProperties() {
-        this.properties.put("fixRawType.javax.servlet.ServletConfig.initParameterNames", "String");
-        this.properties.put("fixRawType.javax.servlet.ServletContext.attributeNames", "String");
-        this.properties.put("fixRawType.javax.servlet.ServletContext.initParameterNames", "String");
-        this.properties.put("fixRawType.javax.servlet.ServletRequest.attributeNames", "String");
-        this.properties.put("fixRawType.javax.servlet.ServletRequest.parameterNames", "String");
-        this.properties.put("fixRawType.javax.servlet.ServletRequest.locales", "Locale");
-        this.properties.put("fixRawType.javax.servlet.ServletRequest.parameterMap", "String, String[]");
-        this.properties.put("fixRawType.javax.servlet.http.HttpServletRequest.headerNames", "String");
-        this.properties.put("fixRawType.javax.servlet.http.HttpSession.attributeNames", "String");
-        this.properties.put("skipAttribute.javax.servlet.http.HttpSession.sessionContext", "true");
-        this.properties.put("skipAttribute.javax.servlet.http.HttpServletRequest.requestedSessionIdFromUrl", "true");
-        this.properties.put("skipAttribute.javax.servlet.ServletContext.servletNames", "true");
-        this.properties.put("skipAttribute.javax.servlet.ServletContext.servlets", "true");
-        this.properties.put("skipAttribute.java.lang.Object.getClass", "true");
-        this.properties.put("skipAttribute.java.lang.Object.notify", "true");
-        this.properties.put("skipAttribute.java.lang.Object.notifyAll", "true");
-    }
-
-    // Now get the user-defined properties
-    private void addProcessingEnvProperties() {
-        for (Map.Entry<String, String> entry : this.processingEnv.getOptions().entrySet()) {
-            this.properties.put(entry.getKey(), entry.getValue());
-        }
-    }
-
     private boolean isEnabled(String property) {
-        return "true".equals(this.properties.get(property));
+        return "true".equals(getOption(property));
     }
 
 }

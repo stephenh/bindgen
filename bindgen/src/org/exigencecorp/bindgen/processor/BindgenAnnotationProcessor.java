@@ -25,13 +25,13 @@ public class BindgenAnnotationProcessor extends AbstractProcessor {
     @Override
     public void init(ProcessingEnvironment processingEnv) {
         super.init(processingEnv);
-        this.queue = new GenerationQueue(processingEnv);
+        CurrentEnv.set(this.processingEnv);
+        this.queue = new GenerationQueue();
         this.hasUpdatedKeywordClass = false;
     }
 
     @Override
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
-        CurrentEnv.set(this.processingEnv);
         for (Element element : roundEnv.getElementsAnnotatedWith(Bindable.class)) {
             if (element.getKind() == ElementKind.CLASS) {
                 this.queue.enqueueForcefully((TypeElement) element);
@@ -41,7 +41,6 @@ public class BindgenAnnotationProcessor extends AbstractProcessor {
         }
         this.queue.processQueue();
         this.updateKeywordClassIfLastRound(roundEnv);
-        CurrentEnv.unset();
         return true;
     }
 

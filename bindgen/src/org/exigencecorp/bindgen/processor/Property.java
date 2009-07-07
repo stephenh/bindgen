@@ -1,5 +1,7 @@
 package org.exigencecorp.bindgen.processor;
 
+import static org.exigencecorp.bindgen.processor.CurrentEnv.getTypeUtils;
+
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -93,7 +95,7 @@ public class Property {
             // double check--Eclipse worked fine but javac is letting non-primitive types in here
             if (type.toString().indexOf('.') == -1) {
                 try {
-                    return CurrentEnv.get().getTypeUtils().boxedClass((PrimitiveType) type).asType();
+                    return getTypeUtils().boxedClass((PrimitiveType) type).asType();
                 } catch (NullPointerException npe) {
                     return type; // it is probably a type parameter, e.g. T
                 }

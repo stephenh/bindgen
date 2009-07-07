@@ -1,5 +1,9 @@
 package org.exigencecorp.bindgen.processor;
 
+import static org.exigencecorp.bindgen.processor.CurrentEnv.getElementUtils;
+import static org.exigencecorp.bindgen.processor.CurrentEnv.getFiler;
+import static org.exigencecorp.bindgen.processor.CurrentEnv.getMessager;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -10,7 +14,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.DeclaredType;
 import javax.tools.FileObject;
@@ -42,7 +45,7 @@ public class BindKeywordGenerator {
 
     private void addBindMethods() {
         for (String className : this.classNames) {
-            TypeElement e = this.getProcessingEnv().getElementUtils().getTypeElement(className);
+            TypeElement e = getElementUtils().getTypeElement(className);
             if (e == null) {
                 this.queue.log("TypeElement not found for " + className);
                 continue;
@@ -71,7 +74,7 @@ public class BindKeywordGenerator {
     private void readExistingBindKeywordFile() {
         try {
             this.queue.log("READING BindKeyword.txt");
-            FileObject fo = this.getProcessingEnv().getFiler().getResource(StandardLocation.SOURCE_OUTPUT, "bindgen", "BindKeyword.txt");
+            FileObject fo = getFiler().getResource(StandardLocation.SOURCE_OUTPUT, "bindgen", "BindKeyword.txt");
             if (fo.getLastModified() > 0) {
                 String line;
                 BufferedReader input = new BufferedReader(new InputStreamReader(fo.openInputStream()));
@@ -84,7 +87,7 @@ public class BindKeywordGenerator {
                 this.queue.log("NOT THERE");
             }
         } catch (IOException io) {
-            this.getProcessingEnv().getMessager().printMessage(Kind.ERROR, io.getMessage());
+            getMessager().printMessage(Kind.ERROR, io.getMessage());
         }
     }
 
@@ -93,7 +96,7 @@ public class BindKeywordGenerator {
             this.queue.log("WRITING BindKeyword.txt");
             List<String> sorted = Copy.list(this.classNames);
             Collections.sort(sorted);
-            FileObject fo = this.getProcessingEnv().getFiler().createResource(StandardLocation.SOURCE_OUTPUT, "bindgen", "BindKeyword.txt");
+            FileObject fo = getFiler().createResource(StandardLocation.SOURCE_OUTPUT, "bindgen", "BindKeyword.txt");
             OutputStream output = fo.openOutputStream();
             for (String className : sorted) {
                 output.write(className.getBytes());
@@ -102,25 +105,21 @@ public class BindKeywordGenerator {
             output.close();
         } catch (IOException io) {
             this.queue.log("ERROR: " + io.getMessage());
-            this.getProcessingEnv().getMessager().printMessage(Kind.ERROR, io.getMessage());
+            getMessager().printMessage(Kind.ERROR, io.getMessage());
         }
     }
 
     private void writeBindKeywordClass() {
         try {
             this.queue.log("WRITING BindKeyword.java");
-            JavaFileObject jfo = this.getProcessingEnv().getFiler().createSourceFile(this.bindClass.getFullClassNameWithoutGeneric());
+            JavaFileObject jfo = getFiler().createSourceFile(this.bindClass.getFullClassNameWithoutGeneric());
             Writer w = jfo.openWriter();
             w.write(this.bindClass.toCode());
             w.close();
         } catch (IOException io) {
             this.queue.log("ERROR: " + io.getMessage());
-            this.getProcessingEnv().getMessager().printMessage(Kind.ERROR, io.getMessage());
+            getMessager().printMessage(Kind.ERROR, io.getMessage());
         }
-    }
-
-    private ProcessingEnvironment getProcessingEnv() {
-        return this.queue.getProcessingEnv();
     }
 
 }

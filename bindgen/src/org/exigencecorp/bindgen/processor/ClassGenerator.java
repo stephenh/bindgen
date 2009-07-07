@@ -1,5 +1,9 @@
 package org.exigencecorp.bindgen.processor;
 
+import static org.exigencecorp.bindgen.processor.CurrentEnv.getFiler;
+import static org.exigencecorp.bindgen.processor.CurrentEnv.getMessager;
+import static org.exigencecorp.bindgen.processor.CurrentEnv.getTypeUtils;
+
 import java.io.IOException;
 import java.io.Writer;
 import java.text.SimpleDateFormat;
@@ -8,7 +12,6 @@ import java.util.Date;
 import java.util.List;
 
 import javax.annotation.Generated;
-import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
@@ -152,7 +155,7 @@ public class ClassGenerator {
         List<TypeElement> elements = new ArrayList<TypeElement>();
         TypeMirror current = this.baseElement;
         while (current != null && !this.isOfTypeObjectOrNone(current)) {
-            TypeElement currentElement = (TypeElement) this.getProcessingEnv().getTypeUtils().asElement(current);
+            TypeElement currentElement = (TypeElement) getTypeUtils().asElement(current);
             if (currentElement != null) { // javac started returning null, not sure why as Eclipse had not done that
                 elements.add(currentElement);
                 current = currentElement.getSuperclass();
@@ -165,7 +168,7 @@ public class ClassGenerator {
 
     private void saveCode(GClass gc) {
         try {
-            JavaFileObject jfo = this.getProcessingEnv().getFiler().createSourceFile(//
+            JavaFileObject jfo = getFiler().createSourceFile(//
                 gc.getFullClassNameWithoutGeneric(),
                 this.getSourceElements());
             Writer w = jfo.openWriter();
@@ -173,7 +176,7 @@ public class ClassGenerator {
             w.close();
             this.queue.log("Saved " + gc.getFullClassNameWithoutGeneric());
         } catch (IOException io) {
-            this.getProcessingEnv().getMessager().printMessage(Kind.ERROR, io.getMessage());
+            getMessager().printMessage(Kind.ERROR, io.getMessage());
         }
     }
 
@@ -205,7 +208,7 @@ public class ClassGenerator {
                     generators.add(mpg);
                     continue;
                 }
-                MethodCallableGenerator mcg = new MethodCallableGenerator(this.queue, this.pathBindingClass, (ExecutableElement) enclosed);
+                MethodCallableGenerator mcg = new MethodCallableGenerator(this.pathBindingClass, (ExecutableElement) enclosed);
                 if (mcg.shouldGenerate()) {
                     generators.add(mcg);
                     continue;
@@ -217,10 +220,6 @@ public class ClassGenerator {
 
     private boolean isOfTypeObjectOrNone(TypeMirror type) {
         return type.toString().equals("java.lang.Object") || type.getKind() == TypeKind.NONE;
-    }
-
-    private ProcessingEnvironment getProcessingEnv() {
-        return this.queue.getProcessingEnv();
     }
 
 }
