@@ -1,5 +1,13 @@
 package org.exigencecorp.bindgen.processor;
 
+import static org.exigencecorp.bindgen.processor.CurrentEnv.getElementUtils;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.lang.model.type.DeclaredType;
+import javax.lang.model.type.TypeVariable;
+
 public class ClassName {
 
     private final String fullClassNameWithGenerics;
@@ -36,6 +44,30 @@ public class ClassName {
         } else {
             return p.substring(0, lastDot);
         }
+    }
+
+    public List<String> getGenericsWithoutBounds() {
+        List<String> args = new ArrayList<String>();
+        for (TypeVariable tv : (List<TypeVariable>) this.getDeclaredType().getTypeArguments()) {
+            args.add(tv.toString());
+        }
+        return args;
+    }
+
+    public List<String> getGenericsWithBounds() {
+        List<String> args = new ArrayList<String>();
+        for (TypeVariable tv : (List<TypeVariable>) this.getDeclaredType().getTypeArguments()) {
+            String arg = tv.toString();
+            if (!Util.isOfTypeObjectOrNone(tv.getUpperBound())) {
+                arg += " extends " + tv.getUpperBound().toString();
+            }
+            args.add(arg);
+        }
+        return args;
+    }
+
+    private DeclaredType getDeclaredType() {
+        return (DeclaredType) getElementUtils().getTypeElement(this.getWithoutGenericPart()).asType();
     }
 
     /** @return "<String, String>" if the type is "com.app.Type<String, String>" or "" if no generics */

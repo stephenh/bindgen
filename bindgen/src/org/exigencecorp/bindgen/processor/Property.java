@@ -1,7 +1,11 @@
 package org.exigencecorp.bindgen.processor;
 
+import java.util.List;
+
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
+
+import joist.util.Join;
 
 import org.exigencecorp.bindgen.AbstractBinding;
 
@@ -26,12 +30,9 @@ public class Property {
     }
 
     public String getBindingPathClassDeclaration() {
-        DeclaredType dt = (DeclaredType) this.type;
-        if (dt.getTypeArguments().size() == 0) {
-            return this.getBindingType().getWithoutGenericPart() + "Path<R>";
-        } else {
-            return this.getBindingType().getWithoutGenericPart() + "Path" + "<R, " + new TypeVars(dt).genericsWithBounds + ">";
-        }
+        List<String> typeArgs = this.name.getGenericsWithBounds();
+        typeArgs.add(0, "R");
+        return this.getBindingType().getWithoutGenericPart() + "Path" + "<" + Join.commaSpace(typeArgs) + ">";
     }
 
     public String getBindingPathClassSuperClass() {
@@ -43,19 +44,14 @@ public class Property {
         if (dt.getTypeArguments().size() == 0) {
             return this.getBindingType().getWithoutGenericPart();
         } else {
-            return this.getBindingType().getWithoutGenericPart() + "<" + new TypeVars(dt).genericsWithBounds + ">";
+            return this.getBindingType().getWithoutGenericPart() + "<" + Join.commaSpace(this.name.getGenericsWithBounds()) + ">";
         }
     }
 
     public String getBindingRootClassSuperClass() {
-        String name;
-        DeclaredType dt = (DeclaredType) this.type;
-        if (dt.getTypeArguments().size() == 0) {
-            name = this.getBindingType().getWithoutGenericPart() + "Path<R>";
-        } else {
-            name = this.getBindingType().getWithoutGenericPart() + "Path<R, " + new TypeVars(dt).generics + ">";
-        }
-        return name.replaceFirst("<R", "<" + this.get());
+        List<String> typeArgs = this.name.getGenericsWithoutBounds();
+        typeArgs.add(0, this.get());
+        return this.getBindingType().getWithoutGenericPart() + "Path" + "<" + Join.commaSpace(typeArgs) + ">";
     }
 
     /** @return "com.app.Type<String, String>" if the type is "com.app.Type<String, String>" */

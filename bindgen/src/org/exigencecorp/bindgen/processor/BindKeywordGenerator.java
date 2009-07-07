@@ -24,6 +24,7 @@ import javax.tools.Diagnostic.Kind;
 import joist.sourcegen.GClass;
 import joist.sourcegen.GMethod;
 import joist.util.Copy;
+import joist.util.Join;
 
 public class BindKeywordGenerator {
 
@@ -53,10 +54,9 @@ public class BindKeywordGenerator {
     private void addBindMethod(String className, DeclaredType type) {
         ClassName bindingType = new Property(type).getBindingType();
         if (type.getTypeArguments().size() > 0) {
-            TypeVars tv = new TypeVars(type);
-            GMethod method = this.bindClass.getMethod("bind({}<{}> o)", className, tv.generics);
+            GMethod method = this.bindClass.getMethod("bind({}<{}> o)", className, Join.commaSpace(bindingType.getGenericPartWithoutBrackets()));
             method.returnType("{}", bindingType);
-            method.typeParameters(tv.genericsWithBounds);
+            method.typeParameters(Join.commaSpace(bindingType.getGenericsWithBounds()));
             method.setStatic();
             method.body.line("return new {}(o);", bindingType);
         } else {

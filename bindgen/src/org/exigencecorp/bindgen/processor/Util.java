@@ -6,6 +6,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.lang.model.type.PrimitiveType;
+import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 
 import joist.util.Inflector;
@@ -36,6 +37,10 @@ public class Util {
             }
         }
         return type;
+    }
+
+    public static boolean isOfTypeObjectOrNone(TypeMirror type) {
+        return type.getKind() == TypeKind.NONE || type.toString().equals("java.lang.Object");
     }
 
 }

@@ -17,7 +17,6 @@ import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
-import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 import javax.tools.JavaFileObject;
 import javax.tools.Diagnostic.Kind;
@@ -43,7 +42,7 @@ public class ClassGenerator {
         this.queue = queue;
         this.element = element;
         this.name = new Property(element.asType());
-        this.baseElement = this.isOfTypeObjectOrNone(this.element.getSuperclass()) ? null : this.element.getSuperclass();
+        this.baseElement = Util.isOfTypeObjectOrNone(this.element.getSuperclass()) ? null : this.element.getSuperclass();
     }
 
     public void generate() {
@@ -154,7 +153,7 @@ public class ClassGenerator {
     private List<TypeElement> getSuperElements() {
         List<TypeElement> elements = new ArrayList<TypeElement>();
         TypeMirror current = this.baseElement;
-        while (current != null && !this.isOfTypeObjectOrNone(current)) {
+        while (current != null && !Util.isOfTypeObjectOrNone(current)) {
             TypeElement currentElement = (TypeElement) getTypeUtils().asElement(current);
             if (currentElement != null) { // javac started returning null, not sure why as Eclipse had not done that
                 elements.add(currentElement);
@@ -214,10 +213,6 @@ public class ClassGenerator {
             }
         }
         return generators;
-    }
-
-    private boolean isOfTypeObjectOrNone(TypeMirror type) {
-        return type.toString().equals("java.lang.Object") || type.getKind() == TypeKind.NONE;
     }
 
 }
