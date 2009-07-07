@@ -1,21 +1,12 @@
 package org.exigencecorp.bindgen.processor;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.TypeParameterElement;
-import javax.lang.model.type.DeclaredType;
-import javax.lang.model.type.TypeKind;
-import javax.lang.model.type.TypeMirror;
-import javax.lang.model.type.WildcardType;
 
 import joist.sourcegen.GClass;
 import joist.sourcegen.GField;
 import joist.sourcegen.GMethod;
-import joist.util.Inflector;
-import joist.util.Join;
 
 import org.exigencecorp.bindgen.AbstractBinding;
 import org.exigencecorp.bindgen.ContainerBinding;
@@ -65,27 +56,6 @@ public class FieldPropertyGenerator implements PropertyGenerator {
         this.addInnerClassGetContainedTypeIfNeeded();
     }
 
-    private String getInnerClassName() {
-        String name = "My" + Inflector.capitalize(this.property.getName()) + "Binding";
-
-        TypeMirror returnType = this.field.asType();
-
-        if (returnType.getKind() == TypeKind.DECLARED) {
-            List<String> dummyParams = new ArrayList<String>();
-            DeclaredType dt = (DeclaredType) returnType;
-            for (TypeMirror tm : dt.getTypeArguments()) {
-                if (tm instanceof WildcardType) {
-                    dummyParams.add("U" + dummyParams.size());
-                }
-            }
-            if (dummyParams.size() > 0) {
-                name += "<" + Join.commaSpace(dummyParams) + ">";
-            }
-        }
-
-        return name;
-    }
-
     private void addOuterClassBindingField() {
         GField f = this.bindingClass.getField(this.property.getName()).type(this.property.getBindingClassFieldDeclaration());
         if (this.property.isRawType()) {
@@ -96,7 +66,7 @@ public class FieldPropertyGenerator implements PropertyGenerator {
     private void addOuterClassGet() {
         GMethod fieldGet = this.bindingClass.getMethod(this.property.getName() + "()");
         if (this.property.isForGenericTypeParameter()) {
-            fieldGet.returnType(this.getInnerClassName());
+            fieldGet.returnType(this.property.getInnerClass());
         } else {
             fieldGet.returnType(this.property.getBindingTypeForPathWithR());
         }
