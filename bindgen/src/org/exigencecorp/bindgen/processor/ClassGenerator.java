@@ -194,13 +194,13 @@ public class ClassGenerator {
                 continue;
             }
             if (enclosed.getKind().isField()) {
-                FieldPropertyGenerator fpg = new FieldPropertyGenerator(this.queue, this.pathBindingClass, enclosed);
+                FieldPropertyGenerator fpg = new FieldPropertyGenerator(this.pathBindingClass, enclosed);
                 if (fpg.shouldGenerate()) {
                     generators.add(fpg);
                     continue;
                 }
             } else if (enclosed.getKind() == ElementKind.METHOD) {
-                MethodPropertyGenerator mpg = new MethodPropertyGenerator(this.queue, this.pathBindingClass, (ExecutableElement) enclosed);
+                MethodPropertyGenerator mpg = new MethodPropertyGenerator(this.pathBindingClass, (ExecutableElement) enclosed);
                 if (mpg.shouldGenerate()) {
                     generators.add(mpg);
                     continue;

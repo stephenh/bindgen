@@ -4,6 +4,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.lang.model.type.DeclaredType;
+import javax.lang.model.type.PrimitiveType;
 import javax.lang.model.type.TypeMirror;
 
 import joist.util.Inflector;
@@ -18,8 +19,8 @@ public class Property {
     protected ClassName2 name;
 
     public Property(TypeMirror type) {
-        this.type = type;
-        this.name = new ClassName2(type.toString());
+        this.type = this.boxIfNeeded(type);
+        this.name = new ClassName2(this.type.toString());
     }
 
     /** @return binding type, e.g. bindgen.java.lang.StringBinding, bindgen.app.EmployeeBinding */
@@ -85,6 +86,20 @@ public class Property {
     // Make this go away
     public String getGenericPartWithoutBrackets() {
         return this.name.getGenericPartWithoutBrackets();
+    }
+
+    private TypeMirror boxIfNeeded(TypeMirror type) {
+        if (type instanceof PrimitiveType) {
+            // double check--Eclipse worked fine but javac is letting non-primitive types in here
+            if (type.toString().indexOf('.') == -1) {
+                try {
+                    return CurrentEnv.get().getTypeUtils().boxedClass((PrimitiveType) type).asType();
+                } catch (NullPointerException npe) {
+                    return type; // it is probably a type parameter, e.g. T
+                }
+            }
+        }
+        return type;
     }
 
     // Watch for package.Foo.Inner -> package.foo.Inner

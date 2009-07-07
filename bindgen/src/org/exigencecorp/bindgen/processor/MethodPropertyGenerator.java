@@ -17,22 +17,17 @@ import org.exigencecorp.bindgen.ContainerBinding;
 
 public class MethodPropertyGenerator implements PropertyGenerator {
 
-    private final GenerationQueue queue;
     private final GClass outerClass;
     private final ExecutableElement method;
     private final String methodName;
     private final Property2 property;
     private GClass innerClass;
 
-    public MethodPropertyGenerator(GenerationQueue queue, GClass outerClass, ExecutableElement method) {
-        this.queue = queue;
+    public MethodPropertyGenerator(GClass outerClass, ExecutableElement method) {
         this.outerClass = outerClass;
         this.method = method;
         this.methodName = this.method.getSimpleName().toString();
-        this.property = new Property2(//
-            this.queue.boxIfNeeded(this.method.getReturnType()),
-            (TypeElement) this.method.getEnclosingElement(),
-            this.guessPropertyNameOrNull());
+        this.property = new Property2(this.method.getReturnType(), this.method.getEnclosingElement(), this.guessPropertyNameOrNull());
     }
 
     @Override

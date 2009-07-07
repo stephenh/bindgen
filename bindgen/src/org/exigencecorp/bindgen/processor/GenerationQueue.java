@@ -10,8 +10,6 @@ import java.util.Set;
 
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.TypeElement;
-import javax.lang.model.type.PrimitiveType;
-import javax.lang.model.type.TypeMirror;
 import javax.tools.FileObject;
 import javax.tools.StandardLocation;
 import javax.tools.Diagnostic.Kind;
@@ -62,20 +60,6 @@ public class GenerationQueue {
             return;
         }
         new BindKeywordGenerator(this).generate(this.written);
-    }
-
-    public TypeMirror boxIfNeeded(TypeMirror returnType) {
-        if (returnType instanceof PrimitiveType) {
-            // double check--Eclipse worked fine but javac is letting non-primitive types in here
-            if (returnType.toString().indexOf('.') == -1) {
-                try {
-                    return this.getProcessingEnv().getTypeUtils().boxedClass((PrimitiveType) returnType).asType();
-                } catch (NullPointerException npe) {
-                    return returnType; // it is probably a type parameter, e.g. T
-                }
-            }
-        }
-        return returnType;
     }
 
     public void log(String message) {

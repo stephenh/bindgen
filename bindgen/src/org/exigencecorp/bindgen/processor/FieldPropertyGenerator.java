@@ -13,21 +13,16 @@ import org.exigencecorp.bindgen.ContainerBinding;
 
 public class FieldPropertyGenerator implements PropertyGenerator {
 
-    private final GenerationQueue queue;
     private final GClass outerClass;
     private final Element field;
     private final Property2 property;
     private final boolean isFinal;
     private GClass innerClass;
 
-    public FieldPropertyGenerator(GenerationQueue queue, GClass outerClass, Element field) {
-        this.queue = queue;
+    public FieldPropertyGenerator(GClass outerClass, Element field) {
         this.outerClass = outerClass;
         this.field = field;
-        this.property = new Property2(//
-            this.queue.boxIfNeeded(this.field.asType()),
-            (TypeElement) this.field.getEnclosingElement(),
-            this.field.getSimpleName().toString());
+        this.property = new Property2(this.field.asType(), this.field.getEnclosingElement(), this.field.getSimpleName().toString());
         this.isFinal = this.field.getModifiers().contains(javax.lang.model.element.Modifier.FINAL);
     }
 

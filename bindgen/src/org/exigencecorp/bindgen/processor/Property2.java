@@ -24,13 +24,13 @@ public class Property2 extends Property {
     private final TypeElement element;
     private final boolean isFixingRawType;
 
-    public Property2(TypeMirror type, TypeElement enclosed, String propertyName) {
+    public Property2(TypeMirror type, Element enclosed, String propertyName) {
         super(type);
-        this.enclosed = enclosed;
+        this.enclosed = (TypeElement) enclosed;
         this.propertyName = propertyName;
         this.isFixingRawType = this.fixRawTypeIfNeeded();
 
-        Element element = CurrentEnv.get().getTypeUtils().asElement(type);
+        Element element = CurrentEnv.get().getTypeUtils().asElement(this.type);
         if (this.isTypeParameter(element)) {
             this.genericElement = (TypeParameterElement) element;
             this.element = null;
