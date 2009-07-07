@@ -1,8 +1,5 @@
 package org.exigencecorp.bindgen.processor;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
@@ -10,16 +7,13 @@ import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.TypeParameterElement;
-import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.ExecutableType;
 import javax.lang.model.type.TypeMirror;
-import javax.lang.model.type.WildcardType;
 
 import joist.sourcegen.GClass;
 import joist.sourcegen.GField;
 import joist.sourcegen.GMethod;
 import joist.util.Inflector;
-import joist.util.Join;
 
 import org.exigencecorp.bindgen.AbstractBinding;
 import org.exigencecorp.bindgen.ContainerBinding;
@@ -101,50 +95,17 @@ public class MethodPropertyGenerator implements PropertyGenerator {
         } else {
             fieldGet.returnType(this.propertyType.getBindingTypeForPathWithR());
         }
-
-        String name = "My" + Inflector.capitalize(this.propertyName) + "Binding";
-        List<String> dummyParams = new ArrayList<String>();
-        TypeMirror returnType = this.queue.boxIfNeeded(this.enclosed.getReturnType());
-        if (returnType instanceof DeclaredType) {
-            DeclaredType dt = (DeclaredType) returnType;
-            for (TypeMirror tm : dt.getTypeArguments()) {
-                if (tm instanceof WildcardType) {
-                    dummyParams.add("Object");
-                }
-            }
-        }
-        if (dummyParams.size() > 0) {
-            name += "<" + Join.commaSpace(dummyParams) + ">";
-        }
-
         fieldGet.body.line("if (this.{} == null) {", this.propertyName);
-        fieldGet.body.line("    this.{} = new {}();", this.propertyName, name);
+        fieldGet.body.line("    this.{} = new {}();", this.propertyName, this.propertyType.getBindingRootClassInstantiation(this.propertyName));
         fieldGet.body.line("}");
         fieldGet.body.line("return this.{};", this.propertyName);
-
         if (this.propertyType.isRawType()) {
             fieldGet.addAnnotation("@SuppressWarnings(\"unchecked\")");
         }
     }
 
     private void addOuterClassBindingField() {
-        String name = "My" + Inflector.capitalize(this.propertyName) + "Binding";
-
-        List<String> dummyParams = new ArrayList<String>();
-        TypeMirror returnType = this.queue.boxIfNeeded(this.enclosed.getReturnType());
-        if (returnType instanceof DeclaredType) {
-            DeclaredType dt = (DeclaredType) returnType;
-            for (TypeMirror tm : dt.getTypeArguments()) {
-                if (tm instanceof WildcardType) {
-                    dummyParams.add("?");
-                }
-            }
-        }
-        if (dummyParams.size() > 0) {
-            name += "<" + Join.commaSpace(dummyParams) + ">";
-        }
-
-        GField f = this.bindingClass.getField(this.propertyName).type(name);
+        GField f = this.bindingClass.getField(this.propertyName).type(this.propertyType.getBindingClassFieldDeclaration(this.propertyName));
         if (this.propertyType.isRawType()) {
             f.addAnnotation("@SuppressWarnings(\"unchecked\")");
         }

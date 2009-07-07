@@ -113,23 +113,7 @@ public class FieldPropertyGenerator implements PropertyGenerator {
     }
 
     private void addOuterClassBindingField() {
-        String name = "My" + Inflector.capitalize(this.propertyName) + "Binding";
-
-        List<String> dummyParams = new ArrayList<String>();
-        TypeMirror returnType = this.queue.boxIfNeeded(this.enclosed.asType());
-        if (returnType instanceof DeclaredType) {
-            DeclaredType dt = (DeclaredType) returnType;
-            for (TypeMirror tm : dt.getTypeArguments()) {
-                if (tm instanceof WildcardType) {
-                    dummyParams.add("?");
-                }
-            }
-        }
-        if (dummyParams.size() > 0) {
-            name += "<" + Join.commaSpace(dummyParams) + ">";
-        }
-
-        GField f = this.bindingClass.getField(this.propertyName).type(name);
+        GField f = this.bindingClass.getField(this.propertyName).type(this.propertyType.getBindingClassFieldDeclaration(this.propertyName));
         if (this.propertyType.isRawType()) {
             f.addAnnotation("@SuppressWarnings(\"unchecked\")");
         }
@@ -142,27 +126,10 @@ public class FieldPropertyGenerator implements PropertyGenerator {
         } else {
             fieldGet.returnType(this.propertyType.getBindingTypeForPathWithR());
         }
-
-        String name = "My" + Inflector.capitalize(this.propertyName) + "Binding";
-        List<String> dummyParams = new ArrayList<String>();
-        TypeMirror returnType = this.queue.boxIfNeeded(this.enclosed.asType());
-        if (returnType instanceof DeclaredType) {
-            DeclaredType dt = (DeclaredType) returnType;
-            for (TypeMirror tm : dt.getTypeArguments()) {
-                if (tm instanceof WildcardType) {
-                    dummyParams.add("Object");
-                }
-            }
-        }
-        if (dummyParams.size() > 0) {
-            name += "<" + Join.commaSpace(dummyParams) + ">";
-        }
-
         fieldGet.body.line("if (this.{} == null) {", this.propertyName);
-        fieldGet.body.line("    this.{} = new {}();", this.propertyName, name);
+        fieldGet.body.line("    this.{} = new {}();", this.propertyName, this.propertyType.getBindingRootClassInstantiation(this.propertyName));
         fieldGet.body.line("}");
         fieldGet.body.line("return this.{};", this.propertyName);
-
         if (this.propertyType.isRawType()) {
             fieldGet.addAnnotation("@SuppressWarnings(\"unchecked\")");
         }

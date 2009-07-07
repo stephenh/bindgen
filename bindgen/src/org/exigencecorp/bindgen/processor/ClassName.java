@@ -88,6 +88,40 @@ public class ClassName {
         return name.replaceFirst("<R", "<" + this.get());
     }
 
+    public String getBindingRootClassInstantiation(String propertyName) {
+        String name = "My" + Inflector.capitalize(propertyName) + "Binding";
+        if (this.type instanceof DeclaredType) {
+            List<String> dummyParams = new ArrayList<String>();
+            DeclaredType dt = (DeclaredType) this.type;
+            for (TypeMirror tm : dt.getTypeArguments()) {
+                if (tm instanceof WildcardType) {
+                    dummyParams.add("Object");
+                }
+            }
+            if (dummyParams.size() > 0) {
+                name += "<" + Join.commaSpace(dummyParams) + ">";
+            }
+        }
+        return name;
+    }
+
+    public String getBindingClassFieldDeclaration(String propertyName) {
+        String name = "My" + Inflector.capitalize(propertyName) + "Binding";
+        if (this.type instanceof DeclaredType) {
+            List<String> dummyParams = new ArrayList<String>();
+            DeclaredType dt = (DeclaredType) this.type;
+            for (TypeMirror tm : dt.getTypeArguments()) {
+                if (tm instanceof WildcardType) {
+                    dummyParams.add("?");
+                }
+            }
+            if (dummyParams.size() > 0) {
+                name += "<" + Join.commaSpace(dummyParams) + ">";
+            }
+        }
+        return name;
+    }
+
     /** @return binding type, e.g. bindgen.java.lang.StringBinding, bindgen.app.EmployeeBinding */
     public String getBindingType() {
         String bindingName = this.getWithoutGenericPart() + "Binding";
