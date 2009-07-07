@@ -17,7 +17,7 @@ public class FieldPropertyGenerator implements PropertyGenerator {
     private final GClass bindingClass;
     private final Element field;
     private final Property2 property;
-    private boolean isFinal = false;
+    private final boolean isFinal;
     private GClass innerClass;
 
     public FieldPropertyGenerator(GenerationQueue queue, GClass bindingClass, Element field) {
