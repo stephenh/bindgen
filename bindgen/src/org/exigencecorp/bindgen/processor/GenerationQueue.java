@@ -45,9 +45,6 @@ public class GenerationQueue {
     }
 
     public void enqueueIfNew(TypeElement element) {
-        if (element == null) {
-            return; // javac is lovely and was passing in nulls
-        }
         if (this.hasAlreadyBeenWrittenByThisRound(element) || this.hasAlreadyBeenWrittenByAPreviousRound(element)) {
             return;
         }

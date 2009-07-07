@@ -127,7 +127,7 @@ public class ClassGenerator {
     }
 
     private void enqueuePropertyTypeIfNeeded(PropertyGenerator pg) {
-        if (pg.isCallable()) {
+        if (pg.isCallable() || pg.getPropertyTypeElement() == null) {
             return;
         }
         this.foundSubBindings.add(pg.getPropertyName());
