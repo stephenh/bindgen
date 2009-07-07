@@ -9,7 +9,7 @@ import org.exigencecorp.bindgen.AbstractBinding;
 public class Property {
 
     protected final TypeMirror type;
-    protected ClassName name;
+    protected final ClassName name;
 
     public Property(TypeMirror type) {
         this.type = Util.boxIfNeeded(type);
