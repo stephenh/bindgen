@@ -114,6 +114,7 @@ public class ClassGenerator {
             pg.generate();
             this.markDone(pg);
             this.enqueuePropertyTypeIfNeeded(pg);
+            this.addToSubBindingsIfNeeded(pg);
         }
     }
 
@@ -127,11 +128,15 @@ public class ClassGenerator {
     }
 
     private void enqueuePropertyTypeIfNeeded(PropertyGenerator pg) {
-        if (pg.isCallable() || pg.getPropertyTypeElement() == null) {
-            return;
+        if (pg.getPropertyTypeElement() != null) {
+            this.queue.enqueueIfNew(pg.getPropertyTypeElement());
         }
-        this.foundSubBindings.add(pg.getPropertyName());
-        this.queue.enqueueIfNew(pg.getPropertyTypeElement());
+    }
+
+    private void addToSubBindingsIfNeeded(PropertyGenerator pg) {
+        if (!pg.isCallable()) {
+            this.foundSubBindings.add(pg.getPropertyName());
+        }
     }
 
     private void addGetChildBindings() {
