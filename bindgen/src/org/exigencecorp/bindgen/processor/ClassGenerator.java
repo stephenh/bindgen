@@ -23,7 +23,6 @@ import joist.sourcegen.GClass;
 import joist.sourcegen.GMethod;
 import joist.util.Make;
 
-import org.exigencecorp.bindgen.AbstractBinding;
 import org.exigencecorp.bindgen.Binding;
 
 public class ClassGenerator {
@@ -62,7 +61,7 @@ public class ClassGenerator {
 
     private void initializePathBindingClass() {
         this.pathBindingClass = new GClass(this.name.getBindingPathClassDeclaration());
-        this.pathBindingClass.baseClassName("{}<R, {}>", AbstractBinding.class.getName(), this.name.get());
+        this.pathBindingClass.baseClassName(this.name.getBindingPathClassSuperClass());
         this.pathBindingClass.setAbstract();
     }
 

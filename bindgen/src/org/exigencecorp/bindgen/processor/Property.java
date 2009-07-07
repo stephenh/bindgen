@@ -8,6 +8,8 @@ import javax.lang.model.type.TypeMirror;
 
 import joist.util.Inflector;
 
+import org.exigencecorp.bindgen.AbstractBinding;
+
 /** Given a TypeMirror type of a field/method property, provides information about its binding outer/inner class. */
 public class Property {
 
@@ -36,6 +38,10 @@ public class Property {
         } else {
             return this.getBindingType().getWithoutGenericPart() + "Path" + "<R, " + new TypeVars(dt).genericsWithBounds + ">";
         }
+    }
+
+    public String getBindingPathClassSuperClass() {
+        return AbstractBinding.class.getName() + "<R, " + this.name.get() + ">";
     }
 
     public String getBindingRootClassDeclaration() {
