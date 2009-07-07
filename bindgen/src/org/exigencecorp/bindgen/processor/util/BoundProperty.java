@@ -127,6 +127,9 @@ public class BoundProperty {
     }
 
     public String getBindingTypeForPathWithR() {
+        if (this.isForGenericTypeParameter()) {
+            return this.getInnerClassDeclaration();
+        }
         String bindingName = Util.lowerCaseOuterClassNames("bindgen." + this.name.getWithoutGenericPart() + "BindingPath");
         List<String> typeArgs = Copy.list("R");
         if (this.isRawType()) {

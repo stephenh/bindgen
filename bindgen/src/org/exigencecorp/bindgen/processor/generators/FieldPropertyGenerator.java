@@ -59,11 +59,7 @@ public class FieldPropertyGenerator implements PropertyGenerator {
 
     private void addOuterClassGet() {
         GMethod fieldGet = this.outerClass.getMethod(this.property.getName() + "()");
-        if (this.property.isForGenericTypeParameter()) {
-            fieldGet.returnType(this.property.getInnerClassDeclaration());
-        } else {
-            fieldGet.returnType(this.property.getBindingTypeForPathWithR());
-        }
+        fieldGet.returnType(this.property.getBindingTypeForPathWithR());
         fieldGet.body.line("if (this.{} == null) {", this.property.getName());
         fieldGet.body.line("    this.{} = new {}();", this.property.getName(), this.property.getBindingRootClassInstantiation());
         fieldGet.body.line("}");
