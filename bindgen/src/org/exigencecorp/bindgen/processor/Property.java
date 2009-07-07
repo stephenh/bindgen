@@ -15,19 +15,19 @@ import javax.lang.model.type.WildcardType;
 import joist.util.Inflector;
 import joist.util.Join;
 
-public class ClassName {
+public class Property {
 
     private static final Pattern outerClassName = Pattern.compile("\\.([A-Z]\\w+)\\.");
     private final TypeMirror type;
     private String fullClassNameWithGenerics;
     public boolean isFixingRawType = false;
 
-    public ClassName(TypeMirror type) {
+    public Property(TypeMirror type) {
         this.type = type;
         this.fullClassNameWithGenerics = type.toString();
     }
 
-    public ClassName(String fullClassNameWithGenerics) {
+    public Property(String fullClassNameWithGenerics) {
         this.type = null;
         this.fullClassNameWithGenerics = fullClassNameWithGenerics;
     }
@@ -57,7 +57,7 @@ public class ClassName {
     }
 
     public String getBindingPathClassDeclaration() {
-        ClassName bindingTypeName = new ClassName(this.getBindingType());
+        Property bindingTypeName = new Property(this.getBindingType());
         DeclaredType dt = (DeclaredType) this.type;
         if (dt.getTypeArguments().size() == 0) {
             return bindingTypeName.getWithoutGenericPart() + "Path<R>";
@@ -67,7 +67,7 @@ public class ClassName {
     }
 
     public String getBindingRootClassDeclaration() {
-        ClassName bindingTypeName = new ClassName(this.getBindingType());
+        Property bindingTypeName = new Property(this.getBindingType());
         DeclaredType dt = (DeclaredType) this.type;
         if (dt.getTypeArguments().size() == 0) {
             return bindingTypeName.getWithoutGenericPart();
@@ -77,7 +77,7 @@ public class ClassName {
     }
 
     public String getBindingRootClassSuperClass() {
-        ClassName bindingTypeName = new ClassName(this.getBindingType());
+        Property bindingTypeName = new Property(this.getBindingType());
         String name;
         DeclaredType dt = (DeclaredType) this.type;
         if (dt.getTypeArguments().size() == 0) {

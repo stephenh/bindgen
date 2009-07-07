@@ -28,7 +28,7 @@ public class FieldPropertyGenerator implements PropertyGenerator {
     private final GClass bindingClass;
     private final Element enclosed;
     private final String propertyName;
-    private ClassName propertyType;
+    private Property propertyType;
     private TypeElement propertyTypeElement;
     private TypeParameterElement propertyGenericElement;
     private boolean isFinal = false;
@@ -38,7 +38,7 @@ public class FieldPropertyGenerator implements PropertyGenerator {
         this.queue = queue;
         this.bindingClass = bindingClass;
         this.enclosed = enclosed;
-        this.propertyType = new ClassName(this.queue.boxIfNeeded(this.enclosed.asType()));
+        this.propertyType = new Property(this.queue.boxIfNeeded(this.enclosed.asType()));
         this.propertyName = this.enclosed.getSimpleName().toString();
         this.isFinal = this.enclosed.getModifiers().contains(javax.lang.model.element.Modifier.FINAL);
     }
@@ -65,7 +65,7 @@ public class FieldPropertyGenerator implements PropertyGenerator {
         Element fieldTypeAsElement = this.getProcessingEnv().getTypeUtils().asElement(fieldType);
         if (fieldTypeAsElement != null && fieldTypeAsElement.getKind() == ElementKind.TYPE_PARAMETER) {
             this.propertyGenericElement = (TypeParameterElement) fieldTypeAsElement;
-            this.propertyType = new ClassName(this.propertyGenericElement.asType());
+            this.propertyType = new Property(this.propertyGenericElement.asType());
             this.propertyTypeElement = null;
         } else if (fieldTypeAsElement instanceof TypeElement) {
             this.propertyTypeElement = (TypeElement) fieldTypeAsElement;

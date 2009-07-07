@@ -25,7 +25,7 @@ public class MethodPropertyGenerator implements PropertyGenerator {
     private final ExecutableElement enclosed;
     private final String methodName;
     private String propertyName;
-    private ClassName propertyType;
+    private Property propertyType;
     private TypeElement propertyTypeElement;
     private TypeParameterElement propertyGenericElement;
     private GClass innerClass;
@@ -54,7 +54,7 @@ public class MethodPropertyGenerator implements PropertyGenerator {
         }
 
         TypeMirror returnType = this.queue.boxIfNeeded(this.enclosed.getReturnType());
-        this.propertyType = new ClassName(returnType);
+        this.propertyType = new Property(returnType);
         if (this.propertyType.getWithoutGenericPart().endsWith("Binding")) {
             return false; // Skip methods that themselves return bindings
         }
@@ -62,7 +62,7 @@ public class MethodPropertyGenerator implements PropertyGenerator {
         Element returnTypeAsElement = this.getProcessingEnv().getTypeUtils().asElement(returnType);
         if (returnTypeAsElement != null && returnTypeAsElement.getKind() == ElementKind.TYPE_PARAMETER) {
             this.propertyGenericElement = (TypeParameterElement) returnTypeAsElement;
-            this.propertyType = new ClassName(this.propertyGenericElement.asType());
+            this.propertyType = new Property(this.propertyGenericElement.asType());
             this.propertyTypeElement = null;
         } else if (returnTypeAsElement instanceof TypeElement) {
             this.propertyTypeElement = (TypeElement) returnTypeAsElement;
