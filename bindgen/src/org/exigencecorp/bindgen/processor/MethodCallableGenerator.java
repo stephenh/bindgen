@@ -24,6 +24,7 @@ public class MethodCallableGenerator implements PropertyGenerator {
     private final String methodName;
     private TypeElement blockType;
     private ExecutableElement blockMethod;
+    private GClass innerClass;
 
     public MethodCallableGenerator(GenerationQueue queue, GClass outerClass, ExecutableElement method) {
         this.queue = queue;
@@ -49,6 +50,14 @@ public class MethodCallableGenerator implements PropertyGenerator {
         return false;
     }
 
+    public void generate() {
+        this.addOuterClassGet();
+        this.addOuterClassField();
+        this.addInnerClass();
+        this.addInnerClassMethod();
+        this.addInnerClassGetName();
+    }
+
     private boolean blockTypeMatchesMethod(String attemptClassName) {
         TypeElement attemptType = this.queue.getProcessingEnv().getElementUtils().getTypeElement(attemptClassName);
         List<ExecutableElement> methods = ElementFilter.methodsIn(attemptType.getEnclosedElements());
@@ -66,45 +75,39 @@ public class MethodCallableGenerator implements PropertyGenerator {
         return false;
     }
 
-    public void generate() {
-        String methodName = this.method.getSimpleName().toString();
+    private void addOuterClassField() {
+        this.outerClass.getField(this.methodName).type(this.blockType.getQualifiedName().toString());
+    }
 
-        this.outerClass.getField(methodName).type(this.blockType.getQualifiedName().toString());
-        GClass fieldClass = this.outerClass.getInnerClass("My{}Binding", Inflector.capitalize(methodName)).notStatic();
-        fieldClass.implementsInterface(this.blockType.getQualifiedName().toString());
-        fieldClass.implementsInterface(NamedBinding.class);
+    private void addOuterClassGet() {
+        GMethod get = this.outerClass.getMethod(this.methodName).returnType(this.blockType.getQualifiedName().toString());
+        get.body.line("if (this.{} == null) {", this.methodName);
+        get.body.line("    this.{} = new My{}Binding();", this.methodName, Inflector.capitalize(this.methodName));
+        get.body.line("}");
+        get.body.line("return this.{};", this.methodName);
+    }
 
-        GMethod fieldClassRun = fieldClass.getMethod(this.blockMethod.getSimpleName().toString());
-        fieldClassRun.returnType(this.blockMethod.getReturnType().toString());
+    private void addInnerClass() {
+        this.innerClass = this.outerClass.getInnerClass("My{}Binding", Inflector.capitalize(this.methodName)).notStatic();
+        this.innerClass.implementsInterface(this.blockType.getQualifiedName().toString());
+        this.innerClass.implementsInterface(NamedBinding.class);
+    }
 
-        // Figure out whether we need a "return" or not
-        String returnPrefix = this.blockMethod.getReturnType().getKind() == TypeKind.VOID ? "" : "return ";
-        String arguments = "";
-        for (VariableElement foo : this.blockMethod.getParameters()) {
-            arguments += foo.getSimpleName().toString() + ", ";
-        }
-        if (arguments.length() > 0) {
-            arguments = arguments.substring(0, arguments.length() - 2); // remove last ", "
-        }
+    private void addInnerClassMethod() {
+        GMethod run = this.innerClass.getMethod(this.blockMethod.getSimpleName().toString());
+        run.returnType(this.blockMethod.getReturnType().toString());
+        run.body.line("{}{}.this.get().{}({});",//
+            this.getReturnPrefixIfNeeded(),
+            this.outerClass.getSimpleClassNameWithoutGeneric(),
+            this.methodName,
+            this.getArguments());
+        this.addMethodParameters(run);
+        this.addMethodThrows(run);
+    }
 
-        fieldClassRun.body.line("{}{}.this.get().{}({});", returnPrefix, this.outerClass.getSimpleClassNameWithoutGeneric(), methodName, arguments);
-        // Add the parameters
-        for (VariableElement foo : this.blockMethod.getParameters()) {
-            fieldClassRun.argument(foo.asType().toString(), foo.getSimpleName().toString());
-        }
-        // Add throws
-        for (TypeMirror type : this.method.getThrownTypes()) {
-            fieldClassRun.addThrows(type.toString());
-        }
-
-        GMethod fieldClassName = fieldClass.getMethod("getName").returnType(String.class);
-        fieldClassName.body.line("return \"{}\";", methodName);
-
-        GMethod fieldGet = this.outerClass.getMethod(methodName).returnType(this.blockType.getQualifiedName().toString());
-        fieldGet.body.line("if (this.{} == null) {", methodName);
-        fieldGet.body.line("    this.{} = new My{}Binding();", methodName, Inflector.capitalize(methodName));
-        fieldGet.body.line("}");
-        fieldGet.body.line("return this.{};", methodName);
+    private void addInnerClassGetName() {
+        GMethod getName = this.innerClass.getMethod("getName").returnType(String.class);
+        getName.body.line("return \"{}\";", this.methodName);
     }
 
     public String getPropertyName() {
@@ -145,6 +148,34 @@ public class MethodCallableGenerator implements PropertyGenerator {
             }
         }
         return true;
+    }
+
+    private void addMethodParameters(GMethod run) {
+        for (VariableElement foo : this.blockMethod.getParameters()) {
+            run.argument(foo.asType().toString(), foo.getSimpleName().toString());
+        }
+    }
+
+    private void addMethodThrows(GMethod run) {
+        for (TypeMirror type : this.method.getThrownTypes()) {
+            run.addThrows(type.toString());
+        }
+    }
+
+    // Figure out whether we need a "return" or not
+    private String getReturnPrefixIfNeeded() {
+        return this.blockMethod.getReturnType().getKind() == TypeKind.VOID ? "" : "return ";
+    }
+
+    private String getArguments() {
+        String arguments = "";
+        for (VariableElement foo : this.blockMethod.getParameters()) {
+            arguments += foo.getSimpleName().toString() + ", ";
+        }
+        if (arguments.length() > 0) {
+            arguments = arguments.substring(0, arguments.length() - 2); // remove last ", "
+        }
+        return arguments;
     }
 
     private String[] getBlockTypesToAttempt() {
