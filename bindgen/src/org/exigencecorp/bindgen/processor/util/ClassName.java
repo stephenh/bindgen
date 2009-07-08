@@ -78,6 +78,9 @@ public class ClassName {
     /** @return "String, String" if the type is "com.app.Type<String, String>" or "" if no generics */
     public String getGenericPartWithoutBrackets() {
         String type = this.getGenericPart();
+        if ("".equals(type)) {
+            return type;
+        }
         return type.substring(1, type.length() - 1);
     }
 

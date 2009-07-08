@@ -81,15 +81,15 @@ public class BoundProperty {
         String name = "My" + Inflector.capitalize(this.propertyName) + "Binding";
         if (this.type.getKind() == TypeKind.DECLARED) {
             List<String> dummyParams = new ArrayList<String>();
-            if (!this.isRawType()) {
+            if (this.isRawType()) {
+                for (TypeParameterElement tpe : this.getElement().getTypeParameters()) {
+                    dummyParams.add(tpe.toString());
+                }
+            } else {
                 for (TypeMirror tm : ((DeclaredType) this.type).getTypeArguments()) {
                     if (tm instanceof WildcardType) {
                         dummyParams.add("U" + dummyParams.size());
                     }
-                }
-            } else {
-                for (TypeParameterElement tpe : this.getElement().getTypeParameters()) {
-                    dummyParams.add(tpe.toString());
                 }
             }
             if (dummyParams.size() > 0) {
@@ -101,26 +101,25 @@ public class BoundProperty {
 
     public String getInnerClassSuperClass() {
         if (this.isForGenericTypeParameter()) {
+            // Being a generic type, we have no XxxBindingPath to extend, so just extend AbstractBinding directly
             return AbstractBinding.class.getName() + "<R, " + this.getGenericElement() + ">";
         }
 
         String superName = Util.lowerCaseOuterClassNames("bindgen." + this.name.getWithoutGenericPart() + "BindingPath");
         List<String> typeArgs = Copy.list("R");
-        if (this.isRawType() || this.name.hasGenerics()) {
-            if (this.isRawType()) {
-                for (TypeParameterElement tpe : this.getElement().getTypeParameters()) {
-                    typeArgs.add(tpe.toString());
+        if (this.isRawType()) {
+            for (TypeParameterElement tpe : this.getElement().getTypeParameters()) {
+                typeArgs.add(tpe.toString());
+            }
+        } else if (this.isFixingRawType()) {
+            typeArgs.add(this.name.getGenericPartWithoutBrackets());
+        } else {
+            for (TypeMirror tm : ((DeclaredType) this.type).getTypeArguments()) {
+                if (tm instanceof WildcardType) {
+                    typeArgs.add("U" + (typeArgs.size() - 1));
+                } else {
+                    typeArgs.add(tm.toString());
                 }
-            } else if (!this.isFixingRawType) {
-                for (TypeMirror tm : ((DeclaredType) this.type).getTypeArguments()) {
-                    if (tm instanceof WildcardType) {
-                        typeArgs.add("U" + (typeArgs.size() - 1));
-                    } else {
-                        typeArgs.add(tm.toString());
-                    }
-                }
-            } else {
-                typeArgs.add(this.name.getGenericPartWithoutBrackets());
             }
         }
         return superName + "<" + Join.commaSpace(typeArgs) + ">";
