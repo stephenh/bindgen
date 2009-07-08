@@ -5,6 +5,7 @@ import static org.exigencecorp.bindgen.processor.CurrentEnv.getElementUtils;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeVariable;
 
@@ -98,11 +99,12 @@ public class ClassName {
     }
 
     public boolean hasWildcards() {
-        return this.getGenericPart().indexOf('?') > -1;
+        return this.getGenericPart().contains("?");
     }
 
     private DeclaredType getDeclaredType() {
-        return (DeclaredType) getElementUtils().getTypeElement(this.getWithoutGenericPart()).asType();
+        TypeElement element = getElementUtils().getTypeElement(this.getWithoutGenericPart());
+        return element == null ? null : (DeclaredType) element.asType();
     }
 
 }
