@@ -33,7 +33,7 @@ public class BindgenAnnotationProcessor extends AbstractProcessor {
     @Override
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
         for (Element element : roundEnv.getElementsAnnotatedWith(Bindable.class)) {
-            if (element.getKind() == ElementKind.CLASS) {
+            if (element.getKind() == ElementKind.CLASS || element.getKind() == ElementKind.INTERFACE) {
                 this.queue.enqueueForcefully((TypeElement) element);
             } else {
                 this.processingEnv.getMessager().printMessage(Kind.WARNING, "Unhandled element " + element);
