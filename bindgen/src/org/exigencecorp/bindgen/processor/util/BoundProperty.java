@@ -57,7 +57,7 @@ public class BoundProperty {
     }
 
     public String getCastForReturnIfNeeded() {
-        return this.hasWildcards() ? "(" + this.getSetType() + ") " : "";
+        return (this.hasWildcards() && !this.isArray()) ? "(" + this.getSetType() + ") " : "";
     }
 
     private String optionalGenericsIfWildcards(String replace) {
@@ -233,7 +233,14 @@ public class BoundProperty {
     }
 
     public boolean hasWildcards() {
-        return this.name.hasWildcards();
+        if (this.type.getKind() == TypeKind.DECLARED) {
+            for (TypeMirror p : ((DeclaredType) this.type).getTypeArguments()) {
+                if (p.getKind() == TypeKind.WILDCARD) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     public boolean isDeprecated() {

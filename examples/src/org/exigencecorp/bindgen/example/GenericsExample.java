@@ -23,4 +23,9 @@ public class GenericsExample<T> {
         return null;
     }
 
+    // Was causing unnecessary cast errors because the ? triggers "hasWildcards()"
+    public List<Set<?>> getSets4() {
+        return null;
+    }
+
 }
