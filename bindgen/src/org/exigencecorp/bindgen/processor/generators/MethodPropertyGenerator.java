@@ -62,7 +62,7 @@ public class MethodPropertyGenerator implements PropertyGenerator {
         fieldGet.body.line("    this.{} = new {}();", this.property.getName(), this.property.getBindingRootClassInstantiation());
         fieldGet.body.line("}");
         fieldGet.body.line("return this.{};", this.property.getName());
-        if (this.property.isRawType()) {
+        if ((this.property.hasWildcards() || this.property.isRawType()) && !this.property.isArray()) {
             fieldGet.addAnnotation("@SuppressWarnings(\"unchecked\")");
         }
     }
@@ -77,10 +77,10 @@ public class MethodPropertyGenerator implements PropertyGenerator {
     private void addInnerClass() {
         this.innerClass = this.outerClass.getInnerClass(this.property.getInnerClassDeclaration()).notStatic();
         this.innerClass.baseClassName(this.property.getInnerClassSuperClass());
-        if (this.property.hasWildcards() || this.property.isRawType()) {
+        if ((this.property.hasWildcards() || this.property.isRawType()) && !this.property.isArray()) {
             this.innerClass.addAnnotation("@SuppressWarnings(\"unchecked\")");
         }
-        if (this.property.isForGenericTypeParameter()) {
+        if (this.property.isForGenericTypeParameter() || this.property.isArray()) {
             this.innerClass.getMethod("getType").returnType("Class<?>").body.line("return null;");
         }
     }

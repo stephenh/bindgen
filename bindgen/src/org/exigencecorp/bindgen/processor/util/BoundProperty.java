@@ -24,17 +24,25 @@ import org.exigencecorp.bindgen.AbstractBinding;
 /** Given a TypeMirror type of a field/method property, provides information about its binding outer/inner class. */
 public class BoundProperty {
 
+    private final Element enclosed;
     private final TypeElement enclosing;
     private final TypeMirror type;
     private final Element element;
     private final String propertyName;
     private final boolean isFixingRawType;
+    private final boolean isArray;
     private ClassName name;
 
     public BoundProperty(Element enclosed, TypeMirror type, String propertyName) {
+        this.enclosed = enclosed;
         this.enclosing = (TypeElement) enclosed.getEnclosingElement();
-        this.type = Util.boxIfNeeded(type);
-        this.element = getTypeUtils().asElement(this.type);
+        this.isArray = type.getKind() == TypeKind.ARRAY;
+        if (this.isArray) {
+            this.type = type;
+        } else {
+            this.type = Util.boxIfNeeded(type);
+        }
+        this.element = getTypeUtils().asElement(Util.boxIfNeeded(type));
         this.propertyName = propertyName;
         this.name = new ClassName(this.type.toString());
         this.isFixingRawType = this.fixRawTypeIfNeeded();
@@ -45,7 +53,7 @@ public class BoundProperty {
     }
 
     public boolean shouldSkip() {
-        return this.element == null || this.isNameless() || this.isSkipAttributeSet() || this.isForBinding();
+        return this.element == null || this.isNameless() || this.isSkipAttributeSet() || this.isForBinding() || this.isDeprecated();
     }
 
     public String getCastForReturnIfNeeded() {
@@ -57,7 +65,7 @@ public class BoundProperty {
             List<String> dummyParams = new ArrayList<String>();
             if (!this.isRawType()) {
                 for (TypeMirror tm : ((DeclaredType) this.type).getTypeArguments()) {
-                    if (tm instanceof WildcardType) {
+                    if (tm instanceof WildcardType && replace != null) {
                         dummyParams.add(replace);
                     }
                 }
@@ -70,7 +78,7 @@ public class BoundProperty {
     }
 
     public String getBindingRootClassInstantiation() {
-        return "My" + Inflector.capitalize(this.propertyName) + "Binding" + this.optionalGenericsIfWildcards("Object");
+        return "My" + Inflector.capitalize(this.propertyName) + "Binding" + this.optionalGenericsIfWildcards(null);
     }
 
     public String getBindingClassFieldDeclaration() {
@@ -88,7 +96,12 @@ public class BoundProperty {
             } else {
                 for (TypeMirror tm : ((DeclaredType) this.type).getTypeArguments()) {
                     if (tm instanceof WildcardType) {
-                        dummyParams.add("U" + dummyParams.size());
+                        WildcardType wt = (WildcardType) tm;
+                        String suffix = "";
+                        if (wt.getExtendsBound() != null) {
+                            suffix += " extends " + wt.getExtendsBound().toString();
+                        }
+                        dummyParams.add("U" + dummyParams.size() + suffix);
                     }
                 }
             }
@@ -100,8 +113,11 @@ public class BoundProperty {
     }
 
     public String getInnerClassSuperClass() {
+        // Being a generic type, we have no XxxBindingPath to extend, so just extend AbstractBinding directly
+        if (this.isArray()) {
+            return AbstractBinding.class.getName() + "<R, " + this.type.toString() + ">";
+        }
         if (this.isForGenericTypeParameter()) {
-            // Being a generic type, we have no XxxBindingPath to extend, so just extend AbstractBinding directly
             return AbstractBinding.class.getName() + "<R, " + this.getGenericElement() + ">";
         }
 
@@ -129,6 +145,9 @@ public class BoundProperty {
         if (this.isForGenericTypeParameter()) {
             return this.getInnerClassDeclaration();
         }
+        if (this.isArray()) {
+            return "org.exigencecorp.bindgen.BindingRoot<R, " + this.type.toString() + ">";
+        }
         String bindingName = Util.lowerCaseOuterClassNames("bindgen." + this.name.getWithoutGenericPart() + "BindingPath");
         List<String> typeArgs = Copy.list("R");
         if (this.isRawType()) {
@@ -143,7 +162,7 @@ public class BoundProperty {
 
     /** @return the type appropriate for setter/return arguments. */
     public String getSetType() {
-        if (this.hasWildcards()) {
+        if (this.hasWildcards() && !this.isArray()) {
             List<String> dummyParams = new ArrayList<String>();
             if (this.type instanceof DeclaredType) {
                 DeclaredType dt = (DeclaredType) this.type;
@@ -217,6 +236,10 @@ public class BoundProperty {
         return this.name.hasWildcards();
     }
 
+    public boolean isDeprecated() {
+        return this.enclosed.getAnnotation(Deprecated.class) != null;
+    }
+
     /** Add generic suffixes to avoid warnings in bindings for pre-1.5 APIs.
      *
      * This is for old pre-1.5 APIs that use, say, Enumeration. We upgrade it
@@ -252,6 +275,10 @@ public class BoundProperty {
 
     private boolean isTypeParameter(Element element) {
         return element != null && element.getKind() == ElementKind.TYPE_PARAMETER;
+    }
+
+    public boolean isArray() {
+        return this.isArray;
     }
 
 }

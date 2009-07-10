@@ -5,6 +5,7 @@ import static org.exigencecorp.bindgen.processor.CurrentEnv.getTypeUtils;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.lang.model.type.ArrayType;
 import javax.lang.model.type.PrimitiveType;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
@@ -28,6 +29,9 @@ public class Util {
     }
 
     public static TypeMirror boxIfNeeded(TypeMirror type) {
+        if (type.getKind() == TypeKind.ARRAY) {
+            type = ((ArrayType) type).getComponentType();
+        }
         if (type.getKind().isPrimitive()) {
             return getTypeUtils().boxedClass((PrimitiveType) type).asType();
         }
