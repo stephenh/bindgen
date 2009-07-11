@@ -21,14 +21,14 @@ import javax.tools.JavaFileObject;
 import javax.tools.StandardLocation;
 import javax.tools.Diagnostic.Kind;
 
-import org.exigencecorp.bindgen.processor.GenerationQueue;
-import org.exigencecorp.bindgen.processor.util.BoundClass;
-import org.exigencecorp.bindgen.processor.util.ClassName;
-
 import joist.sourcegen.GClass;
 import joist.sourcegen.GMethod;
 import joist.util.Copy;
 import joist.util.Join;
+
+import org.exigencecorp.bindgen.processor.GenerationQueue;
+import org.exigencecorp.bindgen.processor.util.BoundClass;
+import org.exigencecorp.bindgen.processor.util.ClassName;
 
 public class BindKeywordGenerator {
 
@@ -57,10 +57,11 @@ public class BindKeywordGenerator {
 
     private void addBindMethod(String className, DeclaredType type) {
         ClassName bindingType = new BoundClass(type).getBindingClassName();
+        this.queue.log("Adding " + className + ", " + type + ", " + bindingType.get());
         if (type.getTypeArguments().size() > 0) {
             GMethod method = this.bindClass.getMethod("bind({}<{}> o)", className, Join.commaSpace(bindingType.getGenericPartWithoutBrackets()));
             method.returnType("{}", bindingType);
-            method.typeParameters(Join.commaSpace(bindingType.getGenericsWithBounds()));
+            method.typeParameters(Join.commaSpace(new ClassName(type.toString()).getGenericsWithBounds()));
             method.setStatic();
             method.body.line("return new {}(o);", bindingType);
         } else {
