@@ -6,7 +6,7 @@ A data binding framework that generates type-safe binding classes.
 
 Or, OGNL with no strings.
 
-Originally built for the [joist](http://joist.ws/bindgen.html) web framework.
+Originally built for the [joist](http://joist.ws) web framework. See joist's [bindgen](http://joist.ws/bindgen.html) page for more docs.
 
 A test case:
 
