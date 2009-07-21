@@ -9,7 +9,7 @@ import javax.annotation.processing.SupportedAnnotationTypes;
 import javax.annotation.processing.SupportedSourceVersion;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Element;
-import javax.lang.model.element.PackageElement;
+import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.TypeElement;
 import javax.tools.Diagnostic.Kind;
 
@@ -25,34 +25,36 @@ public class BindgenAnnotationProcessor extends AbstractProcessor {
     @Override
     public void init(ProcessingEnvironment processingEnv) {
         super.init(processingEnv);
-        this.queue = new GenerationQueue(processingEnv);
+        CurrentEnv.set(this.processingEnv);
+        this.queue = new GenerationQueue();
         this.hasUpdatedKeywordClass = false;
     }
 
     @Override
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
-        boolean emptyRound = true;
         for (Element element : roundEnv.getElementsAnnotatedWith(Bindable.class)) {
-            if (element instanceof PackageElement) {
-                for (Element nested : ((PackageElement) element).getEnclosedElements()) {
-                    this.queue.enqueueForcefully((TypeElement) nested);
-                }
-            } else if (element instanceof TypeElement) {
+            if (element.getKind() == ElementKind.CLASS || element.getKind() == ElementKind.INTERFACE) {
                 this.queue.enqueueForcefully((TypeElement) element);
             } else {
                 this.processingEnv.getMessager().printMessage(Kind.WARNING, "Unhandled element " + element);
             }
-            emptyRound = false;
         }
         this.queue.processQueue();
+        this.updateKeywordClassIfLastRound(roundEnv);
+        return true;
+    }
+
+    /**
+     * Updating the Keyword class on the official processingOver() round did not
+     * work in Eclipse, but we seem to get an "empty" round before the official
+     * "over" round, so detect that and update the keyword class there.
+     */
+    private void updateKeywordClassIfLastRound(RoundEnvironment roundEnv) {
+        boolean emptyRound = roundEnv.getElementsAnnotatedWith(Bindable.class).size() == 0;
         if (emptyRound && !this.hasUpdatedKeywordClass) {
-            // Updating the Keyword class on the official processingOver() round did not
-            // work in Eclipse, but we seem to get an "empty" round before the "over"
-            // round, so detect that and update the keyword class there.
             this.queue.updateBindKeywordClass();
             this.hasUpdatedKeywordClass = true;
         }
-        return true;
     }
 
 }

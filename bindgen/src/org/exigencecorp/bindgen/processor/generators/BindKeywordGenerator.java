@@ -1,4 +1,8 @@
-package org.exigencecorp.bindgen.processor;
+package org.exigencecorp.bindgen.processor.generators;
+
+import static org.exigencecorp.bindgen.processor.CurrentEnv.getElementUtils;
+import static org.exigencecorp.bindgen.processor.CurrentEnv.getFiler;
+import static org.exigencecorp.bindgen.processor.CurrentEnv.getMessager;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -10,7 +14,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.DeclaredType;
 import javax.tools.FileObject;
@@ -21,6 +24,11 @@ import javax.tools.Diagnostic.Kind;
 import joist.sourcegen.GClass;
 import joist.sourcegen.GMethod;
 import joist.util.Copy;
+import joist.util.Join;
+
+import org.exigencecorp.bindgen.processor.GenerationQueue;
+import org.exigencecorp.bindgen.processor.util.BoundClass;
+import org.exigencecorp.bindgen.processor.util.ClassName;
 
 public class BindKeywordGenerator {
 
@@ -42,32 +50,32 @@ public class BindKeywordGenerator {
 
     private void addBindMethods() {
         for (String className : this.classNames) {
-            TypeElement e = this.getProcessingEnv().getElementUtils().getTypeElement(className);
-            if (e == null) {
-                this.queue.log("TypeElement not found for " + className);
-                continue;
-            }
-            DeclaredType t = (DeclaredType) e.asType();
-            String bindingType = new ClassName(className).getBindingType();
-            if (t.getTypeArguments().size() > 0) {
-                TypeVars tv = new TypeVars(t);
-                GMethod method = this.bindClass
-                    .getMethod("bind({}<{}> o)", className, tv.generics)
-                    .returnType("{}<{}>", bindingType, tv.generics)
-                    .typeParameters(tv.genericsWithBounds)
-                    .setStatic();
-                method.body.line("return new {}<{}>(o);", bindingType, tv.generics);
-            } else {
-                GMethod method = this.bindClass.getMethod("bind({} o)", className).returnType(bindingType).setStatic();
-                method.body.line("return new {}(o);", bindingType);
-            }
+            TypeElement e = getElementUtils().getTypeElement(className);
+            this.addBindMethod(className, (DeclaredType) e.asType());
+        }
+    }
+
+    private void addBindMethod(String className, DeclaredType type) {
+        ClassName bindingType = new BoundClass(type).getBindingClassName();
+        this.queue.log("Adding " + className + ", " + type + ", " + bindingType.get());
+        if (type.getTypeArguments().size() > 0) {
+            GMethod method = this.bindClass.getMethod("bind({}<{}> o)", className, Join.commaSpace(bindingType.getGenericPartWithoutBrackets()));
+            method.returnType("{}", bindingType);
+            method.typeParameters(Join.commaSpace(new ClassName(type.toString()).getGenericsWithBounds()));
+            method.setStatic();
+            method.body.line("return new {}(o);", bindingType);
+        } else {
+            GMethod method = this.bindClass.getMethod("bind({} o)", className);
+            method.returnType(bindingType.toString());
+            method.setStatic();
+            method.body.line("return new {}(o);", bindingType);
         }
     }
 
     private void readExistingBindKeywordFile() {
         try {
             this.queue.log("READING BindKeyword.txt");
-            FileObject fo = this.getProcessingEnv().getFiler().getResource(StandardLocation.SOURCE_OUTPUT, "bindgen", "BindKeyword.txt");
+            FileObject fo = getFiler().getResource(StandardLocation.SOURCE_OUTPUT, "bindgen", "BindKeyword.txt");
             if (fo.getLastModified() > 0) {
                 String line;
                 BufferedReader input = new BufferedReader(new InputStreamReader(fo.openInputStream()));
@@ -80,7 +88,7 @@ public class BindKeywordGenerator {
                 this.queue.log("NOT THERE");
             }
         } catch (IOException io) {
-            this.getProcessingEnv().getMessager().printMessage(Kind.ERROR, io.getMessage());
+            getMessager().printMessage(Kind.ERROR, io.getMessage());
         }
     }
 
@@ -89,7 +97,7 @@ public class BindKeywordGenerator {
             this.queue.log("WRITING BindKeyword.txt");
             List<String> sorted = Copy.list(this.classNames);
             Collections.sort(sorted);
-            FileObject fo = this.getProcessingEnv().getFiler().createResource(StandardLocation.SOURCE_OUTPUT, "bindgen", "BindKeyword.txt");
+            FileObject fo = getFiler().createResource(StandardLocation.SOURCE_OUTPUT, "bindgen", "BindKeyword.txt");
             OutputStream output = fo.openOutputStream();
             for (String className : sorted) {
                 output.write(className.getBytes());
@@ -98,25 +106,21 @@ public class BindKeywordGenerator {
             output.close();
         } catch (IOException io) {
             this.queue.log("ERROR: " + io.getMessage());
-            this.getProcessingEnv().getMessager().printMessage(Kind.ERROR, io.getMessage());
+            getMessager().printMessage(Kind.ERROR, io.getMessage());
         }
     }
 
     private void writeBindKeywordClass() {
         try {
             this.queue.log("WRITING BindKeyword.java");
-            JavaFileObject jfo = this.getProcessingEnv().getFiler().createSourceFile(this.bindClass.getFullClassNameWithoutGeneric());
+            JavaFileObject jfo = getFiler().createSourceFile(this.bindClass.getFullClassNameWithoutGeneric());
             Writer w = jfo.openWriter();
             w.write(this.bindClass.toCode());
             w.close();
         } catch (IOException io) {
             this.queue.log("ERROR: " + io.getMessage());
-            this.getProcessingEnv().getMessager().printMessage(Kind.ERROR, io.getMessage());
+            getMessager().printMessage(Kind.ERROR, io.getMessage());
         }
-    }
-
-    private ProcessingEnvironment getProcessingEnv() {
-        return this.queue.getProcessingEnv();
     }
 
 }

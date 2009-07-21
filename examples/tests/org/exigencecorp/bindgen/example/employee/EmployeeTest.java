@@ -5,7 +5,6 @@ import junit.framework.TestCase;
 
 import org.exigencecorp.bindgen.Binding;
 
-import bindgen.java.lang.StringBinding;
 import bindgen.org.exigencecorp.bindgen.example.employee.EmployeeBinding;
 import bindgen.org.exigencecorp.bindgen.example.employee.EmployerBinding;
 
@@ -43,7 +42,7 @@ public class EmployeeTest extends TestCase {
         ee.employer = er;
 
         EmployeeBinding eb = new EmployeeBinding(ee);
-        Assert.assertTrue(StringBinding.class.isAssignableFrom(eb.name().getClass()));
+        // Assert.assertTrue(StringBinding.class.isAssignableFrom(eb.name().getClass()));
 
         // Simulate page rendering
         Assert.assertEquals("bob", new TextBox(eb.name()).toString());
@@ -94,7 +93,7 @@ public class EmployeeTest extends TestCase {
         Employee ee = new Employee("bob");
         EmployeeBinding eb = new EmployeeBinding(ee);
 
-        StringBinding erName = eb.employer().name();
+        Binding<String> erName = eb.employer().name();
         try {
             erName.get();
             Assert.fail();

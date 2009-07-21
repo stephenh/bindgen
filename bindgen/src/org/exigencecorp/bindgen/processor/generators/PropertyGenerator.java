@@ -1,4 +1,4 @@
-package org.exigencecorp.bindgen.processor;
+package org.exigencecorp.bindgen.processor.generators;
 
 import javax.lang.model.element.TypeElement;
 
@@ -9,6 +9,8 @@ public interface PropertyGenerator {
     TypeElement getPropertyTypeElement();
 
     boolean shouldGenerate();
+
+    boolean isCallable();
 
     void generate();
 
