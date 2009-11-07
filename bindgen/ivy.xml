@@ -1,5 +1,7 @@
 <ivy-module version="2.0">
-	<info organisation="exigencecorp" module="bindgen" revision="SNAPSHOT"/>
+	<info organisation="exigencecorp" module="bindgen" revision="SNAPSHOT">
+		<license name="The Apache Software License, Version 2.0" url="http://www.apache.org/licenses/LICENSE-2.0.txt"/>
+	</info>
 	<configurations>
 		<conf name="build" visibility="private"/>
 		<conf name="master"/>
