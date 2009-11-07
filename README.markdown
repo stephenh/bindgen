@@ -75,6 +75,25 @@ Fun things like type conversion using `Binding.getType()` method to go from stri
 
 [1]: http://click.sf.net
 
+Stateless Bindings
+==================
+
+Stateless bindings allows a single `Binding` instance to be evaluated against multiple roots in a thread-safe manner.
+
+For example:
+
+    // Make just once instance of FooBinding/StringBindingPath
+    FooBinding f = new FooBinding();
+    StringBindingPath<Foo> b = f.firstName();
+    // thread1
+    b.getWithRoot(fooBob); // returns Bob
+    // thread2
+    b.getWithRoot(fooFred); // returns Fred
+
+For more examples, see [MethodExampleStatelessTest][4].
+
+[4]: master/examples/tests/org/exigencecorp/bindgen/example/methods/MethodExampleStatelessTest.java
+
 Gotchas
 =======
 
