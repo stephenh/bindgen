@@ -82,13 +82,17 @@ Stateless bindings allows a single `Binding` instance to be evaluated against mu
 
 For example:
 
-    // Make just once instance of FooBinding/StringBindingPath
-    FooBinding f = new FooBinding();
-    StringBindingPath<Foo> b = f.firstName();
+    // Make just once instance of PersonBinding/StringBindingPath
+    PersonBinding p = new PersonBinding();
+    // Get a binding to their first name, through the Demographics object
+    StringBindingPath<Person> b = p.demographics().firstName();
     // thread1
-    b.getWithRoot(fooBob); // returns Bob
+    b.getWithRoot(bob); // returns Bob
+    b.setWithRoob(bob, "Bobby"); // changes bob
     // thread2
-    b.getWithRoot(fooFred); // returns Fred
+    b.getWithRoot(fred); // returns Fred
+
+None of the `getWithRoot`/`setWithRoot` invocations will step on each other's toes if running concurrently.
 
 For more examples, see [MethodExampleStatelessTest][4].
 
