@@ -64,7 +64,7 @@ public class MethodExampleTest extends TestCase {
     public void testGetBindings() {
         MethodExample e = new MethodExample("1", "name");
         MethodExampleBinding b = new MethodExampleBinding(e);
-        Assert.assertEquals(11, b.getChildBindings().size());
+        Assert.assertEquals(12, b.getChildBindings().size());
 
         boolean foundName = false;
         for (Binding<?> sub : b.getChildBindings()) {
@@ -80,4 +80,9 @@ public class MethodExampleTest extends TestCase {
         Assert.assertEquals(String.class, ((ContainerBinding) b.list()).getContainedType());
     }
 
+    public void testNull() {
+        MethodExample e = new MethodExample("1", "name");
+        MethodExampleBinding b = new MethodExampleBinding(e);
+        Assert.assertEquals(false, b.isNull().get().booleanValue());
+    }
 }
