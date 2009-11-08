@@ -9,6 +9,7 @@
 	<target name="compile" description="compile src/ to bin/main/">
 		<mkdir dir="bin/main"/>
 		<javac srcdir="src" destdir="bin/main" debug="true" nowarn="yes" source="1.6" target="1.6" encoding="utf8">
+            <compilerarg value="-proc:none"/>
 			<classpath>
 				<fileset dir="lib/build" includes="**/*.jar"/>
 			</classpath>
