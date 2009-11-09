@@ -9,10 +9,8 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.Writer;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
+import java.util.TreeSet;
 
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.DeclaredType;
@@ -23,7 +21,6 @@ import javax.tools.Diagnostic.Kind;
 
 import joist.sourcegen.GClass;
 import joist.sourcegen.GMethod;
-import joist.util.Copy;
 import joist.util.Join;
 
 import org.exigencecorp.bindgen.Binding;
@@ -49,7 +46,7 @@ public class BindKeywordGenerator {
 
     private final GenerationQueue queue;
     private final GClass bindClass = new GClass("bindgen.BindKeyword");
-    private final Set<String> classNames = new HashSet<String>();
+    private final Set<String> classNames = new TreeSet<String>();
 
     /** @param queue the {@link GenerationQueue} only used for logging */
     public BindKeywordGenerator(GenerationQueue queue) {
@@ -113,11 +110,9 @@ public class BindKeywordGenerator {
     private void writeBindKeywordFile() {
         try {
             this.queue.log("WRITING BindKeyword.txt");
-            List<String> sorted = Copy.list(this.classNames);
-            Collections.sort(sorted);
             FileObject fo = getFiler().createResource(StandardLocation.SOURCE_OUTPUT, "bindgen", "BindKeyword.txt");
             OutputStream output = fo.openOutputStream();
-            for (String className : sorted) {
+            for (String className : this.classNames) {
                 output.write(className.getBytes());
                 output.write("\n".getBytes());
             }
