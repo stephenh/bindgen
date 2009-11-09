@@ -4,7 +4,7 @@ import java.util.List;
 
 /**
  * Interface for a property (field or method) binding.
- * 
+ *
  * @param T the type of the leaf object of the binding
  */
 public interface Binding<T> extends NamedBinding {

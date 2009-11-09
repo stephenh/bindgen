@@ -9,6 +9,16 @@ import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
 
+/** Provides static helper methods to get at the current {@link ProcessingEnvironment}.
+ *
+ * The {@link ProcessingEnvironment} used to get passed around as a method parameter,
+ * but a whole lot of places need it, so putting it in one static location cut down
+ * on the parameter cruft.
+ *
+ * This also installs several default options, specifically fixRawTypes and
+ * skipAttribute settings to remove any warnings from pre-1.5 classes in the
+ * <code>javax.servlet</code> classes.
+ */
 public class CurrentEnv {
 
     private static final Map<String, String> options = new HashMap<String, String>();

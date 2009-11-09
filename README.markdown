@@ -6,6 +6,8 @@ A data binding framework that generates type-safe binding classes.
 
 Or, OGNL with no strings.
 
+Originally built for the [joist](http://joist.ws) web framework. See joist's [bindgen](http://joist.ws/bindgen.html) page for more docs.
+
 A test case:
 
     public void testEmployerThroughEmployee() {
@@ -73,12 +75,36 @@ Fun things like type conversion using `Binding.getType()` method to go from stri
 
 [1]: http://click.sf.net
 
+Stateless Bindings
+==================
+
+Stateless bindings allows a single `Binding` instance to be evaluated against multiple roots in a thread-safe manner.
+
+For example:
+
+    // Make just once instance of PersonBinding/StringBindingPath
+    PersonBinding p = new PersonBinding();
+    // Get a binding to their first name, through the Demographics object
+    StringBindingPath<Person> b = p.demographics().firstName();
+    // thread1
+    b.getWithRoot(bob); // returns Bob
+    b.setWithRoob(bob, "Bobby"); // changes bob
+    // thread2
+    b.getWithRoot(fred); // returns Fred
+
+None of the `getWithRoot`/`setWithRoot` invocations will step on each other's toes if running concurrently.
+
+For more examples, see [MethodExampleStatelessTest][4].
+
+[4]: master/examples/tests/org/exigencecorp/bindgen/example/methods/MethodExampleStatelessTest.java
+
 Gotchas
 =======
 
-* Eclipse: Annotating packages as `@Bindable` does not work until 3.5-M5
-* Eclipse: Clean builds cause compile errors if your `Foo` class references its own `FooBinding` (see [263985][3]) *and* you declare `FooBinding` as a field/method return--for now declaring `FooBinding` inside a method as a local variable works fine
-* IntelliJ: Does not support annotation processors (from what I can tell)
+* Eclipse: 3.5 works best--3.4 has several bugs that were fixed (see [263985][3])
+* Eclipse: Annotating packages does not work
+* Eclipse: Must be run *on* a JDK6 JVM--for Macs, this means 3.5 64-bit on the Apple 64-bit JDK6
+* IntelliJ: Has mediocre support for annotation processors (last I checked)
 * `javac`: Does not properly re-use already-generated classes, so pass `-AskipExistingBindingCheck=true` to re-generate all of the binding classes each time
 
 [3]: https://bugs.eclipse.org/bugs/show_bug.cgi?id=263985

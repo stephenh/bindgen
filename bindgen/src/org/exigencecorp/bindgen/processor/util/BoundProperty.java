@@ -33,6 +33,11 @@ public class BoundProperty {
     private final boolean isArray;
     private ClassName name;
 
+    /**
+     * @param enclosed the parent method or field
+     * @param type our type
+     * @param propertyName our name on the parent <code>enclosed</code> type
+     */
     public BoundProperty(Element enclosed, TypeMirror type, String propertyName) {
         this.enclosed = enclosed;
         this.enclosing = (TypeElement) enclosed.getEnclosingElement();

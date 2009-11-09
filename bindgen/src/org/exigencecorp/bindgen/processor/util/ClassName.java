@@ -9,6 +9,7 @@ import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeVariable;
 
+/** A utility class for inspecting/transforming class names to the binding version. */
 public class ClassName {
 
     private final String fullClassNameWithGenerics;
@@ -47,6 +48,7 @@ public class ClassName {
         }
     }
 
+    /** @return ["T", "U"] if the type is "com.app.Type<T extends Foo, U extends Bar>" */
     public List<String> getGenericsWithoutBounds() {
         List<String> args = new ArrayList<String>();
         for (TypeVariable tv : (List<TypeVariable>) this.getDeclaredType().getTypeArguments()) {
@@ -55,6 +57,7 @@ public class ClassName {
         return args;
     }
 
+    /** @return ["T extends Foo", "U extends Bar" if the type is "com.app.Type<T extends Foo, U extends Bar>" */
     public List<String> getGenericsWithBounds() {
         List<String> args = new ArrayList<String>();
         for (TypeVariable tv : (List<TypeVariable>) this.getDeclaredType().getTypeArguments()) {
@@ -96,10 +99,6 @@ public class ClassName {
 
     public boolean hasGenerics() {
         return this.getGenericPart().length() > 0;
-    }
-
-    public boolean hasWildcards() {
-        return this.getGenericPart().contains("?");
     }
 
     private DeclaredType getDeclaredType() {

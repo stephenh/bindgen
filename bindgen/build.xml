@@ -9,6 +9,7 @@
 	<target name="compile" description="compile src/ to bin/main/">
 		<mkdir dir="bin/main"/>
 		<javac srcdir="src" destdir="bin/main" debug="true" nowarn="yes" source="1.6" target="1.6" encoding="utf8">
+			<compilerarg value="-proc:none"/>
 			<classpath>
 				<fileset dir="lib/build" includes="**/*.jar"/>
 			</classpath>
@@ -39,7 +40,7 @@
 			<rule pattern="joist.util.*" result="org.exigencecorp.bindgen.dependencies.util.Bindgen@1"/>
 		</jarjar>
 		<mkdir dir="bin/sources"/>
-		<zip destfile="bin/sources/bindgen.jar">
+		<zip destfile="bin/sources/bindgen-sources.jar">
 			<fileset dir="src" includes="**/*.java"/>
 		</zip>
 	</target>

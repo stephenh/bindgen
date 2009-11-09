@@ -21,6 +21,8 @@ public class MethodExample {
     private boolean get;
     private List<String> list;
     private List<?> unknown; // Was causing errors with ContainerBinding
+    // isNull -> null would be a keyword
+    private boolean isNull;
 
     public MethodExample(String id, String name) {
         this.id = id;
@@ -109,4 +111,11 @@ public class MethodExample {
         return this.unknown;
     }
 
+    public boolean isNull() {
+        return this.isNull;
+    }
+
+    public void setNull(boolean isNull) {
+        this.isNull = isNull;
+    }
 }
