@@ -40,7 +40,7 @@
 			<rule pattern="joist.util.*" result="org.exigencecorp.bindgen.dependencies.util.Bindgen@1"/>
 		</jarjar>
 		<mkdir dir="bin/sources"/>
-		<zip destfile="bin/sources/bindgen.jar">
+		<zip destfile="bin/sources/bindgen-sources.jar">
 			<fileset dir="src" includes="**/*.java"/>
 		</zip>
 	</target>
