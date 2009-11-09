@@ -101,10 +101,6 @@ public class ClassName {
         return this.getGenericPart().length() > 0;
     }
 
-    public boolean hasWildcards() {
-        return this.getGenericPart().contains("?");
-    }
-
     private DeclaredType getDeclaredType() {
         TypeElement element = getElementUtils().getTypeElement(this.getWithoutGenericPart());
         return element == null ? null : (DeclaredType) element.asType();
