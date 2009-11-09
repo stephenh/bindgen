@@ -32,7 +32,7 @@
 		</javac>
 	</target>
 
-	<target name="tests">
+	<target name="tests" depends="compile">
 		<mkdir dir="bin/results"/>
 		<junit printsummary="on" showoutput="yes" fork="yes" forkmode="once">
 			<classpath>
