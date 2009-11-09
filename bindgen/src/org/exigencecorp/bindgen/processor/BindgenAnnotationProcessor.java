@@ -20,6 +20,19 @@ import javax.tools.Diagnostic.Kind;
 
 import org.exigencecorp.bindgen.Bindable;
 
+/** A processor that generates type-safe binding classes for classes annotated with {@link Bindable}.
+ *
+ * There is one {@link BindgenAnnotationProcessor} created per compilation run. Within that run,
+ * there are several rounds, with <code>process</code> being called for each round the compiler
+ * decides this processor should be a part of.
+ *
+ * For javac, there is one big compilation run with all classes. For Eclipse, there is one
+ * initial large compilation run, and then many small compilation runs each time the user
+ * hits save.
+ *
+ * See the processor <a href="http://java.sun.com/javase/6/docs/api/javax/annotation/processing/Processor.html">javadocs</a>
+ * for more details.
+ */
 @SupportedAnnotationTypes( { "org.exigencecorp.bindgen.Bindable" })
 @SupportedSourceVersion(SourceVersion.RELEASE_6)
 public class BindgenAnnotationProcessor extends AbstractProcessor {

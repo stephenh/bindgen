@@ -31,7 +31,18 @@ import org.exigencecorp.bindgen.processor.GenerationQueue;
 import org.exigencecorp.bindgen.processor.util.BoundClass;
 import org.exigencecorp.bindgen.processor.util.Util;
 
-public class ClassGenerator {
+/** Generates a <code>XxxBinding</code> class for a given {@link TypeElement}.
+ *
+ * Two classes are generated: one class is an abstract <code>XxxBindingPath</code>
+ * which has a generic parameter <code>R</code> to present one part in
+ * a binding evaluation path rooted at type a type <code>R</code>.
+ *
+ * The second class is the <ocde>XxxBinding</code> which extends its
+ * <code>XxxBindingPath</code> but provides the type parameter <code>R</code>
+ * as <code>Xxx</code>, meaning that <code>XxxBinding</code> can be
+ * used as the starting point for binding paths rooted at a <code>Xxx</code>.
+ */
+public class BindingClassGenerator {
 
     private final GenerationQueue queue;
     private final TypeElement element;
@@ -42,7 +53,7 @@ public class ClassGenerator {
     private GClass pathBindingClass;
     private GClass rootBindingClass;
 
-    public ClassGenerator(GenerationQueue queue, TypeElement element) {
+    public BindingClassGenerator(GenerationQueue queue, TypeElement element) {
         this.queue = queue;
         this.element = element;
         this.name = new BoundClass(element.asType());

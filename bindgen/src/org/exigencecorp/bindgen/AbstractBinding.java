@@ -3,6 +3,10 @@ package org.exigencecorp.bindgen;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * A base implementation of {@link BindingRoot} to hold the starting
+ * <code>T</code> value for evaluating bindings paths.
+ */
 public abstract class AbstractBinding<R, T> implements BindingRoot<R, T> {
 
     protected T _value;

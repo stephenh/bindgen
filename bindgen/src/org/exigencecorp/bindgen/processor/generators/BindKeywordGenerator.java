@@ -26,22 +26,39 @@ import joist.sourcegen.GMethod;
 import joist.util.Copy;
 import joist.util.Join;
 
+import org.exigencecorp.bindgen.Binding;
+import org.exigencecorp.bindgen.processor.BindgenAnnotationProcessor;
 import org.exigencecorp.bindgen.processor.GenerationQueue;
 import org.exigencecorp.bindgen.processor.util.BoundClass;
 import org.exigencecorp.bindgen.processor.util.ClassName;
 
+/** Generates a BindKeyword class with "bind" static helper methods.
+ *
+ * The idea is that by static importing <code>BindKeyword.bind</code>,
+ * client code could use the short cut <code>bind(someInstance)</code>
+ * to get a {@link Binding} for that object without typing out the full
+ * <code>new SomeInstanceBinding(someInstance)</code>.
+ *
+ * This requires some gymnastics because in the Eclipse environment,
+ * the {@link BindgenAnnotationProcessor} instance is recreated for
+ * each save/processing cycle. So we have to cache all of the bindings
+ * we've seen on the file system we can persist them across processor
+ * instances. 
+ */
 public class BindKeywordGenerator {
 
     private final GenerationQueue queue;
     private final GClass bindClass = new GClass("bindgen.BindKeyword");
     private final Set<String> classNames = new HashSet<String>();
 
+    /** @param queue the {@link GenerationQueue} only used for logging */
     public BindKeywordGenerator(GenerationQueue queue) {
         this.queue = queue;
     }
 
+    /** Adds/updates <code>bind</code> methods to the <code>BindKeyword</code> class for each of the <code>newlyWritten</code> class names. */
     public void generate(Set<String> newlyWritten) {
-        this.readExistingBindKeywordFile();
+        this.readClassNamesFromBindKeywordFileIfExists();
         this.classNames.addAll(newlyWritten);
         this.addBindMethods();
         this.writeBindKeywordFile();
@@ -72,7 +89,8 @@ public class BindKeywordGenerator {
         }
     }
 
-    private void readExistingBindKeywordFile() {
+    /** Finds class names cached in <code>SOURCE_OUTPUT/BindKeyword.txt</code>, if it exists, and adds them to <code>this.classNames</code>. */
+    private void readClassNamesFromBindKeywordFileIfExists() {
         try {
             this.queue.log("READING BindKeyword.txt");
             FileObject fo = getFiler().getResource(StandardLocation.SOURCE_OUTPUT, "bindgen", "BindKeyword.txt");
