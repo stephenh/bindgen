@@ -2,8 +2,11 @@
 
 	<path id="classpath">
 		<fileset dir="lib" includes="**/*.jar"/>
+		<!-- For testing...
 		<fileset dir="../bindgen/bin/lib/build" includes="**/*.jar"/>
 		<pathelement location="../bindgen/bin/eclipse"/>
+		-->
+		<fileset dir="../bindgen/bin/jars" includes="bindgen.jar"/>
 	</path>
 
 	<target name="clean">
