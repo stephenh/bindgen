@@ -23,11 +23,11 @@ import javax.tools.Diagnostic.Kind;
 
 import joist.sourcegen.GClass;
 import joist.sourcegen.GMethod;
-import joist.util.Make;
+import joist.util.Copy;
 
 import org.bindgen.Binding;
-import org.bindgen.processor.Processor;
 import org.bindgen.processor.GenerationQueue;
+import org.bindgen.processor.Processor;
 import org.bindgen.processor.util.BoundClass;
 import org.bindgen.processor.util.Util;
 
@@ -117,7 +117,7 @@ public class BindingClassGenerator {
 	}
 
 	private void generateProperties() {
-		for (TypeElement e : Make.list(this.element).with(this.getSuperElements())) {
+		for (TypeElement e : Copy.list(this.element).with(this.getSuperElements())) {
 			this.generatePropertiesForType(e);
 		}
 	}
