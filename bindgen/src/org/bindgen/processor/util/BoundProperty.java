@@ -99,14 +99,15 @@ public class BoundProperty {
 					dummyParams.add(tpe.toString());
 				}
 			} else {
+				int wildcardIndex = 0;
 				for (TypeMirror tm : ((DeclaredType) this.type).getTypeArguments()) {
-					if (tm instanceof WildcardType) {
+					if (tm.getKind() == TypeKind.WILDCARD) {
 						WildcardType wt = (WildcardType) tm;
 						String suffix = "";
 						if (wt.getExtendsBound() != null) {
 							suffix += " extends " + wt.getExtendsBound().toString();
 						}
-						dummyParams.add("U" + dummyParams.size() + suffix);
+						dummyParams.add("U" + (wildcardIndex++) + suffix);
 					}
 				}
 			}
@@ -135,9 +136,10 @@ public class BoundProperty {
 		} else if (this.isFixingRawType) {
 			typeArgs.add(this.name.getGenericPartWithoutBrackets());
 		} else {
+			int wildcardIndex = 0;
 			for (TypeMirror tm : ((DeclaredType) this.type).getTypeArguments()) {
-				if (tm instanceof WildcardType) {
-					typeArgs.add("U" + (typeArgs.size() - 1));
+				if (tm.getKind() == TypeKind.WILDCARD) {
+					typeArgs.add("U" + (wildcardIndex++));
 				} else {
 					typeArgs.add(tm.toString());
 				}
@@ -176,9 +178,10 @@ public class BoundProperty {
 			List<String> dummyParams = new ArrayList<String>();
 			if (this.type instanceof DeclaredType) {
 				DeclaredType dt = (DeclaredType) this.type;
+				int wildcardIndex = 0;
 				for (TypeMirror tm : dt.getTypeArguments()) {
-					if (tm instanceof WildcardType) {
-						dummyParams.add("U" + (dummyParams.size()));
+					if (tm.getKind() == TypeKind.WILDCARD) {
+						dummyParams.add("U" + (wildcardIndex++));
 					} else {
 						dummyParams.add(tm.toString());
 					}

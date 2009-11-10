@@ -23,6 +23,7 @@ public class MethodExample {
 	private List<?> unknown; // Was causing errors with ContainerBinding
 	// isNull -> null would be a keyword
 	private boolean isNull;
+	private Wildcards<String, ?, ?> wildcards; // Was causing errors with wildcard in 2nd position
 
 	public MethodExample(String id, String name) {
 		this.id = id;
@@ -117,5 +118,13 @@ public class MethodExample {
 
 	public void setNull(boolean isNull) {
 		this.isNull = isNull;
+	}
+
+	public Wildcards<String, ?, ?> getWildcards() {
+		return this.wildcards;
+	}
+
+	public void setWildcards(Wildcards<String, ?, ?> wildcards) {
+		this.wildcards = wildcards;
 	}
 }
