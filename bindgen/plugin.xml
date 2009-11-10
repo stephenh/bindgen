@@ -3,7 +3,7 @@
 <plugin>
   <extension point="org.eclipse.jdt.apt.core.annotationProcessorFactory">
     <java6processors enableDefault="true">
-      <java6processor class="org.exigencecorp.bindgen.processor.BindgenAnnotationProcessor"/>
+      <java6processor class="org.bindgen.processor.Processor"/>
     </java6processors>
   </extension>
 </plugin>

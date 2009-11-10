@@ -1,4 +1,11 @@
 
+2.2
+===
+
+* Fix bindings for wildcards that were not the first type parameter
+* Upgrade to `joist-util-0.3`, include the source zip, and skip IvyDE for now
+* Rename `org.exigencecorp.bindgen` -> `org.bindgen`, `dos2unix`, spaces to tabs
+
 2.1
 ===
 

@@ -2,24 +2,27 @@ package org.exigencecorp.bindgen.example;
 
 import junit.framework.Assert;
 import junit.framework.TestCase;
-import bindgen.org.exigencecorp.bindgen.example.ArrayExampleBinding;
+
+import org.bindgen.example.ArrayExample;
+
+import bindgen.org.bindgen.example.ArrayExampleBinding;
 
 public class ArrayExampleTest extends TestCase {
 
-    public void testPrimitive() {
-        ArrayExample a = new ArrayExample();
-        ArrayExampleBinding b = new ArrayExampleBinding(a);
+	public void testPrimitive() {
+		ArrayExample a = new ArrayExample();
+		ArrayExampleBinding b = new ArrayExampleBinding(a);
 
-        b.foo().set(new boolean[] { true });
-        Assert.assertTrue(a.foo[0]);
-    }
+		b.foo().set(new boolean[] { true });
+		Assert.assertTrue(a.foo[0]);
+	}
 
-    public void testBoxed() {
-        ArrayExample a = new ArrayExample();
-        ArrayExampleBinding b = new ArrayExampleBinding(a);
+	public void testBoxed() {
+		ArrayExample a = new ArrayExample();
+		ArrayExampleBinding b = new ArrayExampleBinding(a);
 
-        b.fooBig().set(new Boolean[] { true });
-        Assert.assertTrue(a.fooBig[0]);
-    }
+		b.fooBig().set(new Boolean[] { true });
+		Assert.assertTrue(a.fooBig[0]);
+	}
 
 }
