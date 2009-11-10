@@ -18,14 +18,14 @@
 
 	<target name="annotations" depends="compile" description="jar only the annotations into the examples project">
 		<jar destfile="bin/annotations.jar">
-			<fileset dir="bin/main" includes="/org/exigencecorp/bindgen/*.class"/>
+			<fileset dir="bin/main" includes="org/bindgen/*.class"/>
 		</jar>
 		<copy file="bin/annotations.jar" todir="../examples/lib"/>
 	</target>
 
 	<!--
 	I'm not entirely sure using jarjar here is best practice. Eclipse
-	requires bindgen.jar to be just one jar, and bringing in exigence-util
+	requires bindgen.jar to be just one jar, and bringing in joist-util
 	without rewriting seemed likely to cause jar hell confusion. So we'll go
 	with this for now.
 	-->
@@ -36,8 +36,8 @@
 			<fileset dir="bin/main" includes="**/*.class"/>
 			<zipfileset src="bin/lib/build/joist.util.jar" includes="joist/sourcegen/**/*.class,joist/util/**/*.class"/>
 			<zipfileset dir="META-INF" includes="**/*" prefix="META-INF"/>
-			<rule pattern="joist.sourcegen.*" result="org.exigencecorp.bindgen.dependencies.sourcegen.Bindgen@1"/>
-			<rule pattern="joist.util.*" result="org.exigencecorp.bindgen.dependencies.util.Bindgen@1"/>
+			<rule pattern="joist.sourcegen.*" result="org.bindgen.dependencies.sourcegen.Bindgen@1"/>
+			<rule pattern="joist.util.*" result="org.bindgen.dependencies.util.Bindgen@1"/>
 		</jarjar>
 		<mkdir dir="bin/sources"/>
 		<zip destfile="bin/sources/bindgen-sources.jar">
