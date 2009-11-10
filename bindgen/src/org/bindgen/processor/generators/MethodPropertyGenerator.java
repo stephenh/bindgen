@@ -63,7 +63,7 @@ public class MethodPropertyGenerator implements PropertyGenerator {
 		fieldGet.body.line("    this.{} = new {}();", this.property.getName(), this.property.getBindingRootClassInstantiation());
 		fieldGet.body.line("}");
 		fieldGet.body.line("return this.{};", this.property.getName());
-		if ((this.property.hasWildcards() || this.property.isRawType()) && !this.property.isArray()) {
+		if (this.property.doesOuterGetNeedSuppressWarnings()) {
 			fieldGet.addAnnotation("@SuppressWarnings(\"unchecked\")");
 		}
 	}
@@ -78,7 +78,7 @@ public class MethodPropertyGenerator implements PropertyGenerator {
 	private void addInnerClass() {
 		this.innerClass = this.outerClass.getInnerClass(this.property.getInnerClassDeclaration()).notStatic();
 		this.innerClass.baseClassName(this.property.getInnerClassSuperClass());
-		if ((this.property.hasWildcards() || this.property.isRawType()) && !this.property.isArray()) {
+		if (this.property.doesInnerClassNeedSuppressWarnings()) {
 			this.innerClass.addAnnotation("@SuppressWarnings(\"unchecked\")");
 		}
 		if (this.property.isForGenericTypeParameter() || this.property.isArray()) {
@@ -103,7 +103,7 @@ public class MethodPropertyGenerator implements PropertyGenerator {
 			this.property.getCastForReturnIfNeeded(),
 			this.outerClass.getSimpleClassNameWithoutGeneric(),
 			this.methodName);
-		if (this.property.isFixingRawType()) {
+		if (this.property.doesInnerGetNeedSuppressWarnings()) {
 			get.addAnnotation("@SuppressWarnings(\"unchecked\")");
 		}
 	}
@@ -115,7 +115,7 @@ public class MethodPropertyGenerator implements PropertyGenerator {
 			this.property.getCastForReturnIfNeeded(),
 			this.outerClass.getSimpleClassNameWithoutGeneric(),
 			this.methodName);
-		if (this.property.isFixingRawType()) {
+		if (this.property.doesInnerGetNeedSuppressWarnings()) {
 			getWithRoot.addAnnotation("@SuppressWarnings(\"unchecked\")");
 		}
 	}
@@ -211,5 +211,10 @@ public class MethodPropertyGenerator implements PropertyGenerator {
 
 	public String getPropertyName() {
 		return this.property.getName();
+	}
+
+	@Override
+	public String toString() {
+		return this.method.toString();
 	}
 }

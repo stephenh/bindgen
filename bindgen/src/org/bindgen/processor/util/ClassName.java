@@ -97,10 +97,6 @@ public class ClassName {
 		return this.fullClassNameWithGenerics;
 	}
 
-	public boolean hasGenerics() {
-		return this.getGenericPart().length() > 0;
-	}
-
 	private DeclaredType getDeclaredType() {
 		TypeElement element = getElementUtils().getTypeElement(this.getWithoutGenericPart());
 		return element == null ? null : (DeclaredType) element.asType();

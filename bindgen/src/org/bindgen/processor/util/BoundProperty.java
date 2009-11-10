@@ -132,7 +132,7 @@ public class BoundProperty {
 			for (TypeParameterElement tpe : this.getElement().getTypeParameters()) {
 				typeArgs.add(tpe.toString());
 			}
-		} else if (this.isFixingRawType()) {
+		} else if (this.isFixingRawType) {
 			typeArgs.add(this.name.getGenericPartWithoutBrackets());
 		} else {
 			for (TypeMirror tm : ((DeclaredType) this.type).getTypeArguments()) {
@@ -159,8 +159,13 @@ public class BoundProperty {
 			for (int i = 0; i < this.getElement().getTypeParameters().size(); i++) {
 				typeArgs.add("?");
 			}
-		} else if (this.name.hasGenerics()) {
+		} else if (this.isFixingRawType) {
 			typeArgs.add(this.name.getGenericPartWithoutBrackets());
+		} else if (this.hasGenerics()) {
+			DeclaredType dt = (DeclaredType) this.type;
+			for (TypeMirror typeArg : dt.getTypeArguments()) {
+				typeArgs.add(typeArg.toString());
+			}
 		}
 		return (bindingName + "<" + Join.commaSpace(typeArgs) + ">").replaceAll(" super \\w+", ""); // for Class.getSuperClass()
 	}
@@ -228,16 +233,24 @@ public class BoundProperty {
 		return false;
 	}
 
-	public boolean isFixingRawType() {
-		return this.isFixingRawType;
-	}
-
 	/** @return "com.app.Type<String, String>" if the type is "com.app.Type<String, String>" */
 	public String get() {
 		return this.name.get();
 	}
 
-	public boolean hasWildcards() {
+	public boolean doesOuterGetNeedSuppressWarnings() {
+		return (this.hasWildcards() || this.isRawType()) && !this.isArray();
+	}
+
+	public boolean doesInnerClassNeedSuppressWarnings() {
+		return (this.hasWildcards() || this.isRawType()) && !this.isArray();
+	}
+
+	public boolean doesInnerGetNeedSuppressWarnings() {
+		return this.isFixingRawType;
+	}
+
+	private boolean hasWildcards() {
 		if (this.type.getKind() == TypeKind.DECLARED) {
 			for (TypeMirror p : ((DeclaredType) this.type).getTypeArguments()) {
 				if (p.getKind() == TypeKind.WILDCARD) {
@@ -248,7 +261,11 @@ public class BoundProperty {
 		return false;
 	}
 
-	public boolean isDeprecated() {
+	private boolean hasGenerics() {
+		return this.type.getKind() == TypeKind.DECLARED && ((DeclaredType) this.type).getTypeArguments().size() > 0;
+	}
+
+	private boolean isDeprecated() {
 		return this.enclosed.getAnnotation(Deprecated.class) != null;
 	}
 
@@ -264,7 +281,7 @@ public class BoundProperty {
 	private boolean fixRawTypeIfNeeded() {
 		String configKey = "fixRawType." + this.enclosing.toString() + "." + this.propertyName;
 		String configValue = getOption(configKey);
-		if (!this.name.hasGenerics() && configValue != null) {
+		if (!this.hasGenerics() && configValue != null) {
 			this.name = new ClassName(this.type.toString() + "<" + configValue + ">");
 			return true;
 		}
