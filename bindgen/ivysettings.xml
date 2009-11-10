@@ -2,13 +2,13 @@
 	<settings defaultResolver="build"/>
 	<include url="${ivy.default.settings.dir}/ivysettings-local.xml"/>
 	<resolvers>
+		<!-- for jars checked into the repo (for now) -->
 		<filesystem name="build">
 			<artifact pattern="${ivy.settings.dir}/lib/build/[artifact]-[revision](-[classifier]).[ext]" />
 		</filesystem>
-
-		<ssh name="joist-upload" user="root" host="repo.joist.ws" publishPermissions="0644">
-			<ivy pattern="/var/joist.repo/[organisation]/[module]/[revision]/[type]s/[artifact].[ext]" />
-			<artifact pattern="/var/joist.repo/[organisation]/[module]/[revision]/[type]s/[artifact].[ext]" />
-		</ssh>
+		<!-- for publishing via an sshfs share -->
+		<filesystem name="maven-repo" m2compatible="true">
+			<artifact pattern="${user.home}/repo/[organization]/[module]/[revision]/[artifact]-[revision](-[classifier]).[ext]"/>
+		</filesystem>
 	</resolvers>
 </ivysettings>
