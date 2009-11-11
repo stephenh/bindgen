@@ -24,8 +24,8 @@ import joist.sourcegen.GMethod;
 import joist.util.Join;
 
 import org.bindgen.Binding;
-import org.bindgen.processor.Processor;
 import org.bindgen.processor.GenerationQueue;
+import org.bindgen.processor.Processor;
 import org.bindgen.processor.util.BoundClass;
 import org.bindgen.processor.util.ClassName;
 
@@ -65,6 +65,9 @@ public class BindKeywordGenerator {
 	private void addBindMethods() {
 		for (String className : this.classNames) {
 			TypeElement e = getElementUtils().getTypeElement(className);
+			if (e == null) {
+				continue;
+			}
 			this.addBindMethod(className, (DeclaredType) e.asType());
 		}
 	}
