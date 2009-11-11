@@ -20,7 +20,7 @@
 		<mkdir dir="bin/apt-javac"/>
 		<!-- src first -->
 		<javac destdir="bin/main" classpathref="classpath" debug="true" nowarn="yes" source="1.6" target="1.6" encoding="utf8">
-			<src path="src"/>
+			<src path="src/main/java"/>
 			<compilerarg value="-s"/>
 			<compilerarg value="bin/apt-javac"/>
 			<compilerarg value="-processor"/>
@@ -34,7 +34,7 @@
 		<!-- now tests -->
 		<mkdir dir="bin/tests"/>
 		<javac destdir="bin/tests" classpathref="classpath" debug="true" nowarn="yes" source="1.6" target="1.6" encoding="utf8">
-			<src path="tests"/>
+			<src path="src/test/java"/>
 			<classpath>
 				<pathelement location="bin/main"/>
 			</classpath>
@@ -51,7 +51,7 @@
 			</classpath>
 			<formatter type="xml"/>
 			<batchtest todir="bin/results">
-				<fileset dir="tests" includes="**/*Test.java" excludes="**/Abstract*.java"/>
+				<fileset dir="src/test/java" includes="**/*Test.java" excludes="**/Abstract*.java"/>
 			</batchtest>
 		</junit>
 	</target>

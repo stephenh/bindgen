@@ -3,34 +3,33 @@ package org.exigencecorp.bindgen.example.inheritance;
 import junit.framework.Assert;
 import junit.framework.TestCase;
 
-import org.bindgen.Bindable;
 import org.bindgen.Binding;
 import org.bindgen.example.inheritance.SubExample;
+import org.bindgen.example.inheritance.SubHolder;
 
 import bindgen.org.bindgen.example.inheritance.BaseExampleBinding;
 import bindgen.org.bindgen.example.inheritance.SubExampleBinding;
-import bindgen.org.exigencecorp.bindgen.example.inheritance.SubExampleTestBinding;
+import bindgen.org.bindgen.example.inheritance.SubHolderBinding;
 
-@Bindable
 public class SubExampleTest extends TestCase {
 
-	public SubExample sub;
+	private SubHolder holder = new SubHolder();
 
 	public void testFoo() {
-		Assert.assertEquals(null, this.sub);
+		Assert.assertEquals(null, this.holder.sub);
 		SubExample sub = new SubExample();
 
-		SubExampleTestBinding b = new SubExampleTestBinding(this);
+		SubHolderBinding b = new SubHolderBinding(this.holder);
 		Binding<? super SubExample> bind = b.sub();
 		bind.set(sub);
-		Assert.assertSame(sub, this.sub);
+		Assert.assertSame(sub, this.holder.sub);
 
 		b.sub().set(sub);
-		Assert.assertSame(sub, this.sub);
+		Assert.assertSame(sub, this.holder.sub);
 	}
 
 	public void testSuperAttribute() {
-		Assert.assertEquals(null, this.sub);
+		Assert.assertEquals(null, this.holder.sub);
 
 		SubExample sub = new SubExample();
 		sub.description = "existingInSuper";
