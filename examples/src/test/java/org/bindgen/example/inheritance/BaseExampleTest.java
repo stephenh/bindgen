@@ -1,4 +1,4 @@
-package org.exigencecorp.bindgen.example.inheritance;
+package org.bindgen.example.inheritance;
 
 import junit.framework.Assert;
 import junit.framework.TestCase;

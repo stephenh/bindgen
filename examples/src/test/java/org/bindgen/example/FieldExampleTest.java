@@ -1,4 +1,4 @@
-package org.exigencecorp.bindgen.example;
+package org.bindgen.example;
 
 import java.util.List;
 

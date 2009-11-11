@@ -1,4 +1,4 @@
-package org.exigencecorp.bindgen.example.fixRawTypes;
+package org.bindgen.example.fixRawTypes;
 
 import java.util.Enumeration;
 import java.util.Hashtable;

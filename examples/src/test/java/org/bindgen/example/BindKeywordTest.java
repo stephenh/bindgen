@@ -1,4 +1,4 @@
-package org.exigencecorp.bindgen.example;
+package org.bindgen.example;
 
 import static bindgen.BindKeyword.bind;
 import junit.framework.Assert;

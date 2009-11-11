@@ -1,4 +1,4 @@
-package org.exigencecorp.bindgen.example.blocks;
+package org.bindgen.example.blocks;
 
 import junit.framework.Assert;
 import junit.framework.TestCase;

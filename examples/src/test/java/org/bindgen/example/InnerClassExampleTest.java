@@ -1,4 +1,4 @@
-package org.exigencecorp.bindgen.example;
+package org.bindgen.example;
 
 import org.bindgen.example.InnerClassExample1;
 import org.bindgen.example.InnerClassExample2;

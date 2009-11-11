@@ -1,4 +1,4 @@
-package org.exigencecorp.bindgen.example.employee;
+package org.bindgen.example.employee;
 
 import junit.framework.Assert;
 import junit.framework.TestCase;

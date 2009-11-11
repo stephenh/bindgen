@@ -1,4 +1,4 @@
-package org.exigencecorp.bindgen.example.methods;
+package org.bindgen.example.methods;
 
 import junit.framework.Assert;
 import junit.framework.TestCase;
