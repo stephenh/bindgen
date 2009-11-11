@@ -7,8 +7,11 @@
 			<artifact pattern="${ivy.settings.dir}/lib/build/[artifact]-[revision](-[classifier]).[ext]" />
 		</filesystem>
 		<!-- for publishing via an sshfs share -->
-		<filesystem name="maven-repo" m2compatible="true">
+		<filesystem name="maven-share" m2compatible="true">
 			<artifact pattern="${user.home}/repo/[organization]/[module]/[revision]/[artifact]-[revision](-[classifier]).[ext]"/>
+		</filesystem>
+		<filesystem name="maven-user" m2compatible="true">
+			<artifact pattern="${user.home}/.m2/repository/[organization]/[module]/[revision]/[artifact]-[revision](-[classifier]).[ext]"/>
 		</filesystem>
 	</resolvers>
 </ivysettings>
