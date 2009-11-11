@@ -11,15 +11,16 @@
 
 	<target name="clean">
 		<delete dir="bin/main"/>
+		<delete dir="bin/tests"/>
 		<delete dir="bin/apt-javac"/>
 	</target>
 
 	<target name="compile">
 		<mkdir dir="bin/main"/>
 		<mkdir dir="bin/apt-javac"/>
+		<!-- src first -->
 		<javac destdir="bin/main" classpathref="classpath" debug="true" nowarn="yes" source="1.6" target="1.6" encoding="utf8">
 			<src path="src"/>
-			<src path="tests"/>
 			<compilerarg value="-s"/>
 			<compilerarg value="bin/apt-javac"/>
 			<compilerarg value="-processor"/>
@@ -30,6 +31,14 @@
 			<compilerarg value="-AfixRawType.org.bindgen.example.fixRawTypes.RawTypesExample.fieldFixed=String"/>
 			<compilerarg value="-XprintRounds"/>
 		</javac>
+		<!-- now tests -->
+		<mkdir dir="bin/tests"/>
+		<javac destdir="bin/tests" classpathref="classpath" debug="true" nowarn="yes" source="1.6" target="1.6" encoding="utf8">
+			<src path="tests"/>
+			<classpath>
+				<pathelement location="bin/main"/>
+			</classpath>
+		</javac>
 	</target>
 
 	<target name="tests" depends="compile">
@@ -38,6 +47,7 @@
 			<classpath>
 				<path refid="classpath"/>
 				<pathelement path="bin/main"/>
+				<pathelement path="bin/tests"/>
 			</classpath>
 			<formatter type="xml"/>
 			<batchtest todir="bin/results">

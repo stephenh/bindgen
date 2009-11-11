@@ -3,14 +3,17 @@ package org.exigencecorp.bindgen.example;
 import junit.framework.Assert;
 import junit.framework.TestCase;
 
-import org.bindgen.Bindable;
 import org.bindgen.Binding;
 import org.bindgen.Bindings;
+import org.bindgen.example.Parents.Foo;
+import org.bindgen.example.Parents.FooChild;
+import org.bindgen.example.Parents.FooPage;
+import org.bindgen.example.Parents.Zaz;
 
-import bindgen.org.exigencecorp.bindgen.example.parentBindingTest.FooBinding;
-import bindgen.org.exigencecorp.bindgen.example.parentBindingTest.FooChildBinding;
-import bindgen.org.exigencecorp.bindgen.example.parentBindingTest.FooPageBinding;
-import bindgen.org.exigencecorp.bindgen.example.parentBindingTest.ZazBinding;
+import bindgen.org.bindgen.example.parents.FooBinding;
+import bindgen.org.bindgen.example.parents.FooChildBinding;
+import bindgen.org.bindgen.example.parents.FooPageBinding;
+import bindgen.org.bindgen.example.parents.ZazBinding;
 
 public class ParentBindingTest extends TestCase {
 
@@ -134,29 +137,5 @@ public class ParentBindingTest extends TestCase {
 
 	private boolean areForSameProperty(Binding<?> b1, Binding<?> b2) {
 		return Bindings.areForSameProperty(b1, b2);
-	}
-
-	@Bindable
-	public static class Foo {
-		public String bar;
-
-		public String getBaz() {
-			return "baz";
-		}
-	}
-
-	@Bindable
-	public static class FooChild {
-		public Foo foo;
-	}
-
-	@Bindable
-	public static class FooPage {
-		public Foo foo;
-	}
-
-	@Bindable
-	public static class Zaz {
-		public String name;
 	}
 }
