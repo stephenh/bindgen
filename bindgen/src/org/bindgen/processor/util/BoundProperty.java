@@ -253,6 +253,15 @@ public class BoundProperty {
 		return this.isFixingRawType;
 	}
 
+	public String getContainedType() {
+		ClassName containedType = new ClassName(this.getGenericPartWithoutBrackets());
+		if (containedType.get().length() > 0 && !(containedType.get().startsWith("?"))) {
+			return containedType.getWithoutGenericPart() + ".class";
+		} else {
+			return "null";
+		}
+	}
+
 	private boolean hasWildcards() {
 		if (this.type.getKind() == TypeKind.DECLARED) {
 			for (TypeMirror p : ((DeclaredType) this.type).getTypeArguments()) {

@@ -13,7 +13,6 @@ import joist.util.Inflector;
 
 import org.bindgen.ContainerBinding;
 import org.bindgen.processor.util.BoundProperty;
-import org.bindgen.processor.util.ClassName;
 import org.bindgen.processor.util.Util;
 
 public class MethodPropertyGenerator implements PropertyGenerator {
@@ -148,12 +147,7 @@ public class MethodPropertyGenerator implements PropertyGenerator {
 		if (this.property.isForListOrSet() && !this.property.matchesTypeParameterOfParent()) {
 			this.innerClass.implementsInterface(ContainerBinding.class);
 			GMethod getContainedType = this.innerClass.getMethod("getContainedType").returnType("Class<?>").addAnnotation("@Override");
-			ClassName containedType = new ClassName(this.property.getGenericPartWithoutBrackets());
-			if (!(containedType.get().startsWith("?"))) {
-				getContainedType.body.line("return {}.class;", containedType.getWithoutGenericPart());
-			} else {
-				getContainedType.body.line("return null;", containedType.getWithoutGenericPart());
-			}
+			getContainedType.body.line("return {};", this.property.getContainedType());
 		}
 	}
 
