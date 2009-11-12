@@ -37,9 +37,9 @@ The point being that `eb.employer().name()` does not immediately return the valu
 Annotations
 ===========
 
-Bindgen is implemented as JDK6 annotation processor. When configured in your IDE (e.g. with project-specific settings in Eclipse), as soon as you add a `@Bindable` annotation to a class `Foo`, and hit save, the IDE immediately invokes the [BindgenAnnotationProcessor][2] behind the scenes and `FooBinding` is created.
+Bindgen is implemented as JDK6 annotation processor. When configured in your IDE (e.g. with project-specific settings in Eclipse), as soon as you add a `@Bindable` annotation to a class `Foo`, and hit save, the IDE immediately invokes the [Processor][2] behind the scenes and `FooBinding` is created.
 
-[2]: master/bindgen/src/org/bindgen/processor/Processor.java
+[2]: /stephenh/bindgen/blob/master/bindgen/src/org/bindgen/processor/Processor.java
 
 Another Example
 ===============
@@ -96,7 +96,7 @@ None of the `getWithRoot`/`setWithRoot` invocations will step on each other's to
 
 For more examples, see [MethodExampleStatelessTest][4].
 
-[4]: master/examples/tests/org/bindgen/example/methods/MethodExampleStatelessTest.java
+[4]: /stephenh/bindgen/blob/master/examples/tests/org/bindgen/example/methods/MethodExampleStatelessTest.java
 
 Gotchas
 =======

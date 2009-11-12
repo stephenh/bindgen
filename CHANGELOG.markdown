@@ -1,4 +1,12 @@
 
+2.3
+===
+
+* Fix raw Lists/Sets breaking the getContainedType
+* Compile example tests and src separately
+* Avoid NPE in BindKeywordGenerator
+* Add maven2 build for examples
+
 2.2
 ===
 
@@ -21,4 +29,3 @@
 * Added stateless bindings
 * Support for Array bindings
 * Large cleanup/refactoring of bindgen source code
-
