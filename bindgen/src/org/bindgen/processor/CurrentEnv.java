@@ -9,6 +9,12 @@ import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
 
+import org.bindgen.processor.config.BindgenConfig;
+import org.bindgen.processor.config.GlobalScope;
+import org.bindgen.processor.config.PackageExpressionScope;
+import org.bindgen.processor.config.Scope;
+import org.bindgen.processor.util.ClassName;
+
 /** Provides static helper methods to get at the current {@link ProcessingEnvironment}.
  *
  * The {@link ProcessingEnvironment} used to get passed around as a method parameter,
@@ -21,13 +27,29 @@ import javax.lang.model.util.Types;
  */
 public class CurrentEnv {
 
+	private static final String SCOPE_PARAM = "org.bindgen.scope";
+
 	private static final Map<String, String> options = new HashMap<String, String>();
 	private static ProcessingEnvironment current;
+	private static BindgenConfig config;
 
 	public static void set(ProcessingEnvironment env) {
 		current = env;
 		setDefaultOptions();
 		setUserOptions();
+
+		final Scope<ClassName> bindingScope;
+		if (options.containsKey(SCOPE_PARAM)) {
+			bindingScope = new PackageExpressionScope(options.get(SCOPE_PARAM));
+		} else {
+			bindingScope = new GlobalScope<ClassName>();
+		}
+
+		config = new BindgenConfig(bindingScope);
+	}
+
+	public static BindgenConfig getConfig() {
+		return config;
 	}
 
 	public static Filer getFiler() {
