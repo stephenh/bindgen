@@ -130,11 +130,11 @@ public class BoundProperty {
 		}
 
 		// if our type is outside the binding scope we return a generic binding type
-		if (!CurrentEnv.getConfig().shouldGenerateBindingFor(this.name)) {
+		if (!this.shouldGenerateBindingClassForType()) {
 			return GenericObjectBindingPath.class.getName() + "<R>";
 		}
 
-		String superName = Util.lowerCaseOuterClassNames("bindgen." + this.name.getWithoutGenericPart() + "BindingPath");
+		String superName = Util.lowerCaseOuterClassNames(CurrentEnv.getConfig().baseNameForBinding(this.name) + "BindingPath");
 		List<String> typeArgs = Copy.list("R");
 		if (this.isRawType()) {
 			for (TypeParameterElement tpe : this.getElement().getTypeParameters()) {
@@ -153,6 +153,14 @@ public class BoundProperty {
 			}
 		}
 		return superName + "<" + Join.commaSpace(typeArgs) + ">";
+	}
+
+	/**
+	 * Returns whether or not bindgen should generate a binding class for this properties' typeo
+	 * @return
+	 */
+	public boolean shouldGenerateBindingClassForType() {
+		return CurrentEnv.getConfig().shouldGenerateBindingFor(this.name);
 	}
 
 	public String getBindingTypeForPathWithR() {

@@ -5,8 +5,6 @@ import java.util.List;
 import org.bindgen.Bindable;
 import org.bindgen.Binding;
 
-import bindgen.org.bindgen.example.methods.MethodExampleBinding;
-
 @Bindable
 public class MethodExample {
 

@@ -3,10 +3,6 @@ package org.bindgen.example;
 import junit.framework.Assert;
 import junit.framework.TestCase;
 
-import org.bindgen.example.GenericsExample;
-
-import bindgen.org.bindgen.example.GenericsExampleBinding;
-
 public class GenericsExampleTest extends TestCase {
 
 	public void testField() {

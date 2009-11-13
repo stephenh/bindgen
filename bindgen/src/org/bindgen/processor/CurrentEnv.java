@@ -34,13 +34,15 @@ public class CurrentEnv {
 	private static BindgenConfig config;
 
 	public static void set(ProcessingEnvironment env) {
+		options.clear(); // we have to clear the options otherwise they get shared if two eclipse projects are using the bindgen plugin
 		current = env;
 		setDefaultOptions();
 		setUserOptions();
 
 		final Scope<ClassName> bindingScope;
-		if (options.containsKey(SCOPE_PARAM)) {
-			bindingScope = new PackageExpressionScope(options.get(SCOPE_PARAM));
+		final String scopeExpression = options.get(SCOPE_PARAM);
+		if (scopeExpression != null && scopeExpression.trim().length() > 0) {
+			bindingScope = new PackageExpressionScope(scopeExpression);
 		} else {
 			bindingScope = new GlobalScope<ClassName>();
 		}

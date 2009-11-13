@@ -5,10 +5,6 @@ import junit.framework.TestCase;
 
 import org.bindgen.Binding;
 import org.bindgen.ContainerBinding;
-import org.bindgen.example.methods.MethodExample;
-import org.bindgen.example.methods.Wildcards;
-
-import bindgen.org.bindgen.example.methods.MethodExampleBinding;
 
 public class MethodExampleTest extends TestCase {
 

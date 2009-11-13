@@ -6,10 +6,6 @@ import java.util.Hashtable;
 import junit.framework.Assert;
 import junit.framework.TestCase;
 
-import org.bindgen.example.fixRawTypes.RawTypesExample;
-
-import bindgen.org.bindgen.example.fixRawTypes.RawTypesExampleBinding;
-
 public class RawTypesExampleTest extends TestCase {
 
 	private Hashtable<String, String> hash = new Hashtable<String, String>();

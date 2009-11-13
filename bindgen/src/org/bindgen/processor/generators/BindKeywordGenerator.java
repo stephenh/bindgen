@@ -44,8 +44,10 @@ import org.bindgen.processor.util.ClassName;
  */
 public class BindKeywordGenerator {
 
+	private static final String PACKAGE_NAME = "org.bindgen";
+	private static final String CLASS_NAME = "BindKeyword";
 	private final GenerationQueue queue;
-	private final GClass bindClass = new GClass("bindgen.BindKeyword");
+	private final GClass bindClass = new GClass(PACKAGE_NAME + "." + CLASS_NAME);
 	private final Set<String> classNames = new TreeSet<String>();
 
 	/** @param queue the {@link GenerationQueue} only used for logging */
@@ -92,8 +94,8 @@ public class BindKeywordGenerator {
 	/** Finds class names cached in <code>SOURCE_OUTPUT/BindKeyword.txt</code>, if it exists, and adds them to <code>this.classNames</code>. */
 	private void readClassNamesFromBindKeywordFileIfExists() {
 		try {
-			this.queue.log("READING BindKeyword.txt");
-			FileObject fo = getFiler().getResource(StandardLocation.SOURCE_OUTPUT, "bindgen", "BindKeyword.txt");
+			this.queue.log("READING " + CLASS_NAME + ".txt");
+			FileObject fo = getFiler().getResource(StandardLocation.SOURCE_OUTPUT, PACKAGE_NAME, CLASS_NAME + ".txt");
 			if (fo.getLastModified() > 0) {
 				String line;
 				BufferedReader input = new BufferedReader(new InputStreamReader(fo.openInputStream()));
@@ -112,8 +114,8 @@ public class BindKeywordGenerator {
 
 	private void writeBindKeywordFile() {
 		try {
-			this.queue.log("WRITING BindKeyword.txt");
-			FileObject fo = getFiler().createResource(StandardLocation.SOURCE_OUTPUT, "bindgen", "BindKeyword.txt");
+			this.queue.log("WRITING " + CLASS_NAME + ".txt");
+			FileObject fo = getFiler().createResource(StandardLocation.SOURCE_OUTPUT, PACKAGE_NAME, CLASS_NAME + ".txt");
 			OutputStream output = fo.openOutputStream();
 			for (String className : this.classNames) {
 				output.write(className.getBytes());
@@ -128,7 +130,7 @@ public class BindKeywordGenerator {
 
 	private void writeBindKeywordClass() {
 		try {
-			this.queue.log("WRITING BindKeyword.java");
+			this.queue.log("WRITING " + CLASS_NAME + ".java");
 			JavaFileObject jfo = getFiler().createSourceFile(this.bindClass.getFullClassNameWithoutGeneric());
 			Writer w = jfo.openWriter();
 			w.write(this.bindClass.toCode());

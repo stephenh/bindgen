@@ -77,6 +77,9 @@ public class FieldPropertyGenerator implements PropertyGenerator {
 		}
 		if (this.property.isForGenericTypeParameter() || this.property.isArray()) {
 			this.innerClass.getMethod("getType").returnType("Class<?>").body.line("return null;");
+		} else if (!this.property.shouldGenerateBindingClassForType()) {
+			// since no binding class will be generated for the type of this field we may not inherit getType() in MyBinding class (if, for example, MyBinding extends GenericObjectBindingPath) and so we have to implement it ouselves
+			this.innerClass.getMethod("getType").returnType("Class<?>").body.line("return {}.class;", this.property.getSetType());
 		}
 	}
 

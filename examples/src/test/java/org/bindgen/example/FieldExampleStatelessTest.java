@@ -3,10 +3,7 @@ package org.bindgen.example;
 import junit.framework.Assert;
 import junit.framework.TestCase;
 
-import org.bindgen.example.FieldExample;
-
-import bindgen.java.lang.StringBindingPath;
-import bindgen.org.bindgen.example.FieldExampleBinding;
+import org.bindgen.java.lang.StringBindingPath;
 
 public class FieldExampleStatelessTest extends TestCase {
 

@@ -27,4 +27,12 @@ public class BindgenConfig {
 		return this.bindingScope.includes(name);
 	}
 
+	public String baseNameForBinding(ClassName cn) {
+		String pn = cn.getPackageName();
+		if (pn.startsWith("java.") || pn.startsWith("javax.")) {
+			pn = "org.bindgen." + pn;
+		}
+		return pn + "." + cn.getSimpleName();
+	}
+
 }

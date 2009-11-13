@@ -1,5 +1,6 @@
 Manifest-Version: 1.0
-Export-Package: org.bindgen.processor
+Export-Package: org.bindgen.processor,
+ org.bindgen.processor.config
 Require-Bundle: org.eclipse.core.runtime,org.eclipse.jdt.apt.core
 Bundle-Vendor: Exigence
 Bundle-Version: 0.0.0

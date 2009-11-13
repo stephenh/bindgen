@@ -3,8 +3,7 @@ package org.bindgen;
 import junit.framework.TestCase;
 
 import org.bindgen.binding.GenericObjectBindingPath;
-
-import bindgen.org.bindgen.inscope.PersonBinding;
+import org.bindgen.inscope.PersonBinding;
 
 public class ScopeTest extends TestCase {
 	
