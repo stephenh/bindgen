@@ -1,10 +1,11 @@
-#Mon Nov 09 15:18:55 CST 2009
+#Sat Nov 14 16:50:29 CST 2009
 eclipse.preferences.version=1
 org.eclipse.jdt.apt.aptEnabled=true
 org.eclipse.jdt.apt.genSrcDir=bin/apt
 org.eclipse.jdt.apt.processorOptions/blockTypes=org.bindgen.example.blocks.TransactionBlock
 org.eclipse.jdt.apt.processorOptions/fixRawType.org.bindgen.example.fixRawTypes.RawTypesExample.fieldFixed=String
 org.eclipse.jdt.apt.processorOptions/fixRawType.org.bindgen.example.fixRawTypes.RawTypesExample.methodFixed=String
+org.eclipse.jdt.apt.processorOptions/org.bindgen.scope=org.bindgen.example,org.bindgen.inscope,java
 org.eclipse.jdt.apt.processorOptions/skipAttribute.org.bindgen.example.skipAttributes.SkipAttributesExample.description=true
 org.eclipse.jdt.apt.processorOptions/skipAttribute.org.bindgen.example.skipAttributes.SkipAttributesExample.doSomething=true
 org.eclipse.jdt.apt.processorOptions/skipAttribute.org.bindgen.example.skipAttributes.SkipAttributesExample.name=true
