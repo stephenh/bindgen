@@ -9,11 +9,10 @@ import org.bindgen.example.Parents.Foo;
 import org.bindgen.example.Parents.FooChild;
 import org.bindgen.example.Parents.FooPage;
 import org.bindgen.example.Parents.Zaz;
-
-import bindgen.org.bindgen.example.parents.FooBinding;
-import bindgen.org.bindgen.example.parents.FooChildBinding;
-import bindgen.org.bindgen.example.parents.FooPageBinding;
-import bindgen.org.bindgen.example.parents.ZazBinding;
+import org.bindgen.example.parents.FooBinding;
+import org.bindgen.example.parents.FooChildBinding;
+import org.bindgen.example.parents.FooPageBinding;
+import org.bindgen.example.parents.ZazBinding;
 
 public class ParentBindingTest extends TestCase {
 

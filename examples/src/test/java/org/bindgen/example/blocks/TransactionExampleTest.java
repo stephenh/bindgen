@@ -3,11 +3,6 @@ package org.bindgen.example.blocks;
 import junit.framework.Assert;
 import junit.framework.TestCase;
 
-import org.bindgen.example.blocks.TransactionBlock;
-import org.bindgen.example.blocks.TransactionExample;
-
-import bindgen.org.bindgen.example.blocks.TransactionExampleBinding;
-
 public class TransactionExampleTest extends TestCase {
 
 	public void testBusinessLogicMethod() throws Exception {

@@ -1,7 +1,5 @@
 package org.bindgen.example.inheritance;
 
-import bindgen.org.bindgen.example.inheritance.SubExampleBinding;
-
 public class SubExample extends BaseExample {
 
 	public String name;

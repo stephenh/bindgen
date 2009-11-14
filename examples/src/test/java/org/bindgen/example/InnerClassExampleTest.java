@@ -1,8 +1,5 @@
 package org.bindgen.example;
 
-import org.bindgen.example.InnerClassExample1;
-import org.bindgen.example.InnerClassExample2;
-
 import junit.framework.Assert;
 import junit.framework.TestCase;
 

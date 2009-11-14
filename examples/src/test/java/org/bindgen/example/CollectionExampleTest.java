@@ -7,8 +7,6 @@ import junit.framework.TestCase;
 
 import org.bindgen.ContainerBinding;
 
-import bindgen.org.bindgen.example.CollectionExampleBinding;
-
 public class CollectionExampleTest extends TestCase {
 
 	@SuppressWarnings("unchecked")

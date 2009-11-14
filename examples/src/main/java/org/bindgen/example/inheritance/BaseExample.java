@@ -3,8 +3,6 @@ package org.bindgen.example.inheritance;
 import org.bindgen.Bindable;
 import org.bindgen.Binding;
 
-import bindgen.org.bindgen.example.inheritance.BaseExampleBinding;
-
 @Bindable
 public class BaseExample {
 

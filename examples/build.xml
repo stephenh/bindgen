@@ -26,6 +26,7 @@
 			<compilerarg value="-processor"/>
 			<compilerarg value="org.bindgen.processor.Processor"/>
 			<compilerarg value="-Abindgen.skipExistingBindingCheck=true"/> <!-- for javac -->
+			<compilerarg value="-Aorg.bindgen.scope=org.bindgen.example,org.bindgen.inscope,java"/>
 			<compilerarg value="-AblockTypes=org.bindgen.example.blocks.TransactionBlock"/>
 			<compilerarg value="-AfixRawType.org.bindgen.example.fixRawTypes.RawTypesExample.methodFixed=String"/>
 			<compilerarg value="-AfixRawType.org.bindgen.example.fixRawTypes.RawTypesExample.fieldFixed=String"/>

@@ -3,10 +3,6 @@ package org.bindgen.example;
 import junit.framework.Assert;
 import junit.framework.TestCase;
 
-import org.bindgen.example.ArrayExample;
-
-import bindgen.org.bindgen.example.ArrayExampleBinding;
-
 public class ArrayExampleTest extends TestCase {
 
 	public void testPrimitive() {

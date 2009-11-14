@@ -20,6 +20,8 @@ import joist.util.Inflector;
 import joist.util.Join;
 
 import org.bindgen.AbstractBinding;
+import org.bindgen.binding.GenericObjectBindingPath;
+import org.bindgen.processor.CurrentEnv;
 
 /** Given a TypeMirror type of a field/method property, provides information about its binding outer/inner class. */
 public class BoundProperty {
@@ -127,7 +129,12 @@ public class BoundProperty {
 			return AbstractBinding.class.getName() + "<R, " + this.getGenericElement() + ">";
 		}
 
-		String superName = Util.lowerCaseOuterClassNames("bindgen." + this.name.getWithoutGenericPart() + "BindingPath");
+		// if our type is outside the binding scope we return a generic binding type
+		if (!this.shouldGenerateBindingClassForType()) {
+			return GenericObjectBindingPath.class.getName() + "<R>";
+		}
+
+		String superName = Util.lowerCaseOuterClassNames(CurrentEnv.getConfig().baseNameForBinding(this.name) + "BindingPath");
 		List<String> typeArgs = Copy.list("R");
 		if (this.isRawType()) {
 			for (TypeParameterElement tpe : this.getElement().getTypeParameters()) {
@@ -148,6 +155,14 @@ public class BoundProperty {
 		return superName + "<" + Join.commaSpace(typeArgs) + ">";
 	}
 
+	/**
+	 * Returns whether or not bindgen should generate a binding class for this properties' typeo
+	 * @return
+	 */
+	public boolean shouldGenerateBindingClassForType() {
+		return CurrentEnv.getConfig().shouldGenerateBindingFor(this.name);
+	}
+
 	public String getBindingTypeForPathWithR() {
 		if (this.isForGenericTypeParameter()) {
 			return this.getInnerClassDeclaration();
@@ -155,21 +170,31 @@ public class BoundProperty {
 		if (this.isArray()) {
 			return "org.bindgen.BindingRoot<R, " + this.type.toString() + ">";
 		}
-		String bindingName = Util.lowerCaseOuterClassNames("bindgen." + this.name.getWithoutGenericPart() + "BindingPath");
-		List<String> typeArgs = Copy.list("R");
-		if (this.isRawType()) {
-			for (int i = 0; i < this.getElement().getTypeParameters().size(); i++) {
-				typeArgs.add("?");
-			}
-		} else if (this.isFixingRawType) {
-			typeArgs.add(this.name.getGenericPartWithoutBrackets());
-		} else if (this.hasGenerics()) {
-			DeclaredType dt = (DeclaredType) this.type;
-			for (TypeMirror typeArg : dt.getTypeArguments()) {
-				typeArgs.add(typeArg.toString());
-			}
-		}
-		return (bindingName + "<" + Join.commaSpace(typeArgs) + ">").replaceAll(" super \\w+", ""); // for Class.getSuperClass()
+
+		/*
+		 *  FIXME double check the below is ok, we should always be able to use MyPropertyNameBinding
+		 *  instead of its super type when retrieving the property. What needs to be looked at closely 
+		 *  is the generics stuff.
+		 */
+
+		return this.getBindingClassFieldDeclaration();
+
+		//		String bindingName = Util.lowerCaseOuterClassNames("bindgen." + this.name.getWithoutGenericPart() + "BindingPath");
+		//
+		//		List<String> typeArgs = Copy.list("R");
+		//		if (this.isRawType()) {
+		//			for (int i = 0; i < this.getElement().getTypeParameters().size(); i++) {
+		//				typeArgs.add("?");
+		//			}
+		//		} else if (this.isFixingRawType) {
+		//			typeArgs.add(this.name.getGenericPartWithoutBrackets());
+		//		} else if (this.hasGenerics()) {
+		//			DeclaredType dt = (DeclaredType) this.type;
+		//			for (TypeMirror typeArg : dt.getTypeArguments()) {
+		//				typeArgs.add(typeArg.toString());
+		//			}
+		//		}
+		//		return (bindingName + "<" + Join.commaSpace(typeArgs) + ">").replaceAll(" super \\w+", ""); // for Class.getSuperClass()
 	}
 
 	/** @return the type appropriate for setter/return arguments. */

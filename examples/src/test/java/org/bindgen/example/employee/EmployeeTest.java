@@ -4,11 +4,6 @@ import junit.framework.Assert;
 import junit.framework.TestCase;
 
 import org.bindgen.Binding;
-import org.bindgen.example.employee.Employee;
-import org.bindgen.example.employee.Employer;
-
-import bindgen.org.bindgen.example.employee.EmployeeBinding;
-import bindgen.org.bindgen.example.employee.EmployerBinding;
 
 public class EmployeeTest extends TestCase {
 

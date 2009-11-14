@@ -4,9 +4,6 @@ import junit.framework.Assert;
 import junit.framework.TestCase;
 
 import org.bindgen.NamedBinding;
-import org.bindgen.example.blocks.RunnableExample;
-
-import bindgen.org.bindgen.example.blocks.RunnableExampleBinding;
 
 public class RunnableExampleTest extends TestCase {
 

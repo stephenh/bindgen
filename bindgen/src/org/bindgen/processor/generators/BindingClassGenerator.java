@@ -26,6 +26,7 @@ import joist.sourcegen.GMethod;
 import joist.util.Copy;
 
 import org.bindgen.Binding;
+import org.bindgen.processor.CurrentEnv;
 import org.bindgen.processor.GenerationQueue;
 import org.bindgen.processor.Processor;
 import org.bindgen.processor.util.BoundClass;
@@ -145,7 +146,9 @@ public class BindingClassGenerator {
 
 	private void enqueuePropertyTypeIfNeeded(PropertyGenerator pg) {
 		if (pg.getPropertyTypeElement() != null) {
-			this.queue.enqueueIfNew(pg.getPropertyTypeElement());
+			if (CurrentEnv.getConfig().shouldGenerateBindingFor(pg.getPropertyTypeElement())) {
+				this.queue.enqueueIfNew(pg.getPropertyTypeElement());
+			}
 		}
 	}
 

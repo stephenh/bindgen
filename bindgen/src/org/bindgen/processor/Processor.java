@@ -53,7 +53,14 @@ public class Processor extends AbstractProcessor {
 		try {
 			for (Element element : roundEnv.getElementsAnnotatedWith(Bindable.class)) {
 				if (element.getKind() == ElementKind.CLASS || element.getKind() == ElementKind.INTERFACE) {
-					this.queue.enqueueForcefully((TypeElement) element);
+
+					TypeElement type = (TypeElement) element;
+
+					if (CurrentEnv.getConfig().shouldGenerateBindingFor(type)) {
+						this.queue.enqueueForcefully(type);
+					} else {
+						this.warnAnnotatedTypeOutsideScope(type);
+					}
 				} else {
 					this.processingEnv.getMessager().printMessage(Kind.WARNING, "Unhandled element " + element);
 				}
@@ -64,6 +71,12 @@ public class Processor extends AbstractProcessor {
 			this.logExceptionToTextFile(e);
 		}
 		return true;
+	}
+
+	private void warnAnnotatedTypeOutsideScope(TypeElement type) {
+		this.processingEnv.getMessager().printMessage(
+			Kind.WARNING,
+			"Element " + type + " was annotated with @" + Bindable.class.getSimpleName() + " but was outside the specified scope");
 	}
 
 	/**
