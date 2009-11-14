@@ -18,7 +18,7 @@
 
 	<target name="annotations" depends="compile" description="jar only the annotations into the examples project">
 		<jar destfile="bin/annotations.jar">
-			<fileset dir="bin/main" includes="org/bindgen/*.class"/>
+			<fileset dir="bin/main" includes="org/bindgen/*.class,org/bindgen/binding/*.class"/>
 		</jar>
 		<copy file="bin/annotations.jar" todir="../examples/lib"/>
 	</target>
