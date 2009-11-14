@@ -57,7 +57,7 @@ public class MethodPropertyGenerator implements PropertyGenerator {
 
 	private void addOuterClassGet() {
 		GMethod fieldGet = this.outerClass.getMethod(this.property.getName() + "()");
-		fieldGet.returnType(this.property.getBindingTypeForPathWithR());
+		fieldGet.returnType(this.property.getBindingClassFieldDeclaration());
 		fieldGet.body.line("if (this.{} == null) {", this.property.getName());
 		fieldGet.body.line("    this.{} = new {}();", this.property.getName(), this.property.getBindingRootClassInstantiation());
 		fieldGet.body.line("}");
