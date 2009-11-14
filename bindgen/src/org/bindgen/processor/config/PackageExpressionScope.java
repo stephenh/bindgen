@@ -7,8 +7,11 @@ import org.bindgen.processor.util.ClassName;
 /**
  * A {@link ClassName} scope that can filter packages based on a string expression.
  * 
- * The expression specifies all beginning parts of allowed packages in a comma-separated string, eg {@code com.myapp.customers.domain,com.myapp.users.domain} which will allow any ClassName that is in or under the specified packages.
-
+ * The expression specifies all beginning parts of allowed packages
+ * in a comma-separated string, eg {@code com.myapp.customers.domain,
+ * com.myapp.users.domain} which will allow any ClassName that is in
+ * or under the specified packages.
+ *
  * @author igor.vaynberg
  */
 // TODO unit test
