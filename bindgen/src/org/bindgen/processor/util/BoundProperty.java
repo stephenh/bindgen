@@ -1,6 +1,6 @@
 package org.bindgen.processor.util;
 
-import static org.bindgen.processor.CurrentEnv.getOption;
+import static org.bindgen.processor.CurrentEnv.getConfig;
 import static org.bindgen.processor.CurrentEnv.getTypeUtils;
 
 import java.util.ArrayList;
@@ -317,7 +317,7 @@ public class BoundProperty {
 	 */
 	private boolean fixRawTypeIfNeeded() {
 		String configKey = "fixRawType." + this.enclosing.toString() + "." + this.propertyName;
-		String configValue = getOption(configKey);
+		String configValue = getConfig().getOption(configKey);
 		if (!this.hasGenerics() && configValue != null) {
 			this.name = new ClassName(this.type.toString() + "<" + configValue + ">");
 			return true;
@@ -335,7 +335,7 @@ public class BoundProperty {
 
 	private boolean isSkipAttributeSet() {
 		String configKey = "skipAttribute." + this.enclosing.toString() + "." + this.propertyName;
-		String configValue = getOption(configKey);
+		String configValue = getConfig().getOption(configKey);
 		return "true".equals(configValue);
 	}
 

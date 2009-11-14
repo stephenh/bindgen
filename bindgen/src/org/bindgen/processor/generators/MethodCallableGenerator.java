@@ -1,7 +1,7 @@
 package org.bindgen.processor.generators;
 
+import static org.bindgen.processor.CurrentEnv.getConfig;
 import static org.bindgen.processor.CurrentEnv.getElementUtils;
-import static org.bindgen.processor.CurrentEnv.getOption;
 
 import java.util.List;
 
@@ -180,7 +180,7 @@ public class MethodCallableGenerator implements PropertyGenerator {
 	}
 
 	private String[] getBlockTypesToAttempt() {
-		String attempts = getOption("blockTypes");
+		String attempts = getConfig().getOption("blockTypes");
 		if (attempts == null) {
 			attempts = "java.lang.Runnable";
 		} else {
@@ -191,7 +191,7 @@ public class MethodCallableGenerator implements PropertyGenerator {
 
 	private boolean shouldSkipAttribute(String name) {
 		String configKey = "skipAttribute." + this.method.getEnclosingElement().toString() + "." + name;
-		String configValue = getOption(configKey);
+		String configValue = getConfig().getOption(configKey);
 		return "true".equals(configValue);
 	}
 

@@ -1,8 +1,8 @@
 package org.bindgen.processor;
 
+import static org.bindgen.processor.CurrentEnv.getConfig;
 import static org.bindgen.processor.CurrentEnv.getFiler;
 import static org.bindgen.processor.CurrentEnv.getMessager;
-import static org.bindgen.processor.CurrentEnv.getOption;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -126,7 +126,7 @@ public class GenerationQueue {
 	}
 
 	private boolean isEnabled(String property) {
-		return "true".equals(getOption(property));
+		return "true".equals(getConfig().getOption(property));
 	}
 
 }
