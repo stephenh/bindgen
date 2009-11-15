@@ -1,6 +1,6 @@
 ---
 layout: default
-title: Bindgen Screencasts
+title: Screencasts
 ---
 
 <script type="text/javascript" src="swfobject.js"></script>
@@ -8,8 +8,8 @@ title: Bindgen Screencasts
     swfobject.registerObject("csSWF", "9.0.115", "screencasts/expressInstall.swf");
 </script>
 
-Bindgen Screencasts
-===================
+Screencasts
+===========
 
 This screencast shows the details of how bindgen basically duplicates the effect type-safe anonymous inner classes. 
 

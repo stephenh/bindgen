@@ -1,10 +1,10 @@
 ---
 layout: default
-title: Bindgen Setup
+title: Setup
 ---
 
-Bindgen Setup
-=============
+Setup
+=====
 
 Bindgen is an annotation processor that you configure the Java compiler to run during its compilation run.
 
