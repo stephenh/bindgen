@@ -121,6 +121,7 @@ public class BoundProperty {
 	}
 
 	public String getInnerClassSuperClass() {
+		// Arrays don't have individual binding classes
 		if (this.isArray()) {
 			return AbstractBinding.class.getName() + "<R, " + this.type.toString() + ">";
 		}
@@ -142,7 +143,7 @@ public class BoundProperty {
 			}
 		} else if (this.isFixingRawType) {
 			typeArgs.add(this.name.getGenericPartWithoutBrackets());
-		} else {
+		} else if (this.type.getKind() == TypeKind.DECLARED) {
 			int wildcardIndex = 0;
 			for (TypeMirror tm : ((DeclaredType) this.type).getTypeArguments()) {
 				if (tm.getKind() == TypeKind.WILDCARD) {
