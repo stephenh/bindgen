@@ -68,11 +68,11 @@ public class BoundProperty {
 	}
 
 	private String optionalGenericsIfWildcards(String replace) {
-		if (this.type instanceof DeclaredType) {
+		if (this.type.getKind() == TypeKind.DECLARED) {
 			List<String> dummyParams = new ArrayList<String>();
 			if (!this.isRawType()) {
 				for (TypeMirror tm : ((DeclaredType) this.type).getTypeArguments()) {
-					if (tm instanceof WildcardType && replace != null) {
+					if (tm.getKind() == TypeKind.WILDCARD && replace != null) {
 						dummyParams.add(replace);
 					}
 				}
@@ -167,7 +167,7 @@ public class BoundProperty {
 	public String getSetType() {
 		if (this.hasWildcards() && !this.isArray()) {
 			List<String> dummyParams = new ArrayList<String>();
-			if (this.type instanceof DeclaredType) {
+			if (this.type.getKind() == TypeKind.DECLARED) {
 				DeclaredType dt = (DeclaredType) this.type;
 				int wildcardIndex = 0;
 				for (TypeMirror tm : dt.getTypeArguments()) {
