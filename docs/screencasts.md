@@ -3,7 +3,7 @@ layout: default
 title: Screencasts
 ---
 
-<script type="text/javascript" src="swfobject.js"></script>
+<script type="text/javascript" src="screencasts/swfobject.js"></script>
 <script type="text/javascript">
     swfobject.registerObject("csSWF", "9.0.115", "screencasts/expressInstall.swf");
 </script>
@@ -44,5 +44,5 @@ This screencast shows the details of how bindgen basically duplicates the effect
 Note
 ----
 
-Per the [caveat](index.html), Eclipse must be running *on* a JDK6 JVM for the annotation processing to work--it cannot be running on a JDK5 JVM and using the "JDK6" compiler option.
+Per the [caveat](setup.html), Eclipse must be running *on* a JDK6 JVM for the annotation processing to work--it cannot be running on a JDK5 JVM and using the JDK6 compiler option.
 
