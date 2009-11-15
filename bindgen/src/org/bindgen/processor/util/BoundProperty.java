@@ -183,11 +183,6 @@ public class BoundProperty {
 		return this.get();
 	}
 
-	// Make this go away
-	public String getGenericPartWithoutBrackets() {
-		return this.name.getGenericPartWithoutBrackets();
-	}
-
 	public String getName() {
 		return this.propertyName;
 	}
@@ -215,7 +210,7 @@ public class BoundProperty {
 	}
 
 	public boolean matchesTypeParameterOfParent() {
-		String type = this.getGenericPartWithoutBrackets();
+		String type = this.name.getGenericPartWithoutBrackets();
 		if (this.hasWildcards()) {
 			return true;
 		}
@@ -245,7 +240,7 @@ public class BoundProperty {
 	}
 
 	public String getContainedType() {
-		ClassName containedType = new ClassName(this.getGenericPartWithoutBrackets());
+		ClassName containedType = new ClassName(this.name.getGenericPartWithoutBrackets());
 		if (containedType.get().length() > 0 && !(containedType.get().startsWith("?"))) {
 			return containedType.getWithoutGenericPart() + ".class";
 		} else {
