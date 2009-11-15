@@ -99,10 +99,11 @@ public class Processor extends AbstractProcessor {
 			OutputStream out = fo.openOutputStream();
 			e.printStackTrace(new PrintStream(out));
 			// Specifically for Eclipse's AbortCompilation exception which has a useless printStackTrace output
-			if (e.getClass().getField("problem") != null) {
+			try {
 				Field f = e.getClass().getField("problem");
 				Object problem = f.get(e);
 				out.write(problem.toString().getBytes());
+			} catch (NoSuchFieldException nsfe) {
 			}
 			out.close();
 		} catch (Exception e2) {
