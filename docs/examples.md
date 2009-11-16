@@ -41,7 +41,7 @@ During compilation, the compiler will have Bindgen generate a class `FooBinding`
     }
 </pre>
 
-Note that Bindgen recursively generated a `BarBinding` class--this is assuming `Bar` is within the configured [scope](scope.html).
+Note that Bindgen recursively generated a `BarBinding` class--this is assuming `Bar` is within the configured `scope` (see [config](config.html)).
 
 You can now use the bindings like:
 
