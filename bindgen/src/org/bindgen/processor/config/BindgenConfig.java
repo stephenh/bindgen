@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.Properties;
 
 import javax.annotation.processing.ProcessingEnvironment;
+import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
 import javax.tools.FileObject;
 import javax.tools.StandardLocation;
@@ -70,8 +71,25 @@ public class BindgenConfig {
 		return pn + "." + cn.getSimpleName();
 	}
 
-	public String getOption(String key) {
-		return this.options.get(key);
+	/** @return a list of class names to match void methods against for callable bindings */
+	public String[] blockTypesToAttempt() {
+		String attempts = this.options.get("blockTypes");
+		if (attempts == null) {
+			attempts = "java.lang.Runnable";
+		} else {
+			attempts += ",java.lang.Runnable";
+		}
+		return attempts.split(",");
+	}
+
+	/** @return whether the field/method {@code name} of {@code element} should be skipped */
+	public boolean skipAttribute(Element element, String name) {
+		return this.isEnabled("skipAttribute." + element.toString() + "." + name);
+	}
+
+	/** @return the type parameter to fill in for a raw type or null */
+	public String fixedRawType(Element element, String name) {
+		return this.options.get("fixRawType." + element.toString() + "." + name);
 	}
 
 	private boolean isEnabled(String key) {

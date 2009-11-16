@@ -40,10 +40,10 @@ public class MethodCallableGenerator implements PropertyGenerator {
 	}
 
 	public boolean shouldGenerate() {
-		if (this.shouldSkipAttribute(this.methodName)) {
+		if (getConfig().skipAttribute(this.method.getEnclosingElement(), this.methodName)) {
 			return false;
 		}
-		for (String classNameToAttempt : this.getBlockTypesToAttempt()) {
+		for (String classNameToAttempt : getConfig().blockTypesToAttempt()) {
 			if (this.blockTypeMatchesMethod(classNameToAttempt)) {
 				return true;
 			}
@@ -177,22 +177,6 @@ public class MethodCallableGenerator implements PropertyGenerator {
 			arguments = arguments.substring(0, arguments.length() - 2); // remove last ", "
 		}
 		return arguments;
-	}
-
-	private String[] getBlockTypesToAttempt() {
-		String attempts = getConfig().getOption("blockTypes");
-		if (attempts == null) {
-			attempts = "java.lang.Runnable";
-		} else {
-			attempts += ",java.lang.Runnable";
-		}
-		return attempts.split(",");
-	}
-
-	private boolean shouldSkipAttribute(String name) {
-		String configKey = "skipAttribute." + this.method.getEnclosingElement().toString() + "." + name;
-		String configValue = getConfig().getOption(configKey);
-		return "true".equals(configValue);
 	}
 
 	private ExecutableType getMethodAsType() {

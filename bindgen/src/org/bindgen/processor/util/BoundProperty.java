@@ -275,13 +275,11 @@ public class BoundProperty {
 	 * e.g.:
 	 *
 	 * <code>fixRawType.javax.servlet.http.HttpServletRequest.attributeNames=String</code>
-	 *
 	 */
 	private boolean fixRawTypeIfNeeded() {
-		String configKey = "fixRawType." + this.enclosing.toString() + "." + this.propertyName;
-		String configValue = getConfig().getOption(configKey);
-		if (!this.hasGenerics() && configValue != null) {
-			this.name = new ClassName(this.type.toString() + "<" + configValue + ">");
+		String fixedTypeParameter = getConfig().fixedRawType(this.enclosing, this.propertyName);
+		if (!this.hasGenerics() && fixedTypeParameter != null) {
+			this.name = new ClassName(this.type.toString() + "<" + fixedTypeParameter + ">");
 			return true;
 		}
 		return false;
@@ -296,9 +294,7 @@ public class BoundProperty {
 	}
 
 	private boolean isSkipAttributeSet() {
-		String configKey = "skipAttribute." + this.enclosing.toString() + "." + this.propertyName;
-		String configValue = getConfig().getOption(configKey);
-		return "true".equals(configValue);
+		return getConfig().skipAttribute(this.enclosing, this.propertyName);
 	}
 
 	private boolean isTypeParameter(Element element) {
