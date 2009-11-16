@@ -32,6 +32,8 @@ Sections
 
 * [Examples](examples.html)
 * [Setup](setup.html)
+* [Config](config.html)
+* [Changelog](changelog.html)
 * [Screencasts](screencasts.html)
 * [Performance](performance.html)
 
