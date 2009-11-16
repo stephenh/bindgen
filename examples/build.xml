@@ -25,7 +25,6 @@
 			<compilerarg value="bin/apt-javac"/>
 			<compilerarg value="-processor"/>
 			<compilerarg value="org.bindgen.processor.Processor"/>
-			<compilerarg value="-Abindgen.skipExistingBindingCheck=true"/> <!-- for javac -->
 			<compilerarg value="-XprintRounds"/>
 		</javac>
 		<!-- now tests -->

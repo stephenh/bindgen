@@ -21,7 +21,7 @@
  </dependencies>
  <properties>
   <maven.processor.version>1.1</maven.processor.version>
-  <bindgen.properties>-Abindgen.skipExistingBindingCheck=true -XprintRounds</bindgen.properties>
+  <bindgen.properties>-XprintRounds</bindgen.properties>
  </properties>
  <build>
   <plugins>

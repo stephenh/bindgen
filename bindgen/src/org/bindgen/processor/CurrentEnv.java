@@ -28,6 +28,10 @@ public class CurrentEnv {
 		config = new BindgenConfig(env);
 	}
 
+	public static ProcessingEnvironment get() {
+		return current;
+	}
+
 	public static BindgenConfig getConfig() {
 		return config;
 	}

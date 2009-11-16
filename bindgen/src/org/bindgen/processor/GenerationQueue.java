@@ -39,9 +39,9 @@ public class GenerationQueue {
 	private final boolean skipBindKeyword;
 
 	public GenerationQueue() {
-		this.logEnabled = this.isEnabled("bindgen.log");
-		this.skipExistingBindingCheck = this.isEnabled("bindgen.skipExistingBindingCheck");
-		this.skipBindKeyword = this.isEnabled("bindgen.skipBindKeyword");
+		this.logEnabled = getConfig().logEnabled();
+		this.skipExistingBindingCheck = getConfig().skipExistingBindingCheck();
+		this.skipBindKeyword = getConfig().skipBindgenKeyword();
 	}
 
 	/** Enqueue <code>element</code> even if it was written during a previous compilation run. */
@@ -123,10 +123,6 @@ public class GenerationQueue {
 			getMessager().printMessage(Kind.ERROR, io.getMessage());
 			return false;
 		}
-	}
-
-	private boolean isEnabled(String property) {
-		return "true".equals(getConfig().getOption(property));
 	}
 
 }

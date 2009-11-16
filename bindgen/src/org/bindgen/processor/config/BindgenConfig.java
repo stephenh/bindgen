@@ -13,6 +13,7 @@ import javax.tools.FileObject;
 import javax.tools.StandardLocation;
 import javax.tools.JavaFileManager.Location;
 
+import org.bindgen.processor.CurrentEnv;
 import org.bindgen.processor.util.ClassName;
 
 /**
@@ -44,6 +45,23 @@ public class BindgenConfig {
 		return this.bindingScope.includes(name);
 	}
 
+	public boolean logEnabled() {
+		return this.isEnabled("bindgen.log");
+	}
+
+	public boolean skipBindgenKeyword() {
+		return this.isEnabled("bindgen.skipBindgenKeyword");
+	}
+
+	public boolean skipExistingBindingCheck() {
+		String explicit = this.options.get("bindgen.skipExistingBindingCheck");
+		if (explicit != null) {
+			return "true".equals(explicit);
+		}
+		// javac doesn't like skipping existing bindings , so default to true if in javac
+		return CurrentEnv.get().getClass().getName().startsWith("com.sun");
+	}
+
 	public String baseNameForBinding(ClassName cn) {
 		String pn = cn.getPackageName();
 		if (pn.startsWith("java.") || pn.startsWith("javax.")) {
@@ -54,6 +72,10 @@ public class BindgenConfig {
 
 	public String getOption(String key) {
 		return this.options.get(key);
+	}
+
+	private boolean isEnabled(String key) {
+		return "true".equals(this.options.get(key));
 	}
 
 	private Scope<ClassName> getBindingScope() {
