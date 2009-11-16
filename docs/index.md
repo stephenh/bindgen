@@ -36,6 +36,7 @@ Sections
 * [Changelog](changelog.html)
 * [Screencasts](screencasts.html)
 * [Performance](performance.html)
+* [Building](building.html)
 
 [binding]: http://github.com/stephenh/bindgen/blob/master/bindgen/src/org/bindgen/Binding.java
 
