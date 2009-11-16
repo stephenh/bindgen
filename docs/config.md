@@ -17,6 +17,19 @@ Technically, the APT API provides a way to pass key/value pairs to processors vi
 
 So you can use `-Akey=value` arguments, but a separate `bindgen.properties` file is recommended.
 
+Scope
+-----
+
+Given a class annotated with `@Bindable`, Bindgen by default recurses into that class's fields/methods and generates bindings for their types, and their types fields'/methods' types, etc. This is what allows you to chain together a binding like `b.foo().bar().name()`.
+
+However, if unchecked, this recursion can result in a lot of sprawl, especially if Bindgen gets into a framework like Spring or Hibernate.
+
+To limit the recursion to not escape certain package boundaries, you can set the `scope` property:
+
+<pre name="code">
+    scope=com.myapp,java
+</pre>
+
 Block Types to Attempt
 ----------------------
 

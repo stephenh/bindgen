@@ -11,11 +11,11 @@ Bindgen is an annotation processor that you configure the Java compiler to run d
 Ivy/Maven Repository
 --------------------
 
-You can download Bindgen releases from the [Joist repo](http://repo.joist.ws). It has both Ivy `ixy.xml` and Maven `pom.xml` artifacts, e.g.:
+You can download Bindgen releases from the [Joist repo](http://repo.joist.ws). It has both Ivy `ixy.xml` and Maven `pom.xml` artifacts, see:
 
 [http://repo.joist.ws/org/bindgen/bindgen/](http://repo.joist.ws/org/bindgen/bindgen/)
 
-You will only need `bindgen.jar` on your classpath, but you can download the sources/etc. as well.
+You will only need `bindgen.jar` on your project's classpath.
 
 `javac`
 -------
