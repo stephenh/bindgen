@@ -15,13 +15,13 @@
   <dependency>
    <groupId>junit</groupId>
    <artifactId>junit</artifactId>
-   <version>4.7</version>
+   <version>3.8.2</version>
    <scope>test</scope>
   </dependency>
  </dependencies>
  <properties>
   <maven.processor.version>1.1</maven.processor.version>
-  <bindgen.properties>-Abindgen.skipExistingBindingCheck=true -AblockTypes=org.bindgen.example.blocks.TransactionBlock -AfixRawType.org.bindgen.example.fixRawTypes.RawTypesExample.methodFixed=String -AfixRawType.org.bindgen.example.fixRawTypes.RawTypesExample.fieldFixed=String -Aorg.bindgen.scope=org.bindgen.example,org.bindgen.inscope,java -XprintRounds</bindgen.properties>
+  <bindgen.properties>-Abindgen.skipExistingBindingCheck=true -XprintRounds</bindgen.properties>
  </properties>
  <build>
   <plugins>
