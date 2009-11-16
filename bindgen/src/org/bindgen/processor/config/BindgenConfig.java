@@ -47,15 +47,15 @@ public class BindgenConfig {
 	}
 
 	public boolean logEnabled() {
-		return this.isEnabled("bindgen.log");
+		return this.isEnabled("log");
 	}
 
 	public boolean skipBindgenKeyword() {
-		return this.isEnabled("bindgen.skipBindgenKeyword");
+		return this.isEnabled("skipBindgenKeyword");
 	}
 
 	public boolean skipExistingBindingCheck() {
-		String explicit = this.options.get("bindgen.skipExistingBindingCheck");
+		String explicit = this.options.get("skipExistingBindingCheck");
 		if (explicit != null) {
 			return "true".equals(explicit);
 		}
