@@ -18,12 +18,12 @@ For example, with class `Foo`:
 <pre name="code" class="java">
     @Bindable
     public class Foo {
-        public String name;
-        public Bar bar;
+      public String name;
+      public Bar bar;
     }
 
     public class Bar {
-        public String zaz;
+      public String zaz;
     }
 </pre>
 
@@ -31,13 +31,47 @@ During compilation, the compiler will have Bindgen generate a class `FooBinding`
 
 <pre name="code" class="java">
     public class FooBinding {
-        public StringBinding name() { ... }
+      private Foo foo;
 
-        public BarBinding bar() { ... }
+      // for turning Foo.name into a Binding
+      public StringBinding name() {
+        return new StringBinding {
+          public String get() {
+            return FooBinding.this.foo.name;
+          }
+          public void set(String name) {
+            FooBinding.this.foo.name = name;
+          }
+        };
+      }
+
+      // for turning Foo.bar into a Binding
+      public BarBinding bar() {
+        return new BarBinding {
+          public Bar get() {
+            return FooBinding.this.foo.bar;
+          }
+          public void set(Bar bar) {
+            FooBinding.this.foo.bar = bar;
+          }
+        };
+      }
     }
 
     public class BarBinding {
-        public StringBinding zaz() {
+      private Bar bar;
+
+      // for turning Bar.zaz into a Binding
+      public StringBinding zaz() {
+        return new StringBinding() {
+          public String get() {
+            return BarBinding.this.bar.zaz;
+          }
+          public void set(String zaz) {
+            BarBinding.this.bar.zaz = zaz;
+          }
+        };
+      }
     }
 </pre>
 
@@ -49,11 +83,11 @@ You can now use the bindings like:
     Foo foo = new Foo();
     FooBinding fooBinding = new FooBinding(foo);
 
-    // equivalent to foo.setName("bob");
+    // equivalent to foo.name "bob";
     StringBinding nameBinding = fooBinding.name();
     nameBinding.set("bob");
 
-    // equivalent to foo.getBar().setZaz("zaz");
+    // equivalent to foo.getBar().zaz = "zaz";
     StringBinding zazBinding = fooBinding.bar().zaz();
     zazBinding.set("zaz");
 </pre>
@@ -72,14 +106,15 @@ The [joist](http://joist.ws/web.html) web framework is what drove Bindgen's deve
     public class HomePage extends AbstractPage {
 
       public Form form = new Form("Login");
-      public Employee employee = null; // assigned by the framework
+      // assigned by the framework
+      public Employee employee = null;
 
       @Override
       public void onInit() {
         // static import of BindKeyword.bind
         HomePageBinding page = bind(this);
 
-        // read on reader/set on post the employee's name
+        // read on render/set on post the employee's name
         form.add(new TextField(page.employee().name()));
 
         // read on render/set on post the employer's name
