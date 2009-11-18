@@ -1,15 +1,19 @@
 package org.bindgen.processor.util;
 
-import static org.bindgen.processor.CurrentEnv.getTypeUtils;
+import static org.bindgen.processor.CurrentEnv.*;
 
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.lang.model.element.Element;
+import javax.lang.model.element.Modifier;
 import javax.lang.model.type.ArrayType;
 import javax.lang.model.type.PrimitiveType;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 
+import joist.sourcegen.Access;
 import joist.util.Inflector;
 
 public class Util {
@@ -51,4 +55,21 @@ public class Util {
 		return false;
 	}
 
+	/**
+	 * Gets the {@link Access} level of the element
+	 * @param element
+	 * @return
+	 */
+	public static Access getAccess(Element element) {
+		final Set<Modifier> modifiers = element.getModifiers();
+		if (modifiers.contains(Modifier.PUBLIC)) {
+			return Access.PUBLIC;
+		} else if (modifiers.contains(Modifier.PROTECTED)) {
+			return Access.PROTECTED;
+		} else if (modifiers.contains(Modifier.PRIVATE)) {
+			return Access.PRIVATE;
+		} else {
+			return Access.PACKAGE;
+		}
+	}
 }
