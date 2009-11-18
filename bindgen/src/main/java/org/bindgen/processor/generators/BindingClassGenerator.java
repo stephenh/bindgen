@@ -206,7 +206,7 @@ public class BindingClassGenerator {
 	private List<PropertyGenerator> getPropertyGenerators(TypeElement type) {
 		List<PropertyGenerator> generators = new ArrayList<PropertyGenerator>();
 		for (Element enclosed : type.getEnclosedElements()) {
-			if (this.isStaticOrPrivate(enclosed)) {
+			if (this.isStaticOrPrivateOrJavaNonPublic(type, enclosed)) {
 				continue;
 			}
 			if (enclosed.getKind().isField()) {
@@ -231,8 +231,10 @@ public class BindingClassGenerator {
 		return generators;
 	}
 
-	private boolean isStaticOrPrivate(Element enclosed) {
-		return enclosed.getModifiers().contains(Modifier.STATIC) || enclosed.getModifiers().contains(Modifier.PRIVATE);
+	private boolean isStaticOrPrivateOrJavaNonPublic(TypeElement type, Element enclosed) {
+		return enclosed.getModifiers().contains(Modifier.STATIC)
+			|| enclosed.getModifiers().contains(Modifier.PRIVATE)
+			|| (type.getQualifiedName().toString().startsWith("java.") && !enclosed.getModifiers().contains(Modifier.PUBLIC));
 	}
 
 }
