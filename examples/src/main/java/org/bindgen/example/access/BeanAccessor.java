@@ -1,4 +1,4 @@
-package org.bindgen.access;
+package org.bindgen.example.access;
 
 import org.bindgen.Bindable;
 import org.bindgen.Binding;
