@@ -25,7 +25,6 @@ import joist.sourcegen.GClass;
 import joist.sourcegen.GMethod;
 import joist.util.Copy;
 
-import org.bindgen.Bindable;
 import org.bindgen.Binding;
 import org.bindgen.processor.CurrentEnv;
 import org.bindgen.processor.GenerationQueue;
@@ -216,11 +215,6 @@ public class BindingClassGenerator {
 				generate = false;
 			} else if (enclosed.getModifiers().contains(Modifier.PRIVATE)) {
 				generate = false;
-			} else if (!enclosed.getModifiers().contains(Modifier.PUBLIC)) {
-				// protected or package-private, only process if they have their own @bindable
-				if (enclosed.getAnnotation(Bindable.class) == null) {
-					generate = false;
-				}
 			}
 
 			if (!generate) {
