@@ -1,6 +1,6 @@
 package org.bindgen.processor;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.fail;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -26,27 +26,7 @@ public class AccessTest extends AbstractBindgenTestCase {
 	}
 
 	@Test
-	public void shouldNotGenerateBindingsForNonPublicNotAnnotatedFields() throws Exception {
-		ClassLoader loader = this.compile("org/bindgen/processor/access/AccessBean.java");
-
-		Class<?> clazz = loader.loadClass("org.bindgen.processor.access.AccessBeanBindingPath");
-
-		try {
-			clazz.getDeclaredMethod("protectedField2");
-			fail();
-		} catch (NoSuchMethodException e) {
-			//noop
-		}
-		try {
-			clazz.getDeclaredMethod("protectedMethod2");
-			fail();
-		} catch (NoSuchMethodException e) {
-			//noop
-		}
-	}
-
-	@Test
-	public void shouldNotGenerateBindingsForPrivateAnnotatedFields() throws Exception {
+	public void shouldNotGenerateBindingsForPrivateFields() throws Exception {
 		ClassLoader loader = this.compile("org/bindgen/processor/access/AccessBean.java");
 
 		Class<?> clazz = loader.loadClass("org.bindgen.processor.access.AccessBeanBindingPath");

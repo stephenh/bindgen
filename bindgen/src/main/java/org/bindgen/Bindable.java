@@ -8,7 +8,7 @@ import org.bindgen.processor.Processor;
 
 /** Marks a class to have the {@link Processor} generate bindings for it. */
 @Inherited
-@Target(value = { ElementType.TYPE, ElementType.METHOD, ElementType.FIELD })
+@Target(value = { ElementType.TYPE })
 public @interface Bindable {
 
 }
