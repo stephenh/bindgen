@@ -82,9 +82,7 @@ public class MethodCallableGenerator implements PropertyGenerator {
 
 	private void addOuterClassGet() {
 		GMethod get = this.outerClass.getMethod(this.methodName).returnType(this.blockType.getQualifiedName().toString());
-
 		get.setAccess(Util.getAccess(this.method));
-
 		get.body.line("if (this.{} == null) {", this.methodName);
 		get.body.line("    this.{} = new My{}Binding();", this.methodName, Inflector.capitalize(this.methodName));
 		get.body.line("}");
@@ -93,9 +91,7 @@ public class MethodCallableGenerator implements PropertyGenerator {
 
 	private void addInnerClass() {
 		this.innerClass = this.outerClass.getInnerClass("My{}Binding", Inflector.capitalize(this.methodName)).notStatic();
-
 		this.innerClass.setAccess(Util.getAccess(this.method));
-
 		this.innerClass.implementsInterface(this.blockType.getQualifiedName().toString());
 		this.innerClass.implementsInterface(NamedBinding.class);
 	}

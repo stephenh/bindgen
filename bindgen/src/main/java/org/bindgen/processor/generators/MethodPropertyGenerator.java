@@ -57,9 +57,7 @@ public class MethodPropertyGenerator implements PropertyGenerator {
 
 	private void addOuterClassGet() {
 		GMethod fieldGet = this.outerClass.getMethod(this.property.getName() + "()");
-
 		fieldGet.setAccess(Util.getAccess(this.method));
-
 		fieldGet.returnType(this.property.getBindingClassFieldDeclaration());
 		fieldGet.body.line("if (this.{} == null) {", this.property.getName());
 		fieldGet.body.line("    this.{} = new {}();", this.property.getName(), this.property.getBindingRootClassInstantiation());
@@ -79,9 +77,7 @@ public class MethodPropertyGenerator implements PropertyGenerator {
 
 	private void addInnerClass() {
 		this.innerClass = this.outerClass.getInnerClass(this.property.getInnerClassDeclaration()).notStatic();
-
 		this.innerClass.setAccess(Util.getAccess(this.method));
-
 		this.innerClass.baseClassName(this.property.getInnerClassSuperClass());
 		if (this.property.doesInnerClassNeedSuppressWarnings()) {
 			this.innerClass.addAnnotation("@SuppressWarnings(\"unchecked\")");
