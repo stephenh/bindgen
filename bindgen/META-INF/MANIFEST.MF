@@ -9,6 +9,6 @@ Bundle-ActivationPolicy: lazy
 Bundle-ManifestVersion: 2
 Bundle-SymbolicName: org.bindgen;singleton:=true
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Bundle-ClassPath: bin/lib/build/joist.util.jar,
+Bundle-ClassPath: lib/build/joist.util-abef8bb.jar,
  .
 

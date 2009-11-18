@@ -1,7 +1,6 @@
 package org.bindgen.processor.generators;
 
 import javax.lang.model.element.Element;
-import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
 
 import joist.sourcegen.GClass;
@@ -10,6 +9,7 @@ import joist.sourcegen.GMethod;
 
 import org.bindgen.ContainerBinding;
 import org.bindgen.processor.util.BoundProperty;
+import org.bindgen.processor.util.Util;
 
 public class FieldPropertyGenerator implements PropertyGenerator {
 
@@ -60,14 +60,8 @@ public class FieldPropertyGenerator implements PropertyGenerator {
 
 	private void addOuterClassGet() {
 		GMethod fieldGet = this.outerClass.getMethod(this.property.getName() + "()");
-		if (this.field.getModifiers().contains(Modifier.PUBLIC)) {
-			// noop
-		} else if (this.field.getModifiers().contains(Modifier.PROTECTED)) {
-			fieldGet.setProtected();
-		} else {
-			// private and package-private become package-private
-			fieldGet.setProtected(); // TODO need package private modifier
-		}
+
+		fieldGet.setAccess(Util.getAccess(this.field));
 
 		fieldGet.returnType(this.property.getBindingClassFieldDeclaration());
 		fieldGet.body.line("if (this.{} == null) {", this.property.getName());
@@ -81,6 +75,9 @@ public class FieldPropertyGenerator implements PropertyGenerator {
 
 	private void addInnerClass() {
 		this.innerClass = this.outerClass.getInnerClass(this.property.getInnerClassDeclaration()).notStatic();
+
+		this.innerClass.setAccess(Util.getAccess(this.field));
+
 		this.innerClass.baseClassName(this.property.getInnerClassSuperClass());
 		if (this.property.doesInnerClassNeedSuppressWarnings()) {
 			this.innerClass.addAnnotation("@SuppressWarnings(\"unchecked\")");
