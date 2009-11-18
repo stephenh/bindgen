@@ -14,7 +14,7 @@
 	</publications>
 	<dependencies>
 		<!-- joist.util is jarjar'd into bindgen.jar so we count it as a build dependency. -->
-		<dependency org="joist" name="joist.util" rev="0.3" conf="build->default">
+		<dependency org="joist" name="joist.util" rev="abef8bb" conf="build->default">
 			<artifact name="joist.util" conf="build"/>
 			<artifact name="joist.util-sources" conf="sources"/>
 		</dependency>
