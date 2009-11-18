@@ -1,6 +1,7 @@
 package org.bindgen.processor.generators;
 
 import javax.lang.model.element.Element;
+import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
 
 import joist.sourcegen.GClass;
@@ -59,6 +60,15 @@ public class FieldPropertyGenerator implements PropertyGenerator {
 
 	private void addOuterClassGet() {
 		GMethod fieldGet = this.outerClass.getMethod(this.property.getName() + "()");
+		if (this.field.getModifiers().contains(Modifier.PUBLIC)) {
+			// noop
+		} else if (this.field.getModifiers().contains(Modifier.PROTECTED)) {
+			fieldGet.setProtected();
+		} else {
+			// private and package-private become package-private
+			fieldGet.setProtected(); // TODO need package private modifier
+		}
+
 		fieldGet.returnType(this.property.getBindingClassFieldDeclaration());
 		fieldGet.body.line("if (this.{} == null) {", this.property.getName());
 		fieldGet.body.line("    this.{} = new {}();", this.property.getName(), this.property.getBindingRootClassInstantiation());

@@ -13,6 +13,7 @@ import javax.annotation.processing.SupportedSourceVersion;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
+import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
 import javax.tools.FileObject;
 import javax.tools.StandardLocation;
@@ -52,6 +53,19 @@ public class Processor extends AbstractProcessor {
 	public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
 		try {
 			for (Element element : roundEnv.getElementsAnnotatedWith(Bindable.class)) {
+
+				// if the field or method is annotated process their class
+				switch (element.getKind()) {
+					case FIELD:
+					case METHOD:
+						if (element.getModifiers().contains(Modifier.PRIVATE)) {
+							this.warnElementIsUnhadled(element);
+							continue;
+						} else {
+							element = element.getEnclosingElement();
+						}
+				}
+
 				if (element.getKind() == ElementKind.CLASS || element.getKind() == ElementKind.INTERFACE) {
 
 					TypeElement type = (TypeElement) element;
@@ -62,7 +76,7 @@ public class Processor extends AbstractProcessor {
 						this.warnAnnotatedTypeOutsideScope(type);
 					}
 				} else {
-					this.processingEnv.getMessager().printMessage(Kind.WARNING, "Unhandled element " + element);
+					this.warnElementIsUnhadled(element);
 				}
 			}
 			this.queue.processQueue();
@@ -71,6 +85,10 @@ public class Processor extends AbstractProcessor {
 			this.logExceptionToTextFile(e);
 		}
 		return true;
+	}
+
+	private void warnElementIsUnhadled(Element element) {
+		this.processingEnv.getMessager().printMessage(Kind.WARNING, "Unhandled element " + element);
 	}
 
 	private void warnAnnotatedTypeOutsideScope(TypeElement type) {
