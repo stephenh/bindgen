@@ -1,8 +1,6 @@
 package org.bindgen.processor.generators;
 
-import static org.bindgen.processor.CurrentEnv.getFiler;
-import static org.bindgen.processor.CurrentEnv.getMessager;
-import static org.bindgen.processor.CurrentEnv.getTypeUtils;
+import static org.bindgen.processor.CurrentEnv.*;
 
 import java.io.IOException;
 import java.io.Writer;
@@ -208,19 +206,9 @@ public class BindingClassGenerator {
 	private List<PropertyGenerator> getPropertyGenerators(TypeElement type) {
 		List<PropertyGenerator> generators = new ArrayList<PropertyGenerator>();
 		for (Element enclosed : type.getEnclosedElements()) {
-
-			boolean generate = true;
-
-			if (enclosed.getModifiers().contains(Modifier.STATIC)) {
-				generate = false;
-			} else if (enclosed.getModifiers().contains(Modifier.PRIVATE)) {
-				generate = false;
-			}
-
-			if (!generate) {
+			if (this.isStaticOrPrivate(enclosed)) {
 				continue;
 			}
-
 			if (enclosed.getKind().isField()) {
 				FieldPropertyGenerator fpg = new FieldPropertyGenerator(this.pathBindingClass, enclosed);
 				if (fpg.shouldGenerate()) {
@@ -241,6 +229,10 @@ public class BindingClassGenerator {
 			}
 		}
 		return generators;
+	}
+
+	private boolean isStaticOrPrivate(Element enclosed) {
+		return enclosed.getModifiers().contains(Modifier.STATIC) || enclosed.getModifiers().contains(Modifier.PRIVATE);
 	}
 
 }
