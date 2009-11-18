@@ -217,6 +217,11 @@ public class BindingClassGenerator {
 				generate = false;
 			}
 
+			// skip non-public elements in java. packages
+			if (!enclosed.getModifiers().contains(Modifier.PUBLIC) && type.getQualifiedName().toString().startsWith("java.")) {
+				generate = false;
+			}
+
 			if (!generate) {
 				continue;
 			}
