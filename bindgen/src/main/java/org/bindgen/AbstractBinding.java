@@ -38,4 +38,23 @@ public abstract class AbstractBinding<R, T> implements BindingRoot<R, T> {
 		return null;
 	}
 
+	@Override
+	public String toString() {
+		if (this.getParentBinding() == null) {
+			return this.getClass().getSimpleName() + "(" + this.get() + ")";
+		} else {
+			return this.getParentBinding().toString() + "." + this.getName();
+		}
+	}
+
+	@Override
+	public String getPath() {
+		if (this.getParentBinding() == null) {
+			return "#root";
+		} else if (this.getParentBinding().getParentBinding() == null) {
+			return this.getName();
+		} else {
+			return this.getParentBinding().getPath() + "." + this.getName();
+		}
+	}
 }

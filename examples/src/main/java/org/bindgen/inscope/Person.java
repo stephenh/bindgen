@@ -3,6 +3,7 @@ package org.bindgen.inscope;
 import org.bindgen.Bindable;
 import org.bindgen.binding.GenericObjectBindingPath;
 import org.bindgen.outofscope.AddressOut;
+import org.bindgen.outofscope.GenericOut;
 
 /**
  * A simple class to test scoping.
@@ -21,5 +22,6 @@ import org.bindgen.outofscope.AddressOut;
 @Bindable
 public class Person {
 	public AddressOut addressOut;
+	public GenericOut<String> genericOut;
 	public AddressIn addressIn;
 }
