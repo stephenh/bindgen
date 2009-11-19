@@ -1,7 +1,6 @@
 package org.bindgen.processor.util;
 
-import static org.bindgen.processor.CurrentEnv.getConfig;
-import static org.bindgen.processor.CurrentEnv.getTypeUtils;
+import static org.bindgen.processor.CurrentEnv.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -303,6 +302,13 @@ public class BoundProperty {
 
 	public boolean isArray() {
 		return this.isArray;
+	}
+
+	/**
+	 * @return name of type that can be used as a return value
+	 */
+	public String getReturnableType() {
+		return this.name.getWithoutGenericPart();
 	}
 
 }
