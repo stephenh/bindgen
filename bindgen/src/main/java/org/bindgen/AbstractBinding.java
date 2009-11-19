@@ -9,6 +9,8 @@ import java.util.List;
  */
 public abstract class AbstractBinding<R, T> implements BindingRoot<R, T> {
 
+	private static final long serialVersionUID = 1L;
+
 	protected T _value;
 
 	@Override

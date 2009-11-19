@@ -1,7 +1,6 @@
 package org.bindgen.processor.util;
 
-import static org.bindgen.processor.CurrentEnv.getConfig;
-import static org.bindgen.processor.CurrentEnv.getTypeUtils;
+import static org.bindgen.processor.CurrentEnv.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -132,7 +131,7 @@ public class BoundProperty {
 
 		// if our type is outside the binding scope we return a generic binding type
 		if (!this.shouldGenerateBindingClassForType()) {
-			return GenericObjectBindingPath.class.getName() + "<R>";
+			return GenericObjectBindingPath.class.getName() + "<R," + this.type.toString() + ">";
 		}
 
 		String superName = Util.lowerCaseOuterClassNames(CurrentEnv.getConfig().baseNameForBinding(this.name) + "BindingPath");
