@@ -49,7 +49,7 @@ public class AbstractBindgenTestCase {
 
 		fileManager.close();
 
-		//System.out.println(this.tmp.getRoot().getAbsolutePath());
+		//		System.out.println(this.tmp.getRoot().getAbsolutePath());
 
 		for (Diagnostic<? extends JavaFileObject> diag : diagnosticCollector.getDiagnostics()) {
 			switch (diag.getKind()) {

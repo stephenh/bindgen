@@ -209,6 +209,16 @@ public class BindingClassGenerator {
 			if (this.isStaticOrPrivateOrJavaNonPublic(type, enclosed)) {
 				continue;
 			}
+
+			if (!enclosed.getModifiers().contains(Modifier.PUBLIC)) {
+				// if this is a non-public member we generate a binding only if it is declared directly
+				// in the element and not a super class, otherwise protected and package private
+				// access to that element breaks.
+				if (!enclosed.getEnclosingElement().equals(this.element)) {
+					continue;
+				}
+			}
+
 			if (enclosed.getKind().isField()) {
 				FieldPropertyGenerator fpg = new FieldPropertyGenerator(this.pathBindingClass, enclosed);
 				if (fpg.shouldGenerate()) {

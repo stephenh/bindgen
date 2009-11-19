@@ -1,5 +1,6 @@
 package org.bindgen.processor;
 
+import javax.tools.Diagnostic;
 import javax.tools.DiagnosticCollector;
 import javax.tools.JavaFileObject;
 
@@ -19,6 +20,7 @@ public class CompilationErrorException extends Exception {
 	 * @param diagnosticCollector collector that contains compilation errors
 	 */
 	public CompilationErrorException(DiagnosticCollector<JavaFileObject> diagnosticCollector) {
+		super(message(diagnosticCollector));
 		this.diagnosticCollector = diagnosticCollector;
 	}
 
@@ -27,6 +29,17 @@ public class CompilationErrorException extends Exception {
 	 */
 	public DiagnosticCollector<JavaFileObject> getDiagnosticCollector() {
 		return this.diagnosticCollector;
+	}
+
+	private static String message(DiagnosticCollector<JavaFileObject> dc) {
+		StringBuilder message = new StringBuilder();
+		for (Diagnostic<?> d : dc.getDiagnostics()) {
+			switch (d.getKind()) {
+				case ERROR:
+					message.append("ERROR: " + d.toString() + "\n");
+			}
+		}
+		return message.toString();
 	}
 
 }
