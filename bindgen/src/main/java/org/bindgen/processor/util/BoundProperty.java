@@ -304,4 +304,11 @@ public class BoundProperty {
 		return this.isArray;
 	}
 
+	/**
+	 * @return name of type that can be used as a return value
+	 */
+	public String getReturnableType() {
+		return this.name.getWithoutGenericPart();
+	}
+
 }

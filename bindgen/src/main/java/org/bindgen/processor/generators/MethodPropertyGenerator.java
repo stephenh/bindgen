@@ -86,7 +86,7 @@ public class MethodPropertyGenerator implements PropertyGenerator {
 			this.innerClass.getMethod("getType").returnType("Class<?>").body.line("return null;");
 		} else if (!this.property.shouldGenerateBindingClassForType()) {
 			// since no binding class will be generated for the return type of this method we may not inherit getType() in MyBinding class (if, for example, MyBinding extends GenericObjectBindingPath) and so we have to implement it ouselves
-			this.innerClass.getMethod("getType").returnType("Class<?>").body.line("return {}.class;", this.property.getSetType());
+			this.innerClass.getMethod("getType").returnType("Class<?>").body.line("return {}.class;", this.property.getReturnableType());
 		}
 	}
 
