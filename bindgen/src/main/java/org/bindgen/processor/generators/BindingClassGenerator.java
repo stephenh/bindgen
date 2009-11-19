@@ -211,10 +211,9 @@ public class BindingClassGenerator {
 			}
 
 			if (!enclosed.getModifiers().contains(Modifier.PUBLIC)) {
-				// if this is a non-public member we generate a binding only if it is declared directly
-				// in the element and not a super class, otherwise protected and package private
-				// access to that element breaks.
-				if (!enclosed.getEnclosingElement().equals(this.element)) {
+				// if this is a non-public member we generate a binding only if the current (super)
+				// class `type` is in the same package as our target class `this.element`
+				if (!getElementUtils().getPackageOf(type).equals(getElementUtils().getPackageOf(this.element))) {
 					continue;
 				}
 			}
