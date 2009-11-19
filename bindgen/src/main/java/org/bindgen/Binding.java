@@ -27,4 +27,10 @@ public interface Binding<T> extends NamedBinding {
 	/** @return an OGNL-like String representation of the binding. */
 	String getPath();
 
+	/** @return whether a {@code #get} or {@code #set} will NPE because of a null parent */
+	boolean getIsSafe();
+
+	/** @return the value for this binding or {@code null} if a parent path's value is {@code null} */
+	T getSafely();
+
 }

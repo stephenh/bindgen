@@ -41,7 +41,19 @@ public abstract class AbstractBinding<R, T> implements BindingRoot<R, T> {
 		if (this.getParentBinding() == null) {
 			return this.getClass().getSimpleName() + "(" + this.get() + ")";
 		} else {
-			return this.getParentBinding().toString() + "." + this.getName();
+			Object value = this.getIsSafe() ? this.get() : "";
+			return this.getParentBinding().toString() + "." + this.getName() + "(" + value + ")";
+		}
+	}
+
+	@Override
+	public boolean getIsSafe() {
+		if (this.getParentBinding() == null) {
+			return true;
+		} else if (this.getParentBinding().getIsSafe()) {
+			return this.getParentBinding().get() != null;
+		} else {
+			return false;
 		}
 	}
 
@@ -55,4 +67,14 @@ public abstract class AbstractBinding<R, T> implements BindingRoot<R, T> {
 			return this.getParentBinding().getPath() + "." + this.getName();
 		}
 	}
+
+	@Override
+	public T getSafely() {
+		if (this.getIsSafe()) {
+			return this.get();
+		} else {
+			return null;
+		}
+	}
+
 }

@@ -137,8 +137,20 @@ public class ParentBindingTest extends TestCase {
 	public void testToString() {
 		FooChildBinding fcb = new FooChildBinding();
 		Assert.assertEquals("FooChildBinding(null)", fcb.toString());
-		Assert.assertEquals("FooChildBinding(null).foo", fcb.foo().toString());
-		Assert.assertEquals("FooChildBinding(null).foo.baz", fcb.foo().baz().toString());
+		Assert.assertEquals("FooChildBinding(null).foo()", fcb.foo().toString());
+		Assert.assertEquals("FooChildBinding(null).foo().baz()", fcb.foo().baz().toString());
+
+		// Now set FooChild
+		fcb.set(new FooChild());
+		Assert.assertEquals("FooChildBinding(child)", fcb.toString());
+		Assert.assertEquals("FooChildBinding(child).foo(null)", fcb.foo().toString());
+		Assert.assertEquals("FooChildBinding(child).foo(null).baz()", fcb.foo().baz().toString());
+
+		// No set Foo
+		fcb.get().foo = new Foo();
+		Assert.assertEquals("FooChildBinding(child)", fcb.toString());
+		Assert.assertEquals("FooChildBinding(child).foo(foo)", fcb.foo().toString());
+		Assert.assertEquals("FooChildBinding(child).foo(foo).baz(baz)", fcb.foo().baz().toString());
 	}
 
 	public void testGetPath() {
