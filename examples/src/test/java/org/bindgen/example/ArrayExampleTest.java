@@ -21,4 +21,8 @@ public class ArrayExampleTest extends TestCase {
 		Assert.assertTrue(a.fooBig[0]);
 	}
 
+	public void testToString() {
+		ArrayExampleBinding b = new ArrayExampleBinding();
+		Assert.assertEquals("bar", b.bar().toString());
+	}
 }

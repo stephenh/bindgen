@@ -134,6 +134,20 @@ public class ParentBindingTest extends TestCase {
 		Assert.assertEquals(false, this.areForSameProperty(b1.bar(), b2.name()));
 	}
 
+	public void testToString() {
+		FooChildBinding fcb = new FooChildBinding();
+		Assert.assertEquals("FooChildBinding(null)", fcb.toString());
+		Assert.assertEquals("FooChildBinding(null).foo", fcb.foo().toString());
+		Assert.assertEquals("FooChildBinding(null).foo.baz", fcb.foo().baz().toString());
+	}
+
+	public void testGetPath() {
+		FooChildBinding fcb = new FooChildBinding();
+		Assert.assertEquals("#root", fcb.getPath());
+		Assert.assertEquals("foo", fcb.foo().getPath());
+		Assert.assertEquals("foo.baz", fcb.foo().baz().getPath());
+	}
+
 	private boolean areForSameProperty(Binding<?> b1, Binding<?> b2) {
 		return Bindings.areForSameProperty(b1, b2);
 	}

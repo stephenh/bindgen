@@ -24,4 +24,7 @@ public interface Binding<T> extends NamedBinding {
 	/** @return the bindings of the attributes for our current instance. */
 	List<Binding<?>> getChildBindings();
 
+	/** @return an OGNL-like String representation of the binding. */
+	String getPath();
+
 }
