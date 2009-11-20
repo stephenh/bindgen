@@ -39,7 +39,10 @@ public abstract class AbstractBinding<R, T> implements BindingRoot<R, T> {
 	@Override
 	public String toString() {
 		if (this.getParentBinding() == null) {
-			return this.getClass().getSimpleName() + "(" + this.get() + ")";
+			// This is kind of lame, but GWT doesn't support getSimpleName, so use getName
+			String className = this.getClass().getName();
+			String simpleName = className.substring(className.lastIndexOf(".") + 1);
+			return simpleName + "(" + this.get() + ")";
 		} else {
 			Object value = this.getIsSafe() ? this.get() : "";
 			return this.getParentBinding().toString() + "." + this.getName() + "(" + value + ")";
