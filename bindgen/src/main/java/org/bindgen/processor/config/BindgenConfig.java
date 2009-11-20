@@ -50,8 +50,8 @@ public class BindgenConfig {
 		return this.isEnabled("log");
 	}
 
-	public boolean skipBindgenKeyword() {
-		return this.isEnabled("skipBindgenKeyword");
+	public boolean skipBindKeyword() {
+		return this.isEnabled("skipBindKeyword");
 	}
 
 	public boolean skipExistingBindingCheck() {

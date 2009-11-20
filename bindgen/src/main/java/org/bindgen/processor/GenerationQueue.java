@@ -41,7 +41,7 @@ public class GenerationQueue {
 	public GenerationQueue() {
 		this.logEnabled = getConfig().logEnabled();
 		this.skipExistingBindingCheck = getConfig().skipExistingBindingCheck();
-		this.skipBindKeyword = getConfig().skipBindgenKeyword();
+		this.skipBindKeyword = getConfig().skipBindKeyword();
 	}
 
 	/** Enqueue <code>element</code> even if it was written during a previous compilation run. */

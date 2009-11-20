@@ -52,6 +52,15 @@ Sometimes you just don't want a property to have a binding generated for it. In 
 
     skipAttribute.com.myapp.FooClass.barProperty=true
 
+Skip Bind Keyword
+-----------------
+
+By default, Bindgen creates a `org.bindgen.BindKeyword` class with a static `bind` method. This `bind` method is overloaded for each class that had bindings generated, so that you can use `bind(this)` and get back a type-safe `Binding` instance.
+
+If you do not want this behavior, set:
+
+    skipBindKeyword=true
+
 Skip Generated Timestamps
 -------------------------
 
