@@ -51,8 +51,8 @@
 	we also need the source included directly into the binary jar instead
 	of packaged separately.
 	-->
-	<target name="gwt-module" depends="compile,ivy.retrieve">
-		<jar destfile="bin/jars/bindgen-gwt-module.jar">
+	<target name="gwt-jar" depends="compile,ivy.retrieve">
+		<jar destfile="bin/jars/bindgen-gwt.jar">
 			<fileset dir="bin/main" includes="**/*.class"/>
 			<fileset dir="src/main/java" includes="**/*" excludes="**/*.java"/>
 			<fileset dir="src/main/java" includes="org/bindgen/*.java,org/bindgen/binding/*.java" />
