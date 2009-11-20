@@ -50,8 +50,8 @@ public class BindgenConfig {
 		return this.isEnabled("log");
 	}
 
-	public boolean skipBindgenKeyword() {
-		return this.isEnabled("skipBindgenKeyword");
+	public boolean skipBindKeyword() {
+		return this.isEnabled("skipBindKeyword");
 	}
 
 	public boolean skipExistingBindingCheck() {
@@ -80,6 +80,11 @@ public class BindgenConfig {
 			attempts += ",java.lang.Runnable";
 		}
 		return attempts.split(",");
+	}
+
+	/** @return whether the {@code @Generated} annotations should be added to the source output */
+	public boolean skipGeneratedTimestamps() {
+		return this.isEnabled("skipGeneratedTimestamps");
 	}
 
 	/** @return whether the field/method {@code name} of {@code element} should be skipped */

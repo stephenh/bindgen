@@ -6,12 +6,20 @@ title: Changelog
 Changelog
 =========
 
-## master - unreleased
+## 2.4 - 2009-11-19
 
-* Add package-based scope to reduce recursive sprawl (Igor Vaynberg)
-* Generate bindings in the same package as their class, except for `java.*` (Igor Vaynberg)
-* Load configuration from `bindgen.properties`
-* Misc refactoring
+* Changed: Bindings are now generated in the same package as their target class, except for `java.*` (Igor Vaynberg)
+* Changed: Bindings now include bindings for their target class's package private and protected members (Igor Vaynberg)
+* Changed: the `skipBindgenKeyword` setting is now `skipBindKeyword`
+* New: a package-based [scope](config.html) setting to reduce Bindgen's recursive sprawl (Igor Vaynberg)
+* New: Settings are automatically loaded from an optional `bindgen.properties` in the project's root directory
+* New: `javac` is automatically detected so `skipExistingBindingCheck` does not need to be explicitly set anymore
+* New: `Binding.getPath()` method returns an OGNL-like representation of the binding
+* New: `Binding.toString()` implementation returns a pretty representation of the binding
+* New: `Binding.getIsSafe()` method to detect whether `get`/`set` calls will cause `NPEs`
+* New: `Binding.getSafely()` method to return `null` instead of `NPE` if a parent value is not set
+* New: [skipGeneratedTimestamps](config.html) setting
+* New: experimental `bindgen.gwt.xml` for using Bindgen in GWT
 
 ## 2.3 - 2009-11-11
 

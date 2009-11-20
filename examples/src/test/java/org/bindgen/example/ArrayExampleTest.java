@@ -23,7 +23,7 @@ public class ArrayExampleTest extends TestCase {
 
 	public void testToString() {
 		ArrayExampleBinding b = new ArrayExampleBinding();
-		Assert.assertEquals("ArrayExampleBinding(null).bar", b.bar().toString());
+		Assert.assertEquals("ArrayExampleBinding(null).bar()", b.bar().toString());
 		Assert.assertEquals("bar", b.bar().getPath());
 	}
 }

@@ -1,15 +1,16 @@
-package org.bindgen;
+package org.bindgen.binding;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import org.bindgen.Binding;
+import org.bindgen.BindingRoot;
 
 /**
  * A base implementation of {@link BindingRoot} to hold the starting
  * <code>T</code> value for evaluating bindings paths.
  */
 public abstract class AbstractBinding<R, T> implements BindingRoot<R, T> {
-
-	private static final long serialVersionUID = 1L;
 
 	protected T _value;
 
@@ -41,9 +42,24 @@ public abstract class AbstractBinding<R, T> implements BindingRoot<R, T> {
 	@Override
 	public String toString() {
 		if (this.getParentBinding() == null) {
-			return this.getClass().getSimpleName() + "(" + this.get() + ")";
+			// This is kind of lame, but GWT doesn't support getSimpleName, so use getName
+			String className = this.getClass().getName();
+			String simpleName = className.substring(className.lastIndexOf(".") + 1);
+			return simpleName + "(" + this.get() + ")";
 		} else {
-			return this.getParentBinding().toString() + "." + this.getName();
+			Object value = this.getIsSafe() ? this.get() : "";
+			return this.getParentBinding().toString() + "." + this.getName() + "(" + value + ")";
+		}
+	}
+
+	@Override
+	public boolean getIsSafe() {
+		if (this.getParentBinding() == null) {
+			return true;
+		} else if (this.getParentBinding().getIsSafe()) {
+			return this.getParentBinding().get() != null;
+		} else {
+			return false;
 		}
 	}
 
@@ -57,4 +73,14 @@ public abstract class AbstractBinding<R, T> implements BindingRoot<R, T> {
 			return this.getParentBinding().getPath() + "." + this.getName();
 		}
 	}
+
+	@Override
+	public T getSafely() {
+		if (this.getIsSafe()) {
+			return this.get();
+		} else {
+			return null;
+		}
+	}
+
 }

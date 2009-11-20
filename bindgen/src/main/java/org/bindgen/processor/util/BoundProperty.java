@@ -18,7 +18,7 @@ import joist.util.Copy;
 import joist.util.Inflector;
 import joist.util.Join;
 
-import org.bindgen.AbstractBinding;
+import org.bindgen.binding.AbstractBinding;
 import org.bindgen.binding.GenericObjectBindingPath;
 import org.bindgen.processor.CurrentEnv;
 

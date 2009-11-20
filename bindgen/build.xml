@@ -34,7 +34,7 @@
 		<mkdir dir="bin/jars"/>
 		<jarjar destfile="bin/jars/bindgen.jar">
 			<fileset dir="bin/main" includes="**/*.class"/>
-			<zipfileset src="bin/lib/build/joist.util.jar" includes="joist/sourcegen/**/*.class,joist/util/**/*.class"/>
+			<zipfileset src="bin/lib/build/jars/joist.util.jar" includes="joist/sourcegen/**/*.class,joist/util/**/*.class"/>
 			<zipfileset dir="META-INF" includes="**/*" prefix="META-INF"/>
 			<rule pattern="joist.sourcegen.*" result="org.bindgen.dependencies.sourcegen.Bindgen@1"/>
 			<rule pattern="joist.util.*" result="org.bindgen.dependencies.util.Bindgen@1"/>
@@ -43,6 +43,23 @@
 		<zip destfile="bin/sources/bindgen.jar">
 			<fileset dir="src/main/java" includes="**/*.java"/>
 		</zip>
+	</target>
+
+	<!--
+	Use a separate task to build the gwt version because gwt would not
+	like the jarjar package rewriting (source would not be found) and
+	we also need the source included directly into the binary jar instead
+	of packaged separately.
+	-->
+	<target name="gwt-jar" depends="compile,ivy.retrieve">
+		<jar destfile="bin/jars/bindgen-gwt.jar">
+			<fileset dir="bin/main" includes="**/*.class"/>
+			<fileset dir="src/main/java" includes="**/*" excludes="**/*.java"/>
+			<fileset dir="src/main/java" includes="org/bindgen/*.java,org/bindgen/binding/*.java" />
+			<zipfileset src="lib/build/joist.util-abef8bb.jar" includes="joist/sourcegen/**/*.class,joist/util/**/*.class"/>
+			<zipfileset src="lib/build/joist.util-sources-abef8bb.jar" includes="joist/sourcegen/**/*.java,joist/util/**/*.java"/>
+			<zipfileset dir="META-INF" includes="**/*" prefix="META-INF"/>
+		</jar>
 	</target>
 
 </project>

@@ -11,11 +11,19 @@ public class Parents {
 		public String getBaz() {
 			return "baz";
 		}
+
+		public String toString() {
+			return "foo";
+		}
 	}
 
 	@Bindable
 	public static class FooChild {
 		public Foo foo;
+
+		public String toString() {
+			return "child";
+		}
 	}
 
 	@Bindable

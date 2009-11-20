@@ -6,7 +6,7 @@ import javax.lang.model.type.TypeMirror;
 
 import joist.util.Join;
 
-import org.bindgen.AbstractBinding;
+import org.bindgen.binding.AbstractBinding;
 import org.bindgen.processor.CurrentEnv;
 
 /** Given a TypeMirror type of a field/method property, provides information about its binding outer/inner class. */
