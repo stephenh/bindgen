@@ -3,7 +3,6 @@ package org.bindgen.binding;
 import java.util.Collections;
 import java.util.List;
 
-import org.bindgen.AbstractBinding;
 import org.bindgen.Binding;
 
 /**

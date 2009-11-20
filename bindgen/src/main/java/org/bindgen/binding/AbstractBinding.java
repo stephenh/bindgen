@@ -1,7 +1,10 @@
-package org.bindgen;
+package org.bindgen.binding;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import org.bindgen.Binding;
+import org.bindgen.BindingRoot;
 
 /**
  * A base implementation of {@link BindingRoot} to hold the starting
