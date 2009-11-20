@@ -92,6 +92,9 @@ public class BindingClassGenerator {
 	}
 
 	private void addGeneratedTimestamp() {
+		if (getConfig().skipGeneratedTimestamps()) {
+			return;
+		}
 		String value = Processor.class.getName();
 		String date = new SimpleDateFormat("dd MMM yyyy hh:mm").format(new Date());
 		this.pathBindingClass.addImports(Generated.class);

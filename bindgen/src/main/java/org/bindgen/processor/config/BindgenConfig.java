@@ -82,6 +82,11 @@ public class BindgenConfig {
 		return attempts.split(",");
 	}
 
+	/** @return whether the {@code @Generated} annotations should be added to the source output */
+	public boolean skipGeneratedTimestamps() {
+		return this.isEnabled("skipGeneratedTimestamps");
+	}
+
 	/** @return whether the field/method {@code name} of {@code element} should be skipped */
 	public boolean skipAttribute(Element element, String name) {
 		return this.isEnabled("skipAttribute." + element.toString() + "." + name);

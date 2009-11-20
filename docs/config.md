@@ -52,6 +52,15 @@ Sometimes you just don't want a property to have a binding generated for it. In 
 
     skipAttribute.com.myapp.FooClass.barProperty=true
 
+Skip Generated Timestamps
+-------------------------
+
+By default, Bindgen puts a `@Generated` annotation in the source output of any bindings it generates. This identifies Bindgen as the originator of the source and also the timestamp of when it was created.
+
+If you don't want the `@Generated` put, you can set the property:
+
+    skipGeneratedTimestamps=true
+
 Fix Raw Types
 -------------
 
