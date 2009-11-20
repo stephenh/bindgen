@@ -1,0 +1,59 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en-us">
+	<head>
+		<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+		<title>{{ page.title }}</title>
+		<style type="text/css">
+			body {
+				margin-top: 1.0em;
+				font-family: "helvetica";
+			}
+			#container {
+				margin: 0 auto;
+				width: 40em;
+			}
+			li {
+				margin-bottom: 1em;
+			}
+		</style>
+	</head>
+	<body>
+		<div id="container">
+			<div id="nav" style="text-align: center;">
+				<a href="/">home</a>
+				<a href="/examples.html">examples</a>
+				<a href="/setup.html">setup</a>
+				<a href="/config.html">config</a>
+				<a href="/changelog.html">changelog</a>
+				<a href="/screencasts.html">screencasts</a>
+				<a href="/performance.html">performance</a>
+				<a href="/building.html">building</a>
+			</div>
+
+			{{ content }}
+		</div>
+		<!-- syntax highlighting CSS --> 
+		<link rel="stylesheet" href="/css/shCore.css" type="text/css" />
+		<link type="text/css" rel="stylesheet" href="/css/shThemeDefault.css"></link>
+		<script type="text/javascript" src="/js/shCore.js"></script>
+		<script type="text/javascript" src="/js/shLegacy.js"></script>
+		<script type="text/javascript" src="/js/shBrushJava.js"></script>
+		<script type="text/javascript" src="/js/shBrushXml.js"></script>
+		<script type="text/javascript">
+			dp.SyntaxHighlighter.ClipboardSwf = '/js/clipboard.swf';
+			dp.SyntaxHighlighter.HighlightAll('code');
+		</script>
+
+
+		<script type="text/javascript">
+			var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+			document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+		</script>
+		<script type="text/javascript">
+			try {
+				var pageTracker = _gat._getTracker("UA-168996-4");
+				pageTracker._trackPageview();
+			} catch(err) {}
+		</script>
+	</body>
+</html>

@@ -3,10 +3,6 @@ package org.bindgen.example.inheritance;
 import junit.framework.Assert;
 import junit.framework.TestCase;
 
-import org.bindgen.example.inheritance.SubExample;
-
-import bindgen.org.bindgen.example.inheritance.SubExampleBinding;
-
 public class BaseExampleTest extends TestCase {
 
 	public void testSubBindings() {

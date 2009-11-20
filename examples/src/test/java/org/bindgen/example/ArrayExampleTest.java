@@ -3,10 +3,6 @@ package org.bindgen.example;
 import junit.framework.Assert;
 import junit.framework.TestCase;
 
-import org.bindgen.example.ArrayExample;
-
-import bindgen.org.bindgen.example.ArrayExampleBinding;
-
 public class ArrayExampleTest extends TestCase {
 
 	public void testPrimitive() {
@@ -25,4 +21,9 @@ public class ArrayExampleTest extends TestCase {
 		Assert.assertTrue(a.fooBig[0]);
 	}
 
+	public void testToString() {
+		ArrayExampleBinding b = new ArrayExampleBinding();
+		Assert.assertEquals("ArrayExampleBinding(null).bar()", b.bar().toString());
+		Assert.assertEquals("bar", b.bar().getPath());
+	}
 }

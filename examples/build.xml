@@ -25,10 +25,6 @@
 			<compilerarg value="bin/apt-javac"/>
 			<compilerarg value="-processor"/>
 			<compilerarg value="org.bindgen.processor.Processor"/>
-			<compilerarg value="-Abindgen.skipExistingBindingCheck=true"/> <!-- for javac -->
-			<compilerarg value="-AblockTypes=org.bindgen.example.blocks.TransactionBlock"/>
-			<compilerarg value="-AfixRawType.org.bindgen.example.fixRawTypes.RawTypesExample.methodFixed=String"/>
-			<compilerarg value="-AfixRawType.org.bindgen.example.fixRawTypes.RawTypesExample.fieldFixed=String"/>
 			<compilerarg value="-XprintRounds"/>
 		</javac>
 		<!-- now tests -->

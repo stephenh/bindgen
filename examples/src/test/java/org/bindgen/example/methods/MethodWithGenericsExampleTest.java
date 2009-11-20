@@ -6,10 +6,6 @@ import java.util.List;
 import junit.framework.Assert;
 import junit.framework.TestCase;
 
-import org.bindgen.example.methods.MethodWithGenericsExample;
-
-import bindgen.org.bindgen.example.methods.MethodWithGenericsExampleBinding;
-
 public class MethodWithGenericsExampleTest extends TestCase {
 
 	public void testReadWrite() {

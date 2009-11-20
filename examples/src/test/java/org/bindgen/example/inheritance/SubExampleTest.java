@@ -4,12 +4,6 @@ import junit.framework.Assert;
 import junit.framework.TestCase;
 
 import org.bindgen.Binding;
-import org.bindgen.example.inheritance.SubExample;
-import org.bindgen.example.inheritance.SubHolder;
-
-import bindgen.org.bindgen.example.inheritance.BaseExampleBinding;
-import bindgen.org.bindgen.example.inheritance.SubExampleBinding;
-import bindgen.org.bindgen.example.inheritance.SubHolderBinding;
 
 public class SubExampleTest extends TestCase {
 

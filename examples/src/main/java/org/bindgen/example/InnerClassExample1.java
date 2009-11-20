@@ -1,8 +1,7 @@
 package org.bindgen.example;
 
 import org.bindgen.Bindable;
-
-import bindgen.org.bindgen.example.innerClassExample1.InnerClassBinding;
+import org.bindgen.example.innerClassExample1.InnerClassBinding;
 
 public class InnerClassExample1 {
 

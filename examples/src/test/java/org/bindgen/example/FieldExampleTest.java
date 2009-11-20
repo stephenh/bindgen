@@ -6,9 +6,6 @@ import junit.framework.Assert;
 import junit.framework.TestCase;
 
 import org.bindgen.ContainerBinding;
-import org.bindgen.example.FieldExample;
-
-import bindgen.org.bindgen.example.FieldExampleBinding;
 
 public class FieldExampleTest extends TestCase {
 

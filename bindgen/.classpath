@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
-	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="src" path="src/main/java"/>
+	<classpathentry kind="src" path="src/test/java"/>
 	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.6"/>
-	<classpathentry kind="lib" path="lib/build/joist.util-0.3.jar" sourcepath="lib/build/joist.util-sources-0.3.jar"/>
+	<classpathentry kind="lib" path="lib/build/joist.util-abef8bb.jar" sourcepath="lib/build/joist.util-sources-abef8bb.jar"/>
+	<classpathentry kind="lib" path="lib/build/junit-4.7.jar" sourcepath="lib/build/junit-4.7-sources.jar"/>
 	<classpathentry kind="output" path="bin/eclipse"/>
 </classpath>

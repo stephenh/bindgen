@@ -3,10 +3,6 @@ package org.bindgen.example.subpackage;
 import junit.framework.Assert;
 import junit.framework.TestCase;
 
-import org.bindgen.example.subpackage.PackageExample;
-
-import bindgen.org.bindgen.example.subpackage.PackageExampleBinding;
-
 public class PackageExampleTest extends TestCase {
 
 	public void testReadWrite() {
