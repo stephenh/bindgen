@@ -18,17 +18,21 @@
  */
 package org.bindgen.wicket.phonebook.web.page;
 
+
 import static org.bindgen.BindKeyword.*;
-import static org.bindgen.wicket.phonebook.web.FormUtil.*;
+import static org.bindgen.wicket.Bindings.*;
 
 import org.apache.wicket.Page;
 import org.apache.wicket.markup.html.form.Button;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.model.IModel;
+import org.apache.wicket.model.ResourceModel;
 import org.apache.wicket.spring.injection.annot.SpringBean;
 import org.apache.wicket.util.collections.MicroMap;
 import org.apache.wicket.util.string.interpolator.MapVariableInterpolator;
+import org.apache.wicket.validation.validator.EmailAddressValidator;
+import org.apache.wicket.validation.validator.StringValidator;
 import org.bindgen.Bindable;
 import org.bindgen.wicket.phonebook.Contact;
 import org.bindgen.wicket.phonebook.ContactDao;
@@ -67,36 +71,36 @@ public class EditContactPage extends BasePage
         Form< ? > form = new Form<Void>("contactForm");
         add(form);
 
-        form.add(required(maxlen(new TextField<String>("firstname", model(bind(this).contact()
-                .firstname())), 32)));
+        form.add(new TextField<String>("firstname", model(bind(this).contact().firstname()))
+                .setRequired(true).add(StringValidator.maximumLength(32)));
 
-        form.add(required(maxlen(new TextField<String>("lastname", model(bind(this).contact()
-                .lastname())), 32)));
+        form.add(new TextField<String>("lastname", model(bind(this).contact().lastname()))
+                .setRequired(true).add(StringValidator.maximumLength(32)));
 
+        form.add(new TextField<String>("phone", model(bind(this).contact().phone())).setRequired(
+                true).add(StringValidator.maximumLength(16)));
 
-        form.add(required(maxlen(
-                new TextField<String>("phone", model(bind(this).contact().phone())), 16)));
+        form.add(new TextField<String>("email", model(bind(this).contact().email()))
+                .setRequired(true).add(StringValidator.maximumLength(128)).add(
+                        EmailAddressValidator.getInstance()));
 
-        form.add(email(maxlen(new TextField<String>("email",
-                model(bind(this).contact().email())), 128)));
-
-        form.add(cancel(labelled(new Button("cancel")
+        form.add(new Button("cancel", new ResourceModel("cancel"))
         {
             @Override
             public void onSubmit()
             {
                 onCancel();
             }
-        }, "cancel")));
+        }.setDefaultFormProcessing(false));
 
-        form.add(labelled(new Button("save")
+        form.add(new Button("save", new ResourceModel("save"))
         {
             @Override
             public void onSubmit()
             {
                 onSave();
             }
-        }, "save"));
+        });
     }
 
 
@@ -105,7 +109,7 @@ public class EditContactPage extends BasePage
         String msg = getLocalizer().getString("status.cancel", this);
         getSession().info(msg);
         setResponsePage(EditContactPage.this.backPage);
-      
+
     }
 
     private void onSave()

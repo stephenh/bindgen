@@ -48,7 +48,7 @@
 	<!--
 		setup contact dao
 	-->
-	<bean id="contactDaoTarget" class="wicket.contrib.phonebook.HibernateContactDao">
+	<bean id="contactDaoTarget" class="org.bindgen.wicket.phonebook.HibernateContactDao">
 		<property name="sessionFactory" ref="sessionFactory"/>
 	</bean>
 
@@ -67,13 +67,13 @@
 
 
 	<!-- setup data generator that will add some data into the db when the app starts up -->
-	<bean id="dataGenerator" class="wicket.contrib.phonebook.DataGenerator">
+	<bean id="dataGenerator" class="org.bindgen.wicket.phonebook.DataGenerator">
 		<property name="contactDao" ref="contactDao"/>
 		<property name="count" value="35"/>
 	</bean>
 
     <!-- setup wicket application -->
-    <bean id="wicketApplication" class="wicket.contrib.phonebook.web.PhonebookApplication">
+    <bean id="wicketApplication" class="org.bindgen.wicket.phonebook.web.PhonebookApplication">
     </bean>
 
 </beans>

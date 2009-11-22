@@ -3,7 +3,7 @@
     "-//Hibernate/Hibernate Mapping DTD//EN"
     "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd" >
     
-<hibernate-mapping package="wicket.contrib.phonebook" default-access="field">
+<hibernate-mapping package="org.bindgen.wicket.phonebook" default-access="field">
     <class name="Contact" table="contact">
         <cache usage="read-write"/>
         <id name="id">

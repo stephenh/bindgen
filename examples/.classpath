@@ -1,14 +1,9 @@
-<?xml version="1.0" encoding="UTF-8"?>
 <classpath>
-	<classpathentry kind="src" path="src/main/java"/>
-	<classpathentry kind="src" path="src/test/java"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
-	<classpathentry kind="lib" path="lib/junit-3.8.2.jar" sourcepath="lib/junit-3.8.2.zip"/>
-	<classpathentry kind="lib" path="lib/annotations.jar"/>
-	<classpathentry kind="src" path="bin/apt">
-		<attributes>
-			<attribute name="optional" value="true"/>
-		</attributes>
-	</classpathentry>
-	<classpathentry kind="output" path="bin/eclipse"/>
+  <classpathentry kind="src" path="src/main/java"/>
+  <classpathentry kind="src" path="src/test/java" output="target/test-classes"/>
+  <classpathentry kind="src" path="target/generated-sources/apt/main/java"/>
+  <classpathentry kind="output" path="target/classes"/>
+  <classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+  <classpathentry kind="var" path="M2_REPO/org/bindgen/bindgen/SNAPSHOT/bindgen-SNAPSHOT.jar" sourcepath="M2_REPO/org/bindgen/bindgen/SNAPSHOT/bindgen-SNAPSHOT-sources.jar"/>
+  <classpathentry kind="var" path="M2_REPO/junit/junit/4.7/junit-4.7.jar" sourcepath="M2_REPO/junit/junit/4.7/junit-4.7-sources.jar"/>
 </classpath>
