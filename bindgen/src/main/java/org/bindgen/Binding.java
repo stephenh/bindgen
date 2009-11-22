@@ -1,5 +1,6 @@
 package org.bindgen;
 
+import java.io.Serializable;
 import java.util.List;
 
 /**
@@ -7,7 +8,7 @@ import java.util.List;
  *
  * @param T the type of the leaf object of the binding
  */
-public interface Binding<T> extends NamedBinding {
+public interface Binding<T> extends NamedBinding, Serializable {
 
 	/** @return the value for this binding */
 	T get();
