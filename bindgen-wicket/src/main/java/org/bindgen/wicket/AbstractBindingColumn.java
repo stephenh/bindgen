@@ -16,99 +16,29 @@
  */
 package org.bindgen.wicket;
 
+import org.apache.wicket.Component;
 import org.apache.wicket.extensions.markup.html.repeater.data.grid.ICellPopulator;
-import org.apache.wicket.extensions.markup.html.repeater.data.table.AbstractColumn;
+import org.apache.wicket.extensions.markup.html.repeater.data.table.IStyledColumn;
+import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.repeater.Item;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.ResourceModel;
+import org.apache.wicket.util.string.Strings;
+import org.bindgen.Binding;
 import org.bindgen.BindingRoot;
 
-
-/**
- * A convenience implementation of column that adds a label to the cell whose model is determined by
- * the provided bindgen binding that is evaluated against the current row's model object
- * <p>
- * Example
- * 
- * <pre>
- * columns[0] = new PropertyColumn(new Model&lt;String&gt;(&quot;First Name&quot;), new PersonBinding().firstName());
- * </pre>
- * 
- * @see BindingRootModel
- * 
- * @author igor.vaynberg
- * @param <T>
- *            The type of the binding
- * 
- */
-public abstract class AbstractBindingColumn<R, T> extends AbstractColumn<R>
+public abstract class AbstractBindingColumn<R, T> implements IStyledColumn<R>
 {
     private static final long serialVersionUID = 1L;
 
     private final BindingRoot<R, ? extends T> binding;
+    private String sortProperty;
+    private IModel<String> header;
 
-    /**
-     * Creates a property column that is also sortable
-     * 
-     * @param displayModel
-     *            display model
-     * @param sortProperty
-     *            sort property
-     * @param binding
-     *            binding
-     */
-    public AbstractBindingColumn(IModel<String> displayModel, String sortProperty,
-            BindingRoot<R, ? extends T> binding)
+    public AbstractBindingColumn(BindingRoot<R, ? extends T> binding)
     {
-        super(displayModel, sortProperty);
         this.binding = binding;
     }
-
-    /**
-     * Creates a non sortable property column
-     * 
-     * @param displayModel
-     *            display model
-     * @param binding
-     *            binding
-     */
-    public AbstractBindingColumn(IModel<String> displayModel, BindingRoot<R, ? extends T> binding)
-    {
-        super(displayModel, null);
-        this.binding = binding;
-    }
-
-
-    /**
-     * Creates a property column that is also sortable
-     * 
-     * @param displayModel
-     *            display model
-     * @param sortProperty
-     *            sort property
-     * @param binding
-     *            binding
-     */
-    public AbstractBindingColumn(String headerKey, String sortProperty, BindingRoot<R,? extends T> binding)
-    {
-        super(new ResourceModel(headerKey), sortProperty);
-        this.binding = binding;
-    }
-
-    /**
-     * Creates a non sortable property column
-     * 
-     * @param displayModel
-     *            display model
-     * @param binding
-     *            binding
-     */
-    public AbstractBindingColumn(String headerKey, BindingRoot<R, ? extends T> binding)
-    {
-        super(new ResourceModel(headerKey), null);
-        this.binding = binding;
-    }
-
 
     /**
      * {@inheritDoc}
@@ -117,7 +47,8 @@ public abstract class AbstractBindingColumn<R, T> extends AbstractColumn<R>
      */
     public void populateItem(Item<ICellPopulator<R>> item, String componentId, IModel<R> rowModel)
     {
-        populateItem(item, componentId, new BindingRootModel<R, T>(rowModel, (BindingRoot<R, T>)binding));
+        populateItem(item, componentId, new BindingRootModel<R, T>(rowModel,
+                (BindingRoot<R, T>)binding));
     }
 
     /**
@@ -134,5 +65,65 @@ public abstract class AbstractBindingColumn<R, T> extends AbstractColumn<R>
     protected abstract void populateItem(Item<ICellPopulator<R>> item, String componentId,
             BindingRootModel<R, T> model);
 
+    public String getCssClass()
+    {
+        return null;
+    }
+
+    public void detach()
+    {
+
+    }
+
+    public Component getHeader(String componentId)
+    {
+        if (header != null)
+        {
+            return new Label(componentId, header);
+        }
+        else
+        {
+            return new Label(componentId, "");
+        }
+    }
+
+    public String getSortProperty()
+    {
+        return sortProperty;
+    }
+
+    public boolean isSortable()
+    {
+        return !Strings.isEmpty(sortProperty);
+    }
+
+    public AbstractBindingColumn<R, T> setSort(String sortProperty)
+    {
+        this.sortProperty = sortProperty;
+        return this;
+    }
+
+    public AbstractBindingColumn<R, T> setSort(Binding< ? > binding)
+    {
+        return setSort(binding.getPath());
+    }
+
+
+    public AbstractBindingColumn<R, T> setHeader(IModel<String> header)
+    {
+        this.header = header;
+        return this;
+    }
+
+    public AbstractBindingColumn<R, T> setHeader(String headerKey)
+    {
+        return setHeader(new ResourceModel(headerKey));
+    }
+
+    public AbstractBindingColumn<R, T> setSortToData()
+    {
+        setSort(binding);
+        return this;
+    }
 
 }

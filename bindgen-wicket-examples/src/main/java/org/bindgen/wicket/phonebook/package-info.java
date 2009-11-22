@@ -30,5 +30,5 @@
  *   <li>All Hibernate session management and transaction management is handled by Spring.</li>
  * </ul>
  */
-package wicket.contrib.phonebook;
+package org.bindgen.wicket.phonebook;
 

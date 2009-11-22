@@ -20,5 +20,5 @@
 /**
  * <p>Application level classes.</p>
  */
-package wicket.contrib.phonebook.web;
+package org.bindgen.wicket.phonebook.web;
 

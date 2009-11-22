@@ -16,12 +16,12 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package wicket.contrib.phonebook.web;
+package org.bindgen.wicket.phonebook.web;
 
 import org.apache.wicket.model.LoadableDetachableModel;
+import org.bindgen.wicket.phonebook.Contact;
+import org.bindgen.wicket.phonebook.ContactDao;
 
-import wicket.contrib.phonebook.Contact;
-import wicket.contrib.phonebook.ContactDao;
 
 /**
  * Detachable, read-only Contact model. Ensures that memory used to load the

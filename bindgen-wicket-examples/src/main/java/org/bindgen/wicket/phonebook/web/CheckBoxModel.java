@@ -16,7 +16,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package wicket.contrib.phonebook.web;
+package org.bindgen.wicket.phonebook.web;
 
 import java.io.Serializable;
 import java.util.Collection;

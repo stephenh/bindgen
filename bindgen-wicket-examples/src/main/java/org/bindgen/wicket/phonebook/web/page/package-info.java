@@ -20,5 +20,5 @@
 /**
  * <p>Page-specific classes.</p>
  */
-package wicket.contrib.phonebook.web.page;
+package org.bindgen.wicket.phonebook.web.page;
 

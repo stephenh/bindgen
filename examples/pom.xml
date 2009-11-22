@@ -1,34 +1,31 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
  <modelVersion>4.0.0</modelVersion>
+ <parent>
  <groupId>org.bindgen</groupId>
- <artifactId>examples</artifactId>
- <version>2.3-SNAPSHOT</version>
+ <artifactId>bindgen-parent</artifactId>
+ <version>2.5-SNAPSHOT</version>
+ </parent>
+ <artifactId>bindgen-examples</artifactId>
  <packaging>jar</packaging>
  <name>Bindgen Examples</name>
  <dependencies>
   <dependency>
    <groupId>org.bindgen</groupId>
    <artifactId>bindgen</artifactId>
-   <version>SNAPSHOT</version>
   </dependency>
   <dependency>
    <groupId>junit</groupId>
    <artifactId>junit</artifactId>
-   <version>3.8.2</version>
-   <scope>test</scope>
   </dependency>
  </dependencies>
  <properties>
-  <maven.processor.version>1.1</maven.processor.version>
-  <bindgen.properties>-XprintRounds</bindgen.properties>
  </properties>
  <build>
   <plugins>
    <plugin>
     <groupId>org.bsc.maven</groupId>
     <artifactId>maven-processor-plugin</artifactId>
-    <version>${maven.processor.version}</version>
     <executions>
      <execution>
       <id>process</id>
@@ -36,9 +33,6 @@
        <goal>process</goal>
       </goals>
       <phase>generate-sources</phase>
-      <configuration>
-       <compilerArguments>${bindgen.properties}</compilerArguments>
-      </configuration>
      </execution>
     </executions>
     <dependencies/>
@@ -46,7 +40,6 @@
    <plugin>
     <groupId>org.bsc.maven</groupId>
     <artifactId>maven-processor-plugin</artifactId>
-    <version>${maven.processor.version}</version>
     <executions>
      <execution>
       <id>process-test</id>
@@ -54,39 +47,10 @@
        <goal>process-test</goal>
       </goals>
       <phase>generate-test-sources</phase>
-      <configuration>
-       <compilerArguments>${bindgen.properties}</compilerArguments>
-      </configuration>
      </execution>
     </executions>
     <dependencies/>
    </plugin>
-   <plugin>
-    <groupId>org.apache.maven.plugins</groupId>
-    <artifactId>maven-compiler-plugin</artifactId>
-    <configuration>
-     <source>1.6</source>
-     <target>1.6</target>
-     <compilerArgument>-proc:none</compilerArgument>
-    </configuration>
-   </plugin>
   </plugins>
  </build>
- <repositories>
-  <repository>
-   <id>org.bindgen</id>
-   <name>Bindgen Repository</name>
-   <layout>default</layout>
-   <url>http://repo.joist.ws</url>
-   <snapshots>
-    <enabled>false</enabled>
-   </snapshots>
-  </repository>
- </repositories>
- <pluginRepositories>
-  <pluginRepository>
-   <id>maven-annotation-plugin</id>
-   <url>http://maven-annotation-plugin.googlecode.com/svn/trunk/mavenrepo</url>
-  </pluginRepository>
- </pluginRepositories>
 </project>

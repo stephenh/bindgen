@@ -16,7 +16,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package wicket.contrib.phonebook.web;
+package org.bindgen.wicket.phonebook.web;
 
 import java.util.Iterator;
 
@@ -24,10 +24,10 @@ import org.apache.wicket.extensions.markup.html.repeater.data.table.filter.IFilt
 import org.apache.wicket.extensions.markup.html.repeater.util.SortParam;
 import org.apache.wicket.extensions.markup.html.repeater.util.SortableDataProvider;
 import org.apache.wicket.model.IModel;
+import org.bindgen.wicket.phonebook.Contact;
+import org.bindgen.wicket.phonebook.ContactDao;
+import org.bindgen.wicket.phonebook.QueryParam;
 
-import wicket.contrib.phonebook.Contact;
-import wicket.contrib.phonebook.ContactDao;
-import wicket.contrib.phonebook.QueryParam;
 
 /**
  * note: it is important that the dao passed to the data provider be a proxy

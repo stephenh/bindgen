@@ -16,14 +16,14 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package wicket.contrib.phonebook.web;
+package org.bindgen.wicket.phonebook.web;
 
 import org.apache.wicket.Page;
 import org.apache.wicket.protocol.http.WebApplication;
 import org.apache.wicket.spring.injection.annot.SpringComponentInjector;
+import org.bindgen.wicket.phonebook.web.page.ListContactsPage;
 import org.springframework.context.ApplicationContext;
 
-import wicket.contrib.phonebook.web.page.ListContactsPage;
 
 /**
  * @author Kare Nuorteva

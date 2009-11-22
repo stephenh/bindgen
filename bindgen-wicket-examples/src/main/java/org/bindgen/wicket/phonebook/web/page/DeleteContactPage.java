@@ -16,7 +16,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package wicket.contrib.phonebook.web.page;
+package org.bindgen.wicket.phonebook.web.page;
 
 import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.Page;
@@ -27,9 +27,9 @@ import org.apache.wicket.model.ResourceModel;
 import org.apache.wicket.spring.injection.annot.SpringBean;
 import org.apache.wicket.util.collections.MicroMap;
 import org.apache.wicket.util.string.interpolator.MapVariableInterpolator;
+import org.bindgen.wicket.phonebook.Contact;
+import org.bindgen.wicket.phonebook.ContactDao;
 
-import wicket.contrib.phonebook.Contact;
-import wicket.contrib.phonebook.ContactDao;
 
 /**
  * Delete the Contact.

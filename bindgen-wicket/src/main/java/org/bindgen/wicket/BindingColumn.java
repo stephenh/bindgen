@@ -19,51 +19,16 @@ package org.bindgen.wicket;
 import org.apache.wicket.extensions.markup.html.repeater.data.grid.ICellPopulator;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.repeater.Item;
-import org.apache.wicket.model.IModel;
 import org.bindgen.BindingRoot;
 
 
-/**
- * A convenience implementation of column that adds a label to the cell whose model is determined by
- * the provided bindgen binding that is evaluated against the current row's model object
- * <p>
- * Example
- * 
- * <pre>
- * columns[0] = new StringBindingColumn(new Model&lt;String&gt;(&quot;First Name&quot;), new PersonBinding()
- *         .firstName());
- * </pre>
- * 
- * @see BindingRootModel
- * 
- * @author igor.vaynberg
- * @param <T>
- *            The type of the binding
- * 
- */
+
 public class BindingColumn<R> extends AbstractBindingColumn<R, Object>
 {
 
-
-    public BindingColumn(IModel<String> displayModel, BindingRoot<R, ? extends Object> binding)
+    public BindingColumn(BindingRoot<R, ? extends Object> binding)
     {
-        super(displayModel, binding);
-    }
-
-    public BindingColumn(IModel<String> displayModel, String sortProperty,
-            BindingRoot<R, ? extends Object> binding)
-    {
-        super(displayModel, sortProperty, binding);
-    }
-
-    public BindingColumn(String headerKey, BindingRoot<R, ? extends Object> binding)
-    {
-        super(headerKey, binding);
-    }
-
-    public BindingColumn(String headerKey, String sortProperty, BindingRoot<R, ? extends Object> binding)
-    {
-        super(headerKey, sortProperty, binding);
+        super(binding);
     }
 
     @Override

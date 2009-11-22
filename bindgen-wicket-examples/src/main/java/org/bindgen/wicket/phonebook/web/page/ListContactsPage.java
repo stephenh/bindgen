@@ -16,7 +16,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package wicket.contrib.phonebook.web.page;
+package org.bindgen.wicket.phonebook.web.page;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -43,12 +43,11 @@ import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.model.ResourceModel;
 import org.apache.wicket.spring.injection.annot.SpringBean;
 import org.bindgen.wicket.BindingColumn;
-
-import wicket.contrib.phonebook.Contact;
-import wicket.contrib.phonebook.ContactBinding;
-import wicket.contrib.phonebook.ContactDao;
-import wicket.contrib.phonebook.web.CheckBoxColumn;
-import wicket.contrib.phonebook.web.ContactsDataProvider;
+import org.bindgen.wicket.phonebook.Contact;
+import org.bindgen.wicket.phonebook.ContactBinding;
+import org.bindgen.wicket.phonebook.ContactDao;
+import org.bindgen.wicket.phonebook.web.CheckBoxColumn;
+import org.bindgen.wicket.phonebook.web.ContactsDataProvider;
 
 /**
  * Display a Pageable List of Contacts.
@@ -172,12 +171,14 @@ public class ListContactsPage extends BasePage
 
         });
         columns.add(createActionsColumn());
-        columns.add(new BindingColumn<Contact>("first.name", "firstname", new ContactBinding()
-                .firstname()));
-        columns.add(new BindingColumn<Contact>("last.name", "lastname", new ContactBinding()
-                .lastname()));
-        columns.add(new BindingColumn<Contact>("phone", "phone", new ContactBinding().phone()));
-        columns.add(new BindingColumn<Contact>("email", "email", new ContactBinding().email()));
+        columns.add(new BindingColumn<Contact>(new ContactBinding().firstname()).setHeader(
+                "first.name").setSortToData());
+        columns.add(new BindingColumn<Contact>(new ContactBinding().lastname()).setHeader(
+                "last.name").setSortToData());
+        columns.add(new BindingColumn<Contact>(new ContactBinding().phone()).setHeader("phone")
+                .setSortToData());
+        columns.add(new BindingColumn<Contact>(new ContactBinding().email()).setHeader("email")
+                .setSortToData());
         return columns;
     }
 
