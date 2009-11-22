@@ -28,7 +28,7 @@
   <dependency>
    <groupId>org.bindgen</groupId>
    <artifactId>bindgen</artifactId>
-   <version>2.4</version>
+   <version>SNAPSHOT</version>
   </dependency>
   <dependency>
    <groupId>junit</groupId>
