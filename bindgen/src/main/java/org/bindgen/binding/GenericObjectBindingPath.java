@@ -19,7 +19,7 @@ import org.bindgen.Binding;
  *
  * @param <R> type of root object
  */
-public abstract class GenericObjectBindingPath<R> extends AbstractBinding<R, Object> {
+public abstract class GenericObjectBindingPath<R, T> extends AbstractBinding<R, T> {
 
 	@Override
 	public List<Binding<?>> getChildBindings() {
