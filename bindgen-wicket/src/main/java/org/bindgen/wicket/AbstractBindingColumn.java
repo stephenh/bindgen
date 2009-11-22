@@ -18,6 +18,7 @@ package org.bindgen.wicket;
 
 import org.apache.wicket.Component;
 import org.apache.wicket.extensions.markup.html.repeater.data.grid.ICellPopulator;
+import org.apache.wicket.extensions.markup.html.repeater.data.table.IColumn;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.IStyledColumn;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.repeater.Item;
@@ -27,6 +28,16 @@ import org.apache.wicket.util.string.Strings;
 import org.bindgen.Binding;
 import org.bindgen.BindingRoot;
 
+/**
+ * Base class for {@link IColumn}s that work with bindings
+ * 
+ * @author igor.vaynberg
+ * 
+ * @param <R>
+ *            type of root object represented by the column
+ * @param <T>
+ *            type of object returned by the binding
+ */
 public abstract class AbstractBindingColumn<R, T> implements IStyledColumn<R>
 {
     private static final long serialVersionUID = 1L;
@@ -65,16 +76,19 @@ public abstract class AbstractBindingColumn<R, T> implements IStyledColumn<R>
     protected abstract void populateItem(Item<ICellPopulator<R>> item, String componentId,
             BindingRootModel<R, T> model);
 
+    /** {@inheritDoc} */
     public String getCssClass()
     {
         return null;
     }
 
+    /** {@inheritDoc} */
     public void detach()
     {
 
     }
 
+    /** {@inheritDoc} */
     public Component getHeader(String componentId)
     {
         if (header != null)
@@ -87,39 +101,74 @@ public abstract class AbstractBindingColumn<R, T> implements IStyledColumn<R>
         }
     }
 
+    /** {@inheritDoc} */
     public String getSortProperty()
     {
         return sortProperty;
     }
 
+    /** {@inheritDoc} */
     public boolean isSortable()
     {
         return !Strings.isEmpty(sortProperty);
     }
 
+    /**
+     * Sets sortable property
+     * 
+     * @param sortProperty
+     * @return
+     */
     public AbstractBindingColumn<R, T> setSort(String sortProperty)
     {
         this.sortProperty = sortProperty;
         return this;
     }
 
+    /**
+     * Sets sortable property to the path procuded by the binding, see {@link Binding#getPath()}
+     * 
+     * @param binding
+     * @return
+     */
     public AbstractBindingColumn<R, T> setSort(Binding< ? > binding)
     {
         return setSort(binding.getPath());
     }
 
-
+    /**
+     * Sets header text
+     * 
+     * @param header
+     * @return
+     */
     public AbstractBindingColumn<R, T> setHeader(IModel<String> header)
     {
         this.header = header;
         return this;
     }
 
+    /**
+     * Sets header text to the resource specified by the provided resource key. This is essentially
+     * the same as
+     * 
+     * <pre>
+     * setHeader(new ResourceModel(headerKey));
+     * </pre>
+     * 
+     * @param headerKey
+     * @return
+     */
     public AbstractBindingColumn<R, T> setHeader(String headerKey)
     {
         return setHeader(new ResourceModel(headerKey));
     }
 
+    /**
+     * Sets sort property to the binding path of the binding used by this column
+     * 
+     * @return
+     */
     public AbstractBindingColumn<R, T> setSortToData()
     {
         setSort(binding);

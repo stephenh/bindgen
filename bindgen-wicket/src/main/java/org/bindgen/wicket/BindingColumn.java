@@ -17,12 +17,17 @@
 package org.bindgen.wicket;
 
 import org.apache.wicket.extensions.markup.html.repeater.data.grid.ICellPopulator;
+import org.apache.wicket.extensions.markup.html.repeater.data.table.PropertyColumn;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.repeater.Item;
+import org.bindgen.Binding;
 import org.bindgen.BindingRoot;
 
 
-
+/**
+ * A column that displays the string value of the specified binding. This class is similar to
+ * {@link PropertyColumn}, but uses a {@link Binding} instead of an unsafe string expression
+ */
 public class BindingColumn<R> extends AbstractBindingColumn<R, Object>
 {
 

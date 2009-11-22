@@ -19,25 +19,74 @@ package org.bindgen.wicket;
 import org.apache.wicket.model.IModel;
 import org.bindgen.Binding;
 
+/**
+ * A model that uses a {@link Binding} to push and pull data
+ * 
+ * <p>
+ * Example:
+ * 
+ * <pre>
+ * &#064;Bindable
+ * public class EditPersonPage extends Webpage {
+ *  IModel&lt;Person&gt; person;
+ *  
+ *  public EditPersonPage(IModel&lt;Person&gt; person) {
+ *    this.person=person;
+ *    
+ *    Form&lt;?&gt; form=new Form&lt;Void&gt;("form");
+ *    form.add(new TextField&lt;String&gt;("street1", new BindingModel&lt;String&gt;(new EditPersonPageBinding(this).person().address().street1()));
+ * </pre>
+ * 
+ * or using the shorthand provided by {@link Bindings} class:
+ * 
+ * <pre>
+ * import static org.bindgen.wicket.Bindings.*;
+ * import static org.bindgen.BindKeyword.*;
+ * 
+ * &#064;Bindable
+ * public class EditPersonPage extends Webpage {
+ *  IModel&lt;Person&gt; person;
+ *  
+ *  public EditPersonPage(IModel&lt;Person&gt; person) {
+ *    this.person=person;
+ *    
+ *    Form&lt;?&gt; form=new Form&lt;Void&gt;("form");
+ *    form.add(new TextField&lt;String&gt;("street1", model(bind(this).person().address().street1()));
+ * </pre>
+ * 
+ * </p>
+ * 
+ * @author igor.vaynberg
+ * 
+ * @param <T>
+ */
 public class BindingModel<T> implements IModel<T>
 {
     private final Binding<T> binding;
 
+    /**
+     * Constructor
+     * 
+     * @param binding
+     */
     public BindingModel(Binding<T> binding)
     {
         this.binding = binding;
     }
 
+    /** {@inheritDoc} */
     public T getObject()
     {
         return binding.get();
     }
 
+    /** {@inheritDoc} */
     public void setObject(T object)
     {
         binding.set(object);
     }
 
+    /** {@inheritDoc} */
     public void detach()
     {
     }
