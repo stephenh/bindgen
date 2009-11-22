@@ -6,6 +6,11 @@ title: Changelog
 Changelog
 =========
 
+## 2.5 - 2009-11-22
+
+* Changed: Binding extends `Serializable`
+* Changed: `GenericObjectBindingPath` is parameterized on its bound type `T`
+
 ## 2.4 - 2009-11-19
 
 * Changed: Bindings are now generated in the same package as their target class, except for `java.*` (Igor Vaynberg)
