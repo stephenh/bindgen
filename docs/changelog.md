@@ -6,6 +6,16 @@ title: Changelog
 Changelog
 =========
 
+## master - unreleased
+
+* Changed: Generated binding classes have a `serialVersionUID=1L` to avoid compiler warnings
+* Changed: Moved `org/bindgen.gwt.xml` to `org/bindgen/Bindgen.gwt.xml`
+
+## 2.5 - 2009-11-22
+
+* Changed: Binding extends `Serializable` (Igor Vaynberg)
+* Changed: `GenericObjectBindingPath` is parameterized on its bound type `T` (Igor Vaynberg)
+
 ## 2.4 - 2009-11-19
 
 * Changed: Bindings are now generated in the same package as their target class, except for `java.*` (Igor Vaynberg)
