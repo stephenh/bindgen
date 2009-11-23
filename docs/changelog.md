@@ -6,6 +6,11 @@ title: Changelog
 Changelog
 =========
 
+## master - unreleased
+
+* Changed: Generated binding classes have a `serialVersionUID=1L` to avoid compiler warnings
+* Changed: Moved `org/bindgen.gwt.xml` to `org/bindgen/Bindgen.gwt.xml`
+
 ## 2.5 - 2009-11-22
 
 * Changed: Binding extends `Serializable` (Igor Vaynberg)
