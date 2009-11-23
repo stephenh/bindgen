@@ -52,6 +52,7 @@
 	of packaged separately.
 	-->
 	<target name="gwt-jar" depends="compile,ivy.retrieve">
+		<mkdir dir="bin/jars"/>
 		<jar destfile="bin/jars/bindgen-gwt.jar">
 			<fileset dir="bin/main" includes="**/*.class"/>
 			<fileset dir="src/main/java" includes="**/*" excludes="**/*.java"/>
@@ -59,6 +60,7 @@
 			<zipfileset src="lib/build/joist.util-abef8bb.jar" includes="joist/sourcegen/**/*.class,joist/util/**/*.class"/>
 			<zipfileset src="lib/build/joist.util-sources-abef8bb.jar" includes="joist/sourcegen/**/*.java,joist/util/**/*.java"/>
 			<zipfileset dir="META-INF" includes="**/*" prefix="META-INF"/>
+			<zipfileset dir="src/main/resources" includes="Bindgen.gwt.xml" prefix="org/bindgen"/>
 		</jar>
 	</target>
 
