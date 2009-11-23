@@ -1,87 +1,95 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
- <modelVersion>4.0.0</modelVersion>
- <groupId>org.bindgen</groupId>
- <artifactId>bindgen-parent</artifactId>
- <version>2.5-SNAPSHOT</version>
- <packaging>pom</packaging>
-  <name>Bindgen Parent Project</name>
-  <modules>
-    <module>examples</module>
-    <module>bindgen-wicket</module>
-<module>bindgen-wicket-examples</module>
-  </modules>
- <dependencyManagement>
-  <dependencies>
-<dependency><groupId>org.bindgen</groupId><artifactId>bindgen-wicket</artifactId><version>2.5-SNAPSHOT</version></dependency>
- <dependency>
-                        <groupId>org.apache.wicket</groupId>
-                        <artifactId>wicket</artifactId><version>${wicket.version}</version>
-                </dependency>
-         <dependency> <groupId>org.apache.wicket</groupId>
-                        <artifactId>wicket-extensions</artifactId><version>${wicket.version}</version>
-</dependency>
-                                <dependency>
-                        <groupId>org.apache.wicket</groupId>
-                        <artifactId>wicket-spring</artifactId><version>${wicket.version}</version>
-                </dependency>
-  <dependency>
-   <groupId>org.bindgen</groupId>
-   <artifactId>bindgen</artifactId>
-   <version>SNAPSHOT</version>
-  </dependency>
-  <dependency>
-   <groupId>junit</groupId>
-   <artifactId>junit</artifactId>
-   <version>4.7</version>
-   <scope>test</scope>
-  </dependency>
-  </dependencies>
- </dependencyManagement>
- <properties>
-  <wicket.version>1.4.3</wicket.version>
-  <!--maven.processor.version>1.1</maven.processor.version-->
- </properties>
- <build>
- <resources>
-                        <resource>
-                                <filtering>false</filtering>
-                                <directory>src/main/resources</directory>
-                        </resource>
-                        <resource>
-                                <filtering>false</filtering>
-                                <directory>src/main/java</directory>
-                                <includes>
-                                        <include>**</include>
-                                </includes>
-                                <excludes>
-                                        <exclude>**/*.java</exclude>
-                                </excludes>
-                        </resource>
-                </resources>
-                <testResources>
-                        <testResource>
-                                <filtering>false</filtering>
-                                <directory>src/test/java</directory>
-                                <includes>
-                                        <include>**</include>
-                                </includes>
-                                <excludes>
-                                        <exclude>**/*.java</exclude>
-                                </excludes>
-                        </testResource>
-                </testResources>
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>org.bindgen</groupId>
+	<artifactId>bindgen-parent</artifactId>
+	<version>2.5-SNAPSHOT</version>
+	<packaging>pom</packaging>
+	<name>Bindgen Parent Project</name>
+	<modules>
+		<module>examples</module>
+		<module>bindgen-wicket</module>
+		<module>bindgen-wicket-examples</module>
+	</modules>
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>org.bindgen</groupId>
+				<artifactId>bindgen-wicket</artifactId>
+				<version>2.5-SNAPSHOT</version></dependency>
+			<dependency>
+				<groupId>org.apache.wicket</groupId>
+				<artifactId>wicket</artifactId>
+				<version>${wicket.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.wicket</groupId>
+				<artifactId>wicket-extensions</artifactId>
+				<version>${wicket.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.wicket</groupId>
+				<artifactId>wicket-spring</artifactId>
+				<version>${wicket.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.bindgen</groupId>
+				<artifactId>bindgen</artifactId>
+				<version>SNAPSHOT</version>
+			</dependency>
+			<dependency>
+				<groupId>junit</groupId>
+				<artifactId>junit</artifactId>
+				<version>4.7</version>
+				<scope>test</scope>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
+	<properties>
+		<wicket.version>1.4.3</wicket.version>
+		<!-- maven.processor.version>1.1< /maven.processor.version -->
+	</properties>
+	<build>
+		<resources>
+			<resource>
+				<filtering>false</filtering>
+				<directory>src/main/resources</directory>
+			</resource>
+			<resource>
+				<filtering>false</filtering>
+				<directory>src/main/java</directory>
+				<includes>
+					<include>**</include>
+				</includes>
+				<excludes>
+					<exclude>**/*.java</exclude>
+				</excludes>
+			</resource>
+		</resources>
 
-   <pluginManagement>
-  <plugins>
-   <!--plugin>
-    <groupId>org.bsc.maven</groupId>
-    <artifactId>maven-processor-plugin</artifactId>
-    <version>${maven.processor.version}</version>
-   </plugin-->
-   </plugins>
-   </pluginManagement>
-   <plugins>
+		<testResources>
+			<testResource>
+				<filtering>false</filtering>
+				<directory>src/test/java</directory>
+				<includes>
+					<include>**</include>
+				</includes>
+				<excludes>
+					<exclude>**/*.java</exclude>
+				</excludes>
+			</testResource>
+		</testResources>
+
+		<pluginManagement>
+			<plugins>
+				<!--plugin>
+				<groupId>org.bsc.maven< /groupId>
+				<artifactId>maven-processor-plugin< /artifactId>
+				<version>${maven.processor.version}< /version>
+				< / plugin -->
+			</plugins>
+		</pluginManagement>
+		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-eclipse-plugin</artifactId>
@@ -89,33 +97,34 @@
 					<downloadSources>true</downloadSources>
 				</configuration>
 			</plugin>
-	
-   <plugin>
-    <groupId>org.apache.maven.plugins</groupId>
-    <artifactId>maven-compiler-plugin</artifactId>
-    <configuration>
-     <source>1.6</source>
-     <target>1.6</target>
-     <compilerArgument>-proc:none</compilerArgument>
-    </configuration>
-   </plugin>
-  </plugins>
- </build>
- <repositories>
-  <repository>
-   <id>org.bindgen</id>
-   <name>Bindgen Repository</name>
-   <layout>default</layout>
-   <url>http://repo.joist.ws</url>
-   <snapshots>
-    <enabled>false</enabled>
-   </snapshots>
-  </repository>
- </repositories>
- <pluginRepositories>
-  <pluginRepository>
-   <id>maven-annotation-plugin</id>
-   <url>http://maven-annotation-plugin.googlecode.com/svn/trunk/mavenrepo</url>
-  </pluginRepository>
- </pluginRepositories>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<configuration>
+					<source>1.6</source>
+					<target>1.6</target>
+					<compilerArgument>-proc:none</compilerArgument>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+
+	<repositories>
+		<repository>
+			<id>org.bindgen</id>
+			<name>Bindgen Repository</name>
+			<layout>default</layout>
+			<url>http://repo.joist.ws</url>
+			<snapshots>
+				<enabled>false</enabled>
+			</snapshots>
+		</repository>
+	</repositories>
+
+	<pluginRepositories>
+		<pluginRepository>
+			<id>maven-annotation-plugin</id>
+			<url>http://maven-annotation-plugin.googlecode.com/svn/trunk/mavenrepo</url>
+		</pluginRepository>
+	</pluginRepositories>
 </project>
