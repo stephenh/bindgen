@@ -71,6 +71,7 @@ public class BindingClassGenerator {
 		this.addGetWithRoot();
 
 		this.addGeneratedTimestamp();
+		this.addSerialVersionUID();
 		this.saveCode(this.pathBindingClass);
 		this.saveCode(this.rootBindingClass);
 	}
@@ -249,4 +250,8 @@ public class BindingClassGenerator {
 			|| (type.getQualifiedName().toString().startsWith("java.") && !enclosed.getModifiers().contains(Modifier.PUBLIC));
 	}
 
+	private void addSerialVersionUID() {
+		this.rootBindingClass.getField("serialVersionUID").type("long").setStatic().setFinal().initialValue("1L");
+		this.pathBindingClass.getField("serialVersionUID").type("long").setStatic().setFinal().initialValue("1L");
+	}
 }

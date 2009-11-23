@@ -57,6 +57,7 @@ public class MethodCallableGenerator implements PropertyGenerator {
 		this.addInnerClass();
 		this.addInnerClassMethod();
 		this.addInnerClassGetName();
+		this.addInnerClassSerialVersionUID();
 	}
 
 	private boolean blockTypeMatchesMethod(String attemptClassName) {
@@ -111,6 +112,10 @@ public class MethodCallableGenerator implements PropertyGenerator {
 	private void addInnerClassGetName() {
 		GMethod getName = this.innerClass.getMethod("getName").returnType(String.class);
 		getName.body.line("return \"{}\";", this.methodName);
+	}
+
+	private void addInnerClassSerialVersionUID() {
+		this.innerClass.getField("serialVersionUID").type("long").setStatic().setFinal().initialValue("1L");
 	}
 
 	public String getPropertyName() {
