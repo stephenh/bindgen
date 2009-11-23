@@ -4,6 +4,7 @@
 	</info>
 	<configurations>
 		<conf name="build" visibility="private"/>
+		<conf name="tests" visibility="private"/>
 		<conf name="default"/>
 		<conf name="sources"/>
 		<conf name="gwt" description="gwt-compatible bindgen jar"/>
@@ -16,10 +17,8 @@
 	</publications>
 	<dependencies>
 		<!-- joist.util is jarjar'd into bindgen.jar so we count it as a build dependency. -->
-		<dependency org="joist" name="joist.util" rev="abef8bb" conf="build->default">
-			<artifact name="joist.util" conf="build"/>
-			<artifact name="joist.util-sources" conf="sources"/>
-		</dependency>
-		<dependency org="jarjar" name="jarjar" rev="1.0" conf="build->default"/>
+		<dependency org="joist" name="joist.util" rev="abef8bb" conf="build->default"/>
+		<dependency org="com.tonicsystems" name="jarjar" rev="1.0" conf="build->default"/>
+		<dependency org="junit" name="junit" rev="4.7" conf="tests->default,sources"/>
 	</dependencies>
 </ivy-module>

@@ -11,7 +11,7 @@
 		<javac srcdir="src/main/java" destdir="bin/main" debug="true" nowarn="yes" source="1.6" target="1.6" encoding="utf8">
 			<compilerarg value="-proc:none"/>
 			<classpath>
-				<fileset dir="lib/build" includes="**/*.jar"/>
+				<fileset dir="bin/lib/build/jars" includes="**/*.jar"/>
 			</classpath>
 		</javac>
 	</target>
@@ -30,7 +30,7 @@
 	with this for now.
 	-->
 	<target name="jar" depends="compile,ivy.retrieve" description="jar bin/main/ into bin/jars/bindgen.jar and bin/sources/bindgen.jar">
-		<taskdef name="jarjar" classname="com.tonicsystems.jarjar.JarJarTask" classpath="lib/build/jarjar-1.0.jar"/>
+		<taskdef name="jarjar" classname="com.tonicsystems.jarjar.JarJarTask" classpath="bin/lib/build/jars/jarjar.jar"/>
 		<mkdir dir="bin/jars"/>
 		<jarjar destfile="bin/jars/bindgen.jar">
 			<fileset dir="bin/main" includes="**/*.class"/>
@@ -53,6 +53,32 @@
 			<fileset dir="src/main/java" includes="org/bindgen/*.java,org/bindgen/binding/*.java"/>
 			<zipfileset dir="src/gwt/resources" includes="Bindgen.gwt.xml" prefix="org/bindgen"/>
 		</jar>
+	</target>
+
+	<target name="tests" depends="jar">
+		<!-- compile -->
+		<mkdir dir="bin/tests"/>
+		<javac destdir="bin/tests" debug="true" nowarn="yes" source="1.6" target="1.6" encoding="utf8">
+			<src path="src/test/java"/>
+			<classpath>
+				<pathelement location="bin/jars/bindgen.jar"/>
+				<fileset dir="bin/lib/tests/jars" includes="**/*.jar"/>
+			</classpath>
+		</javac>
+		<!-- run -->
+		<mkdir dir="bin/results"/>
+		<junit printsummary="on" showoutput="yes" fork="yes" forkmode="once">
+			<classpath>
+				<pathelement location="bin/jars/bindgen.jar"/>
+				<fileset dir="bin/lib/tests/jars" includes="**/*.jar"/>
+				<pathelement path="bin/tests"/>
+				<pathelement path="src/test/template"/>
+			</classpath>
+			<formatter type="xml"/>
+			<batchtest todir="bin/results">
+				<fileset dir="src/test/java" includes="**/*Test.java" excludes="**/Abstract*.java"/>
+			</batchtest>
+		</junit>
 	</target>
 
 </project>
