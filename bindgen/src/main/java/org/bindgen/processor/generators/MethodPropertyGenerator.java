@@ -2,7 +2,6 @@ package org.bindgen.processor.generators;
 
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
-import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.ExecutableType;
 
@@ -163,9 +162,10 @@ public class MethodPropertyGenerator implements PropertyGenerator {
 
 	private boolean hasSetter() {
 		String setterName = this.getSetterName();
-		for (Element other : this.method.getEnclosingElement().getEnclosedElements()) {
-			if (other.getSimpleName().toString().equals(setterName) && other.getModifiers().contains(Modifier.PUBLIC)) {
-				ExecutableElement e = (ExecutableElement) other;
+		for (Element enclosed : this.method.getEnclosingElement().getEnclosedElements()) {
+			TypeElement parent = (TypeElement) this.method.getEnclosingElement();
+			if (enclosed.getSimpleName().toString().equals(setterName) && Util.isAccessibleIfGenerated(parent, parent, enclosed)) {
+				ExecutableElement e = (ExecutableElement) enclosed;
 				return e.getParameters().size() == 1 && e.getThrownTypes().size() == 0; // only true if no throws
 			}
 		}
