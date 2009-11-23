@@ -6,7 +6,7 @@
 		<delete dir="bin"/>
 	</target>
 
-	<target name="compile" description="compile src/ to bin/main/">
+	<target name="compile" depends="ivy.retrieve" description="compile src/ to bin/main/">
 		<mkdir dir="bin/main"/>
 		<javac srcdir="src/main/java" destdir="bin/main" debug="true" nowarn="yes" source="1.6" target="1.6" encoding="utf8">
 			<compilerarg value="-proc:none"/>
@@ -29,7 +29,7 @@
 	without rewriting seemed likely to cause jar hell confusion. So we'll go
 	with this for now.
 	-->
-	<target name="jar" depends="compile,ivy.retrieve" description="jar bin/main/ into bin/jars/bindgen.jar and bin/sources/bindgen.jar">
+	<target name="jar" depends="compile" description="jar bin/main/ into bin/jars/bindgen.jar and bin/sources/bindgen.jar">
 		<taskdef name="jarjar" classname="com.tonicsystems.jarjar.JarJarTask" classpath="bin/lib/build/jars/jarjar.jar"/>
 		<mkdir dir="bin/jars"/>
 		<jarjar destfile="bin/jars/bindgen.jar">
