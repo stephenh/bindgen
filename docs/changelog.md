@@ -8,8 +8,8 @@ Changelog
 
 ## 2.5 - 2009-11-22
 
-* Changed: Binding extends `Serializable`
-* Changed: `GenericObjectBindingPath` is parameterized on its bound type `T`
+* Changed: Binding extends `Serializable` (Igor Vaynberg)
+* Changed: `GenericObjectBindingPath` is parameterized on its bound type `T` (Igor Vaynberg)
 
 ## 2.4 - 2009-11-19
 
