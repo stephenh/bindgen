@@ -45,22 +45,13 @@
 		</zip>
 	</target>
 
-	<!--
-	Use a separate task to build the gwt version because gwt would not
-	like the jarjar package rewriting (source would not be found) and
-	we also need the source included directly into the binary jar instead
-	of packaged separately.
-	-->
-	<target name="gwt-jar" depends="compile,ivy.retrieve">
+	<!-- Use a separate task to build the gwt version which includes the source directly in the jar. -->
+	<target name="gwt-jar" depends="jar">
 		<mkdir dir="bin/jars"/>
-		<jar destfile="bin/jars/bindgen-gwt.jar">
-			<fileset dir="bin/main" includes="**/*.class"/>
-			<fileset dir="src/main/java" includes="**/*" excludes="**/*.java"/>
-			<fileset dir="src/main/java" includes="org/bindgen/*.java,org/bindgen/binding/*.java" />
-			<zipfileset src="lib/build/joist.util-abef8bb.jar" includes="joist/sourcegen/**/*.class,joist/util/**/*.class"/>
-			<zipfileset src="lib/build/joist.util-sources-abef8bb.jar" includes="joist/sourcegen/**/*.java,joist/util/**/*.java"/>
-			<zipfileset dir="META-INF" includes="**/*" prefix="META-INF"/>
-			<zipfileset dir="src/main/resources" includes="Bindgen.gwt.xml" prefix="org/bindgen"/>
+		<copy file="bin/jars/bindgen.jar" tofile="bin/jars/bindgen-gwt.jar"/>
+		<jar destfile="bin/jars/bindgen-gwt.jar" update="true">
+			<fileset dir="src/main/java" includes="org/bindgen/*.java,org/bindgen/binding/*.java"/>
+			<zipfileset dir="src/gwt/resources" includes="Bindgen.gwt.xml" prefix="org/bindgen"/>
 		</jar>
 	</target>
 
