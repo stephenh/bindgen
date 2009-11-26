@@ -122,6 +122,7 @@ public class FieldPropertyGenerator implements PropertyGenerator {
 
 	private void addInnerClassSet() {
 		GMethod set = this.innerClass.getMethod("set").argument(this.property.getSetType(), this.property.getName());
+		set.addAnnotation("@Override");
 		if (this.isFinal) {
 			set.body.line("throw new RuntimeException(this.getName() + \" is read only\");");
 			return;
@@ -134,6 +135,7 @@ public class FieldPropertyGenerator implements PropertyGenerator {
 
 	private void addInnerClassSetWithRoot() {
 		GMethod setWithRoot = this.innerClass.getMethod("setWithRoot(R root, {} {})", this.property.getSetType(), this.property.getName());
+		setWithRoot.addAnnotation("@Override");
 		if (this.isFinal) {
 			setWithRoot.body.line("throw new RuntimeException(this.getName() + \" is read only\");");
 			return;
