@@ -6,9 +6,11 @@ title: Changelog
 Changelog
 =========
 
-## master - unreleased
+## 2.6 - 2009-11-26
 
-* Changed: Generated binding classes have a `serialVersionUID=1L` to avoid compiler warnings
+* Fix: Protected bindings are now `set`-able
+* Fix: Generated binding inner classes have `@Override` on `set` and `setWithRoot` methods
+* Fix: Generated binding classes have a `serialVersionUID=1L` to avoid compiler warnings
 * Changed: Moved `org/bindgen.gwt.xml` to `org/bindgen/Bindgen.gwt.xml`
 
 ## 2.5 - 2009-11-22
