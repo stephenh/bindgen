@@ -180,6 +180,15 @@ public class BoundProperty {
 			}
 			return this.name.getWithoutGenericPart() + "<" + Join.commaSpace(dummyParams) + ">";
 		}
+		if (this.isRawType()) {
+			List<String> dummyParams = new ArrayList<String>();
+			for (TypeParameterElement tpe : this.getElement().getTypeParameters()) {
+				dummyParams.add(tpe.toString());
+			}
+			if (dummyParams.size() > 0) {
+				return this.get() + "<" + Join.commaSpace(dummyParams) + ">";
+			}
+		}
 		return this.get();
 	}
 

@@ -13,7 +13,6 @@ import javax.annotation.Generated;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
-import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeMirror;
 import javax.tools.JavaFileObject;
@@ -71,6 +70,7 @@ public class BindingClassGenerator {
 		this.addGetWithRoot();
 
 		this.addGeneratedTimestamp();
+		this.addSerialVersionUID();
 		this.saveCode(this.pathBindingClass);
 		this.saveCode(this.rootBindingClass);
 	}
@@ -208,45 +208,37 @@ public class BindingClassGenerator {
 
 	private List<PropertyGenerator> getPropertyGenerators(TypeElement type) {
 		List<PropertyGenerator> generators = new ArrayList<PropertyGenerator>();
+		// Do methods first so that if a field/method overlap, the getter/setter take precedence
 		for (Element enclosed : type.getEnclosedElements()) {
-			if (this.isStaticOrPrivateOrJavaNonPublic(type, enclosed)) {
+			if (!Util.isAccessibleIfGenerated(this.element, type, enclosed) || enclosed.getKind() != ElementKind.METHOD) {
 				continue;
 			}
-
-			if (!enclosed.getModifiers().contains(Modifier.PUBLIC)) {
-				// if this is a non-public member we generate a binding only if the current (super)
-				// class `type` is in the same package as our target class `this.element`
-				if (!getElementUtils().getPackageOf(type).equals(getElementUtils().getPackageOf(this.element))) {
-					continue;
-				}
+			MethodPropertyGenerator mpg = new MethodPropertyGenerator(this.pathBindingClass, (ExecutableElement) enclosed);
+			if (mpg.shouldGenerate()) {
+				generators.add(mpg);
+				continue;
 			}
-
-			if (enclosed.getKind().isField()) {
-				FieldPropertyGenerator fpg = new FieldPropertyGenerator(this.pathBindingClass, enclosed);
-				if (fpg.shouldGenerate()) {
-					generators.add(fpg);
-					continue;
-				}
-			} else if (enclosed.getKind() == ElementKind.METHOD) {
-				MethodPropertyGenerator mpg = new MethodPropertyGenerator(this.pathBindingClass, (ExecutableElement) enclosed);
-				if (mpg.shouldGenerate()) {
-					generators.add(mpg);
-					continue;
-				}
-				MethodCallableGenerator mcg = new MethodCallableGenerator(this.pathBindingClass, (ExecutableElement) enclosed);
-				if (mcg.shouldGenerate()) {
-					generators.add(mcg);
-					continue;
-				}
+			MethodCallableGenerator mcg = new MethodCallableGenerator(this.pathBindingClass, (ExecutableElement) enclosed);
+			if (mcg.shouldGenerate()) {
+				generators.add(mcg);
+				continue;
+			}
+		}
+		// Now look for fields--just adding them is fine as markDone will take care of overlaps
+		for (Element enclosed : type.getEnclosedElements()) {
+			if (!Util.isAccessibleIfGenerated(this.element, type, enclosed) || enclosed.getKind() != ElementKind.FIELD) {
+				continue;
+			}
+			FieldPropertyGenerator fpg = new FieldPropertyGenerator(this.pathBindingClass, enclosed);
+			if (fpg.shouldGenerate()) {
+				generators.add(fpg);
 			}
 		}
 		return generators;
 	}
 
-	private boolean isStaticOrPrivateOrJavaNonPublic(TypeElement type, Element enclosed) {
-		return enclosed.getModifiers().contains(Modifier.STATIC)
-			|| enclosed.getModifiers().contains(Modifier.PRIVATE)
-			|| (type.getQualifiedName().toString().startsWith("java.") && !enclosed.getModifiers().contains(Modifier.PUBLIC));
+	private void addSerialVersionUID() {
+		this.rootBindingClass.getField("serialVersionUID").type("long").setStatic().setFinal().initialValue("1L");
+		this.pathBindingClass.getField("serialVersionUID").type("long").setStatic().setFinal().initialValue("1L");
 	}
-
 }

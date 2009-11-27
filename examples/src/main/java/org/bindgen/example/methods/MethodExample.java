@@ -22,6 +22,8 @@ public class MethodExample {
 	// isNull -> null would be a keyword
 	private boolean isNull;
 	private Wildcards<String, ?, ?> wildcards; // Was causing errors with wildcard in 2nd position
+	// Even though protected, the setter takes precendence
+	protected int protectedProperty;
 
 	public MethodExample(String id, String name) {
 		this.id = id;
@@ -125,4 +127,14 @@ public class MethodExample {
 	public void setWildcards(Wildcards<String, ?, ?> wildcards) {
 		this.wildcards = wildcards;
 	}
+
+	protected int isProtectedProperty() {
+		return this.protectedProperty;
+	}
+
+	protected void setProtectedProperty(int protectedProperty) {
+		// show the setter working
+		this.protectedProperty = protectedProperty + 1;
+	}
+
 }

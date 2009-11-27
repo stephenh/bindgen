@@ -2,7 +2,6 @@ package org.bindgen.processor.generators;
 
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
-import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.ExecutableType;
 
@@ -53,6 +52,7 @@ public class MethodPropertyGenerator implements PropertyGenerator {
 		this.addInnerClassSet();
 		this.addInnerClassSetWithRoot();
 		this.addInnerClassGetContainedTypeIfNeeded();
+		this.addInnerClassSerialVersionUID();
 	}
 
 	private void addOuterClassGet() {
@@ -125,7 +125,8 @@ public class MethodPropertyGenerator implements PropertyGenerator {
 	}
 
 	private void addInnerClassSet() {
-		GMethod set = this.innerClass.getMethod("set({} {})", this.property.getSetType(), this.property.getName()); // .addAnnotation("@Override");
+		GMethod set = this.innerClass.getMethod("set({} {})", this.property.getSetType(), this.property.getName());
+		set.addAnnotation("@Override");
 		if (!this.hasSetter()) {
 			set.body.line("throw new RuntimeException(this.getName() + \" is read only\");");
 			return;
@@ -137,7 +138,8 @@ public class MethodPropertyGenerator implements PropertyGenerator {
 	}
 
 	private void addInnerClassSetWithRoot() {
-		GMethod setWithRoot = this.innerClass.getMethod("setWithRoot(R root, {} {})", this.property.getSetType(), this.property.getName()); // .addAnnotation("@Override");
+		GMethod setWithRoot = this.innerClass.getMethod("setWithRoot(R root, {} {})", this.property.getSetType(), this.property.getName());
+		setWithRoot.addAnnotation("@Override");
 		if (!this.hasSetter()) {
 			setWithRoot.body.line("throw new RuntimeException(this.getName() + \" is read only\");");
 			return;
@@ -156,11 +158,16 @@ public class MethodPropertyGenerator implements PropertyGenerator {
 		}
 	}
 
+	private void addInnerClassSerialVersionUID() {
+		this.innerClass.getField("serialVersionUID").type("long").setStatic().setFinal().initialValue("1L");
+	}
+
 	private boolean hasSetter() {
 		String setterName = this.getSetterName();
-		for (Element other : this.method.getEnclosingElement().getEnclosedElements()) {
-			if (other.getSimpleName().toString().equals(setterName) && other.getModifiers().contains(Modifier.PUBLIC)) {
-				ExecutableElement e = (ExecutableElement) other;
+		for (Element enclosed : this.method.getEnclosingElement().getEnclosedElements()) {
+			TypeElement parent = (TypeElement) this.method.getEnclosingElement();
+			if (enclosed.getSimpleName().toString().equals(setterName) && Util.isAccessibleIfGenerated(parent, parent, enclosed)) {
+				ExecutableElement e = (ExecutableElement) enclosed;
 				return e.getParameters().size() == 1 && e.getThrownTypes().size() == 0; // only true if no throws
 			}
 		}

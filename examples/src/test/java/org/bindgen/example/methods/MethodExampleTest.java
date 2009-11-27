@@ -62,7 +62,7 @@ public class MethodExampleTest extends TestCase {
 	public void testGetBindings() {
 		MethodExample e = new MethodExample("1", "name");
 		MethodExampleBinding b = new MethodExampleBinding(e);
-		Assert.assertEquals(13, b.getChildBindings().size());
+		Assert.assertEquals(14, b.getChildBindings().size());
 
 		boolean foundName = false;
 		for (Binding<?> sub : b.getChildBindings()) {
@@ -91,5 +91,13 @@ public class MethodExampleTest extends TestCase {
 		MethodExampleBinding b = new MethodExampleBinding(e);
 		b.wildcards().a().set("a string");
 		// needs casting b.wildcards().b().set("anything");
+	}
+
+	public void testProtected() {
+		MethodExample e = new MethodExample("1", "name");
+		MethodExampleBinding b = new MethodExampleBinding(e);
+		// was causing read only exception
+		b.protectedProperty().set(1);
+		Assert.assertEquals(2, e.protectedProperty);
 	}
 }

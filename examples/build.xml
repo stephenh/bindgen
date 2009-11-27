@@ -19,13 +19,8 @@
 		<mkdir dir="bin/main"/>
 		<mkdir dir="bin/apt-javac"/>
 		<!-- src first -->
-		<javac destdir="bin/main" classpathref="classpath" debug="true" nowarn="yes" source="1.6" target="1.6" encoding="utf8">
+		<javac destdir="bin/main" classpathref="classpath" debug="true" nowarn="yes" encoding="utf8">
 			<src path="src/main/java"/>
-			<compilerarg value="-s"/>
-			<compilerarg value="bin/apt-javac"/>
-			<compilerarg value="-processor"/>
-			<compilerarg value="org.bindgen.processor.Processor"/>
-			<compilerarg value="-XprintRounds"/>
 		</javac>
 		<!-- now tests -->
 		<mkdir dir="bin/tests"/>

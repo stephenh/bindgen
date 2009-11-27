@@ -21,6 +21,8 @@ import org.bindgen.Binding;
  */
 public abstract class GenericObjectBindingPath<R, T> extends AbstractBinding<R, T> {
 
+	private static final long serialVersionUID = 1L;
+
 	@Override
 	public List<Binding<?>> getChildBindings() {
 		return Collections.emptyList();

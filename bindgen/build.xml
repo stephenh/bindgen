@@ -6,12 +6,12 @@
 		<delete dir="bin"/>
 	</target>
 
-	<target name="compile" description="compile src/ to bin/main/">
+	<target name="compile" depends="ivy.retrieve" description="compile src/ to bin/main/">
 		<mkdir dir="bin/main"/>
 		<javac srcdir="src/main/java" destdir="bin/main" debug="true" nowarn="yes" source="1.6" target="1.6" encoding="utf8">
 			<compilerarg value="-proc:none"/>
 			<classpath>
-				<fileset dir="lib/build" includes="**/*.jar"/>
+				<fileset dir="bin/lib/build/jars" includes="**/*.jar"/>
 			</classpath>
 		</javac>
 	</target>
@@ -29,8 +29,8 @@
 	without rewriting seemed likely to cause jar hell confusion. So we'll go
 	with this for now.
 	-->
-	<target name="jar" depends="compile,ivy.retrieve" description="jar bin/main/ into bin/jars/bindgen.jar and bin/sources/bindgen.jar">
-		<taskdef name="jarjar" classname="com.tonicsystems.jarjar.JarJarTask" classpath="lib/build/jarjar-1.0.jar"/>
+	<target name="jar" depends="compile" description="jar bin/main/ into bin/jars/bindgen.jar and bin/sources/bindgen.jar">
+		<taskdef name="jarjar" classname="com.tonicsystems.jarjar.JarJarTask" classpath="bin/lib/build/jars/jarjar.jar"/>
 		<mkdir dir="bin/jars"/>
 		<jarjar destfile="bin/jars/bindgen.jar">
 			<fileset dir="bin/main" includes="**/*.class"/>
@@ -45,21 +45,40 @@
 		</zip>
 	</target>
 
-	<!--
-	Use a separate task to build the gwt version because gwt would not
-	like the jarjar package rewriting (source would not be found) and
-	we also need the source included directly into the binary jar instead
-	of packaged separately.
-	-->
-	<target name="gwt-jar" depends="compile,ivy.retrieve">
-		<jar destfile="bin/jars/bindgen-gwt.jar">
-			<fileset dir="bin/main" includes="**/*.class"/>
-			<fileset dir="src/main/java" includes="**/*" excludes="**/*.java"/>
-			<fileset dir="src/main/java" includes="org/bindgen/*.java,org/bindgen/binding/*.java" />
-			<zipfileset src="lib/build/joist.util-abef8bb.jar" includes="joist/sourcegen/**/*.class,joist/util/**/*.class"/>
-			<zipfileset src="lib/build/joist.util-sources-abef8bb.jar" includes="joist/sourcegen/**/*.java,joist/util/**/*.java"/>
-			<zipfileset dir="META-INF" includes="**/*" prefix="META-INF"/>
+	<!-- Use a separate task to build the gwt version which includes the source directly in the jar. -->
+	<target name="gwt-jar" depends="jar">
+		<mkdir dir="bin/jars"/>
+		<copy file="bin/jars/bindgen.jar" tofile="bin/jars/bindgen-gwt.jar"/>
+		<jar destfile="bin/jars/bindgen-gwt.jar" update="true">
+			<fileset dir="src/main/java" includes="org/bindgen/*.java,org/bindgen/binding/*.java"/>
+			<zipfileset dir="src/gwt/resources" includes="Bindgen.gwt.xml" prefix="org/bindgen"/>
 		</jar>
+	</target>
+
+	<target name="tests" depends="jar">
+		<!-- compile -->
+		<mkdir dir="bin/tests"/>
+		<javac destdir="bin/tests" debug="true" nowarn="yes" source="1.6" target="1.6" encoding="utf8">
+			<src path="src/test/java"/>
+			<classpath>
+				<pathelement location="bin/jars/bindgen.jar"/>
+				<fileset dir="bin/lib/tests/jars" includes="**/*.jar"/>
+			</classpath>
+		</javac>
+		<!-- run -->
+		<mkdir dir="bin/results"/>
+		<junit printsummary="on" showoutput="yes" fork="yes" forkmode="once">
+			<classpath>
+				<pathelement location="bin/jars/bindgen.jar"/>
+				<fileset dir="bin/lib/tests/jars" includes="**/*.jar"/>
+				<pathelement path="bin/tests"/>
+				<pathelement path="src/test/template"/>
+			</classpath>
+			<formatter type="xml"/>
+			<batchtest todir="bin/results">
+				<fileset dir="src/test/java" includes="**/*Test.java" excludes="**/Abstract*.java"/>
+			</batchtest>
+		</junit>
 	</target>
 
 </project>

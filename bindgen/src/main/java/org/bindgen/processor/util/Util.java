@@ -8,6 +8,7 @@ import java.util.regex.Pattern;
 
 import javax.lang.model.element.Element;
 import javax.lang.model.element.Modifier;
+import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.ArrayType;
 import javax.lang.model.type.PrimitiveType;
 import javax.lang.model.type.TypeKind;
@@ -44,6 +45,20 @@ public class Util {
 
 	public static boolean isOfTypeObjectOrNone(TypeMirror type) {
 		return type.getKind() == TypeKind.NONE || type.toString().equals("java.lang.Object");
+	}
+
+	/**
+	 * @param current the type element of the element having bindings generated
+	 * @param currentOrSuper the type or super type element of the element having bindings generated
+	 * @param enclosed the field or method element
+	 */
+	public static boolean isAccessibleIfGenerated(TypeElement current, TypeElement currentOrSuper, Element enclosed) {
+		boolean isStatic = enclosed.getModifiers().contains(Modifier.STATIC);
+		boolean isPrivate = enclosed.getModifiers().contains(Modifier.PRIVATE);
+		boolean notPublic = !enclosed.getModifiers().contains(Modifier.PUBLIC);
+		boolean inJava = currentOrSuper.getQualifiedName().toString().startsWith("java.");
+		boolean superSamePackage = getElementUtils().getPackageOf(currentOrSuper).equals(getElementUtils().getPackageOf(current));
+		return !isStatic && !isPrivate && !(notPublic && inJava) && superSamePackage;
 	}
 
 	public static boolean isJavaKeyword(String name) {
