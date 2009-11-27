@@ -40,3 +40,9 @@ Sections
 
 [binding]: http://github.com/stephenh/bindgen/blob/master/bindgen/src/org/bindgen/Binding.java
 
+Related Projects
+----------------
+
+* [bindgen-wicket](http://code.google.com/p/bindgen-wicket/) integrates Bindgen with the [Wicket](http://wicket.apache.org) web framework
+
+
