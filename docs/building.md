@@ -6,10 +6,13 @@ title: Building
 Building
 ========
 
-Note that this is for building Bindgen itself--to use Bindgen, you can just use a binary distribution as described in [setup](setup.html).
+Note that this is for building Bindgen itself--to use Bindgen, you can just use a binary distribution from the [Joist maven repo](http://repo.joist.ws), as described in [setup](setup.html).
+
 
 Overview
 --------
+
+The source for Bindgen is available in the [Bindgen](http://github.com/stephenh/bindgen) project on GitHub.
 
 Bindgen currently consists of two projects:
 
