@@ -4,6 +4,8 @@ import static org.bindgen.processor.CurrentEnv.*;
 
 import java.util.List;
 
+import javax.lang.model.element.Element;
+import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
@@ -28,18 +30,21 @@ public class MethodCallableGenerator implements PropertyGenerator {
 	private ExecutableElement blockMethod;
 	private GClass innerClass;
 
-	public MethodCallableGenerator(GClass outerClass, ExecutableElement method) {
+	public MethodCallableGenerator(GClass outerClass, ExecutableElement method) throws WrongGeneratorException {
 		this.outerClass = outerClass;
 		this.method = method;
 		this.methodName = this.method.getSimpleName().toString();
+		if (!this.shouldGenerate()) {
+			throw new WrongGeneratorException();
+		}
 	}
 
 	@Override
-	public boolean isCallable() {
-		return true;
+	public boolean hasSubBindings() {
+		return false;
 	}
 
-	public boolean shouldGenerate() {
+	private boolean shouldGenerate() {
 		if (getConfig().skipAttribute(this.method.getEnclosingElement(), this.methodName)) {
 			return false;
 		}
@@ -188,6 +193,16 @@ public class MethodCallableGenerator implements PropertyGenerator {
 
 	private ExecutableType getMethodAsType() {
 		return (ExecutableType) this.method.asType();
+	}
+
+	public static class Factory implements GeneratorFactory {
+		@Override
+		public MethodCallableGenerator newGenerator(GClass outerClass, Element possibleMethod) throws WrongGeneratorException {
+			if (possibleMethod.getKind() != ElementKind.METHOD) {
+				throw new WrongGeneratorException();
+			}
+			return new MethodCallableGenerator(outerClass, (ExecutableElement) possibleMethod);
+		}
 	}
 
 }
