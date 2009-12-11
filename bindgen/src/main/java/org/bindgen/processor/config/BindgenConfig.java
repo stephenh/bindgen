@@ -43,7 +43,7 @@ public class BindgenConfig {
 	}
 
 	public boolean shouldGenerateBindingFor(ClassName name) {
-		return this.bindingScope.includes(name);
+		return name.getPackageName().isEmpty() ? false : this.bindingScope.includes(name);
 	}
 
 	public boolean logEnabled() {
@@ -68,7 +68,11 @@ public class BindgenConfig {
 		if (pn.startsWith("java.") || pn.startsWith("javax.")) {
 			pn = "org.bindgen." + pn;
 		}
-		return pn + "." + cn.getSimpleName();
+		if (pn.isEmpty()) {
+			return cn.getSimpleName();
+		} else {
+			return pn + "." + cn.getSimpleName();
+		}
 	}
 
 	/** @return a list of class names to match void methods against for callable bindings */

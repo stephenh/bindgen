@@ -50,6 +50,13 @@ public class AccessTest extends AbstractBindgenTestCase {
 		ClassLoader loader = this.compile("org/bindgen/processor/access/package1/Bean1.java", "org/bindgen/processor/access/package2/Bean2.java");
 	}
 
+	@Test(expected = ClassNotFoundException.class)
+	public void shouldNotGenerateBindingsForClassesInDefaultPackage() throws Exception {
+		ClassLoader loader = this.compile("ClassInDefaultPackage.java");
+		loader.loadClass("ClassInDefaultPackageBindingPath");
+		fail();
+	}
+
 	private static void assertPublic(Method method) {
 		if ((method.getModifiers() & Modifier.PUBLIC) == 0) {
 			fail();

@@ -54,6 +54,7 @@ public class Processor extends AbstractProcessor {
 			for (Element element : roundEnv.getElementsAnnotatedWith(Bindable.class)) {
 				if (element.getKind() == ElementKind.CLASS || element.getKind() == ElementKind.INTERFACE) {
 					TypeElement type = (TypeElement) element;
+
 					if (CurrentEnv.getConfig().shouldGenerateBindingFor(type)) {
 						this.queue.enqueueForcefully(type);
 					} else {
