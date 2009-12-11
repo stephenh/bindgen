@@ -4,6 +4,7 @@ import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.ExecutableType;
+import javax.lang.model.type.TypeKind;
 
 import joist.sourcegen.GClass;
 import joist.sourcegen.GField;
@@ -163,6 +164,9 @@ public class MethodPropertyGenerator implements PropertyGenerator {
 	}
 
 	private boolean hasSetter() {
+		if (null == this.getPrefix()) {
+			return false;
+		}
 		String setterName = this.getSetterName();
 		for (Element enclosed : this.method.getEnclosingElement().getEnclosedElements()) {
 			TypeElement parent = (TypeElement) this.method.getEnclosingElement();
@@ -187,7 +191,10 @@ public class MethodPropertyGenerator implements PropertyGenerator {
 		return null;
 	}
 
+	private static final String[] skipGenerationOfNoArgMethods = { "hashCode", "toString", "clone" };
+
 	private String guessPropertyNameOrNull() {
+		// TODO this class should be split in one that handles get/set properties and one that handles no-arg methods that return a value  
 		String propertyName = null;
 		for (String possible : new String[] { "get", "to", "has", "is" }) {
 			if (this.methodName.startsWith(possible)
@@ -199,6 +206,18 @@ public class MethodPropertyGenerator implements PropertyGenerator {
 		}
 		if (Util.isJavaKeyword(propertyName) || "get".equals(propertyName)) {
 			propertyName = this.methodName;
+		}
+		if (null == propertyName) {
+			ExecutableType mt = (ExecutableType) this.method.asType();
+			// friendly no-arg methods that do not throw any exceptions can also be thought of as properties
+			if (mt.getThrownTypes().isEmpty() && mt.getParameterTypes().isEmpty() && mt.getReturnType().getKind() != TypeKind.VOID) {
+				propertyName = this.methodName;
+			}
+			for (String illegalProp : skipGenerationOfNoArgMethods) {
+				if (illegalProp.equals(propertyName)) {
+					return null;
+				}
+			}
 		}
 		return propertyName;
 	}
