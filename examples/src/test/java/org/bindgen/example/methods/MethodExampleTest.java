@@ -44,7 +44,7 @@ public class MethodExampleTest extends TestCase {
 	public void testToString() {
 		MethodExample e = new MethodExample("1", "name");
 		MethodExampleBinding b = new MethodExampleBinding(e);
-		Assert.assertEquals("method", b.string().get());
+		Assert.assertEquals("method", b.toStringBinding().get());
 	}
 
 	public void testHasMethod() {
