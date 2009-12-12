@@ -36,7 +36,7 @@ public abstract class MethodBindingGenerator implements PropertyGenerator {
 				}
 				for (String illegalProp : illegalPropertyNames) {
 					if (illegalProp.equals(getterMethodName)) {
-						return null;
+						return getterMethodName + "Binding";
 					}
 				}
 
@@ -117,7 +117,7 @@ public abstract class MethodBindingGenerator implements PropertyGenerator {
 				ExecutableElement e = (ExecutableElement) enclosed;
 				return e.getParameters().size() == 1 // single parameter 
 					&& e.getThrownTypes().isEmpty() // no throws
-					&& e.getParameters().get(0).asType() == this.method.getReturnType(); // types match
+					&& e.getParameters().get(0).asType().equals(this.method.getReturnType()); // types match
 			}
 		}
 		return false;
