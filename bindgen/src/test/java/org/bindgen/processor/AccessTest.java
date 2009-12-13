@@ -2,8 +2,6 @@ package org.bindgen.processor;
 
 import static org.junit.Assert.*;
 
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
 
 import org.junit.Test;
 
@@ -55,26 +53,6 @@ public class AccessTest extends AbstractBindgenTestCase {
 		ClassLoader loader = this.compile("ClassInDefaultPackage.java");
 		loader.loadClass("ClassInDefaultPackageBindingPath");
 		fail();
-	}
-
-	private static void assertPublic(Method method) {
-		if ((method.getModifiers() & Modifier.PUBLIC) == 0) {
-			fail();
-		}
-	}
-
-	private static void assertProtected(Method method) {
-		if ((method.getModifiers() & Modifier.PROTECTED) == 0) {
-			fail();
-		}
-	}
-
-	private static void assertPackage(Method method) {
-		if ((method.getModifiers() & Modifier.PUBLIC) > 0
-			|| (method.getModifiers() & Modifier.PROTECTED) > 0
-			|| (method.getModifiers() & Modifier.PRIVATE) > 0) {
-			fail();
-		}
 	}
 
 }

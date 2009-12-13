@@ -12,9 +12,21 @@ public class ComplexData {
 		this.y=y;
 	}
 	
-	public int sum() {
+	public int noArgNoThrows() {
 		sumCount++;
 		return x+y;
+	}
+
+	public int noArgWithThrows() throws Exception {
+		return 0;
+	}
+
+	public int oneArgNoThrows(int arg) {
+		return arg;
+	}
+
+	public int oneArgWithThrows(int arg) throws Exception {
+		return arg;
 	}
 	
 	public int getSumCount() {

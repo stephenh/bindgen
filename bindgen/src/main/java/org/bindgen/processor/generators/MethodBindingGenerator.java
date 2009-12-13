@@ -78,7 +78,7 @@ public abstract class MethodBindingGenerator implements PropertyGenerator {
 				AccessorPrefix possiblePrefix = values[i];
 				String possible = possiblePrefix.getterPrefix;
 				if (getterMethodName.startsWith(possible)
-					&& getterMethodName.length() > possible.length() + 1
+					&& getterMethodName.length() > possible.length()
 					&& getterMethodName.substring(possible.length(), possible.length() + 1).matches("[A-Z]")) {
 					return possiblePrefix;
 				}

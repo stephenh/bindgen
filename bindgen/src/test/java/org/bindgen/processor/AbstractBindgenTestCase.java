@@ -1,7 +1,11 @@
 package org.bindgen.processor;
 
+import static org.junit.Assert.*;
+
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
@@ -62,4 +66,46 @@ public class AbstractBindgenTestCase {
 
 		return loader;
 	}
+
+	protected static void assertPublic(Method method) {
+		if ((method.getModifiers() & Modifier.PUBLIC) == 0) {
+			fail();
+		}
+	}
+
+	protected static void assertProtected(Method method) {
+		if ((method.getModifiers() & Modifier.PROTECTED) == 0) {
+			fail();
+		}
+	}
+
+	protected static void assertPackage(Method method) {
+		if ((method.getModifiers() & Modifier.PUBLIC) > 0
+			|| (method.getModifiers() & Modifier.PROTECTED) > 0
+			|| (method.getModifiers() & Modifier.PRIVATE) > 0) {
+			fail();
+		}
+	}
+
+	public static void assertMethodDeclared(Class<?> bindingClass, String methodName) {
+		try {
+			assertNotNull(bindingClass.getDeclaredMethod(methodName));
+		} catch (SecurityException e) {
+			fail(e.toString());
+		} catch (NoSuchMethodException e) {
+			fail("Expected class " + bindingClass.getName() + " to declare method: " + methodName);
+		}
+	}
+
+	public static void assertMethodNotDeclared(Class<?> bindingClass, String methodName) {
+		try {
+			bindingClass.getDeclaredMethod(methodName);
+			fail("Expected class " + bindingClass.getName() + " to not declare method: " + methodName);
+		} catch (SecurityException e) {
+			fail(e.toString());
+		} catch (NoSuchMethodException e) {
+			// OK
+		}
+	}
+
 }
