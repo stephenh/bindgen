@@ -10,7 +10,9 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map.Entry;
 
 import javax.annotation.processing.Processor;
 import javax.tools.Diagnostic;
@@ -26,6 +28,7 @@ import org.junit.rules.TemporaryFolder;
 
 public class AbstractBindgenTestCase {
 	private static final JavaCompiler COMPILER = ToolProvider.getSystemJavaCompiler();
+	private HashMap<String, String> aptProperties = new HashMap<String, String>();
 
 	@Rule
 	public TemporaryFolder tmp = new TemporaryFolder();
@@ -43,7 +46,7 @@ public class AbstractBindgenTestCase {
 			null,
 			fileManager,
 			diagnosticCollector,
-			Arrays.asList("-d", this.tmp.getRoot().getAbsolutePath()),
+			this.compileProps("-d", this.tmp.getRoot().getAbsolutePath()),
 			null,
 			fileManager.getJavaFileObjectsFromFiles(compilationUnits));
 
@@ -65,6 +68,24 @@ public class AbstractBindgenTestCase {
 		URLClassLoader loader = new URLClassLoader(new URL[] { this.tmp.getRoot().getAbsoluteFile().toURL() }, this.getClass().getClassLoader());
 
 		return loader;
+	}
+
+	private List<String> compileProps(String... props) {
+		List<String> result = new ArrayList<String>();
+		result.addAll(Arrays.asList(props));
+
+		for (Entry<String, String> prop : this.aptProperties.entrySet()) {
+			result.add("-A" + prop.getKey() + "=" + prop.getValue());
+		}
+		return result;
+	}
+
+	protected void setBindingPathSuperClass(String qualifiedClassName) {
+		this.aptProperties.put("bindingPathSuperClass", qualifiedClassName);
+	}
+
+	protected static String filePath(String qualifiedClassName) {
+		return qualifiedClassName.replace(".", "/") + ".java";
 	}
 
 	protected static void assertPublic(Method method) {

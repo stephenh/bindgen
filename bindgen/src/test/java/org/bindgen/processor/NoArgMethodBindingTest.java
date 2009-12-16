@@ -8,10 +8,11 @@ public class NoArgMethodBindingTest extends AbstractBindgenTestCase {
 
 	@Test
 	public void testGenerateBindingsForNoArgMethodsThatReturnAValue() throws Exception {
-		ClassLoader loader = this.compile("org/bindgen/processor/noarg/ComplexData.java");
+		String testedClass = "org.bindgen.processor.noarg.ComplexData";
+		ClassLoader loader = this.compile(filePath(testedClass));
 
 		//Class<?> actualClass = loader.loadClass("org.bindgen.processor.noarg.ComplexData");
-		Class<?> bindingClass = loader.loadClass("org.bindgen.processor.noarg.ComplexDataBindingPath");
+		Class<?> bindingClass = loader.loadClass(testedClass + "BindingPath");
 
 		assertNotNull(bindingClass);
 		assertMethodDeclared(bindingClass, "noArgNoThrows");
@@ -19,4 +20,5 @@ public class NoArgMethodBindingTest extends AbstractBindgenTestCase {
 		assertMethodNotDeclared(bindingClass, "oneArgNoThrows");
 		assertMethodNotDeclared(bindingClass, "oneArgWithThrows");
 	}
+
 }

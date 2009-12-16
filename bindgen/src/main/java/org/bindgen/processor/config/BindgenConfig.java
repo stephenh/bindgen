@@ -14,6 +14,7 @@ import javax.tools.FileObject;
 import javax.tools.StandardLocation;
 import javax.tools.JavaFileManager.Location;
 
+import org.bindgen.binding.AbstractBinding;
 import org.bindgen.processor.CurrentEnv;
 import org.bindgen.processor.util.ClassName;
 
@@ -75,6 +76,11 @@ public class BindgenConfig {
 		}
 	}
 
+	/** @return the fully qualified name of the super class of all Bindings - useful for integration */
+	public String bindingPathSuperClassName() {
+		return this.options.get("bindingPathSuperClass");
+	}
+
 	/** @return a list of class names to match void methods against for callable bindings */
 	public String[] blockTypesToAttempt() {
 		String attempts = this.options.get("blockTypes");
@@ -134,6 +140,7 @@ public class BindgenConfig {
 		this.options.put("skipAttribute.java.lang.Object.getClass", "true");
 		this.options.put("skipAttribute.java.lang.Object.notify", "true");
 		this.options.put("skipAttribute.java.lang.Object.notifyAll", "true");
+		this.options.put("bindingPathSuperClass", AbstractBinding.class.getName());
 	}
 
 	private void loadBindgenDotProperties(ProcessingEnvironment env) {

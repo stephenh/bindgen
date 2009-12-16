@@ -13,12 +13,14 @@ import javax.lang.model.type.ExecutableType;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.ElementFilter;
+import javax.lang.model.util.Types;
 
 import joist.sourcegen.GClass;
 import joist.sourcegen.GMethod;
 import joist.util.Inflector;
 
 import org.bindgen.NamedBinding;
+import org.bindgen.processor.CurrentEnv;
 import org.bindgen.processor.util.Util;
 
 public class MethodCallableGenerator implements PropertyGenerator {
@@ -132,7 +134,7 @@ public class MethodCallableGenerator implements PropertyGenerator {
 	}
 
 	private boolean doBlockReturnTypesMatch(ExecutableElement methodToMatch) {
-		return methodToMatch.getReturnType().equals(this.method.getReturnType());
+		return CurrentEnv.getTypeUtils().isSameType(methodToMatch.getReturnType(), this.method.getReturnType());
 	}
 
 	private boolean doBlockParamsMatch(ExecutableElement methodToMatch) {
@@ -140,19 +142,22 @@ public class MethodCallableGenerator implements PropertyGenerator {
 			return false;
 		}
 		boolean allMatch = true;
+		Types typeUtils = CurrentEnv.getTypeUtils();
 		for (int i = 0; i < methodToMatch.getParameters().size(); i++) {
-			if (!methodToMatch.getParameters().get(i).asType().equals(this.getMethodAsType().getParameterTypes().get(i))) {
-				allMatch = false;
+			allMatch = typeUtils.isSameType(methodToMatch.getParameters().get(i).asType(), this.getMethodAsType().getParameterTypes().get(i));
+			if (!allMatch) {
+				break;
 			}
 		}
 		return allMatch;
 	}
 
 	private boolean doBlockThrowsMatch(ExecutableElement methodToMatch) {
+		Types typeUtils = CurrentEnv.getTypeUtils();
 		for (TypeMirror throwsType : this.method.getThrownTypes()) {
 			boolean matchesOne = false;
 			for (TypeMirror otherType : methodToMatch.getThrownTypes()) {
-				if (otherType.equals(throwsType)) {
+				if (typeUtils.isSameType(otherType, throwsType)) {
 					matchesOne = true;
 				}
 			}

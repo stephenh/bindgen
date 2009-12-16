@@ -6,6 +6,8 @@ import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.ExecutableType;
 import javax.lang.model.type.TypeKind;
+import javax.lang.model.type.TypeMirror;
+import javax.lang.model.util.Types;
 
 import joist.sourcegen.GClass;
 import joist.sourcegen.GField;
@@ -13,6 +15,7 @@ import joist.sourcegen.GMethod;
 import joist.util.Inflector;
 
 import org.bindgen.ContainerBinding;
+import org.bindgen.processor.CurrentEnv;
 import org.bindgen.processor.util.BoundProperty;
 import org.bindgen.processor.util.Util;
 
@@ -109,6 +112,9 @@ public abstract class MethodBindingGenerator implements PropertyGenerator {
 	protected abstract void checkViability() throws WrongGeneratorException;
 
 	protected boolean hasSetterMethod() {
+		Types typeUtils = CurrentEnv.getTypeUtils();
+		TypeMirror methodReturnType = this.method.getReturnType();
+
 		String setterName = this.prefix.setterName(this.methodName);
 		TypeElement parent = (TypeElement) this.method.getEnclosingElement();
 		for (Element enclosed : parent.getEnclosedElements()) {
@@ -117,7 +123,7 @@ public abstract class MethodBindingGenerator implements PropertyGenerator {
 				ExecutableElement e = (ExecutableElement) enclosed;
 				return e.getParameters().size() == 1 // single parameter 
 					&& e.getThrownTypes().isEmpty() // no throws
-					&& e.getParameters().get(0).asType().equals(this.method.getReturnType()); // types match
+					&& typeUtils.isSameType(e.getParameters().get(0).asType(), methodReturnType); // types match (using proper comparison)
 			}
 		}
 		return false;

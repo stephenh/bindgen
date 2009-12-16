@@ -18,7 +18,6 @@ import joist.util.Copy;
 import joist.util.Inflector;
 import joist.util.Join;
 
-import org.bindgen.binding.AbstractBinding;
 import org.bindgen.binding.GenericObjectBindingPath;
 import org.bindgen.processor.CurrentEnv;
 
@@ -122,11 +121,11 @@ public class BoundProperty {
 	public String getInnerClassSuperClass() {
 		// Arrays don't have individual binding classes
 		if (this.isArray()) {
-			return AbstractBinding.class.getName() + "<R, " + this.type.toString() + ">";
+			return CurrentEnv.getConfig().bindingPathSuperClassName() + "<R, " + this.type.toString() + ">";
 		}
 		// Being a generic type, we have no XxxBindingPath to extend, so just extend AbstractBinding directly
 		if (this.isForGenericTypeParameter()) {
-			return AbstractBinding.class.getName() + "<R, " + this.getGenericElement() + ">";
+			return CurrentEnv.getConfig().bindingPathSuperClassName() + "<R, " + this.getGenericElement() + ">";
 		}
 
 		// if our type is outside the binding scope we return a generic binding type
