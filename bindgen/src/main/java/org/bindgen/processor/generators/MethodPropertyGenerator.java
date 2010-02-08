@@ -166,7 +166,7 @@ public class MethodPropertyGenerator implements PropertyGenerator {
 		String setterName = this.getSetterName();
 		for (Element enclosed : this.method.getEnclosingElement().getEnclosedElements()) {
 			TypeElement parent = (TypeElement) this.method.getEnclosingElement();
-			if (enclosed.getSimpleName().toString().equals(setterName) && Util.isAccessibleIfGenerated(parent, parent, enclosed)) {
+			if (enclosed.getSimpleName().toString().equals(setterName) && Util.isAccessibleIfGenerated(parent, enclosed)) {
 				ExecutableElement e = (ExecutableElement) enclosed;
 				return e.getParameters().size() == 1 && e.getThrownTypes().size() == 0; // only true if no throws
 			}

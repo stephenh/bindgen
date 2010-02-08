@@ -52,7 +52,8 @@ public class Util {
 	 * @param currentOrSuper the type or super type element of the element having bindings generated
 	 * @param enclosed the field or method element
 	 */
-	public static boolean isAccessibleIfGenerated(TypeElement current, TypeElement currentOrSuper, Element enclosed) {
+	public static boolean isAccessibleIfGenerated(TypeElement current, Element enclosed) {
+		TypeElement currentOrSuper = (TypeElement) enclosed.getEnclosingElement();
 		boolean isStatic = enclosed.getModifiers().contains(Modifier.STATIC);
 		boolean isPrivate = enclosed.getModifiers().contains(Modifier.PRIVATE);
 		boolean notPublic = !enclosed.getModifiers().contains(Modifier.PUBLIC);
