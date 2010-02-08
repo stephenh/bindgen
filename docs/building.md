@@ -6,10 +6,13 @@ title: Building
 Building
 ========
 
-Note that this is for building Bindgen itself--to use Bindgen, you can just use a binary distribution as described in [setup](setup.html).
+Note that this is for building Bindgen itself--to use Bindgen, you can just use a binary distribution from the [Joist maven repo](http://repo.joist.ws), as described in [setup](setup.html).
+
 
 Overview
 --------
+
+The source for Bindgen is available in the [Bindgen](http://github.com/stephenh/bindgen) project on GitHub.
 
 Bindgen currently consists of two projects:
 
@@ -23,7 +26,7 @@ Building `examples` is supported via ant, Eclipse, or maven. Having `examples` a
 Building `bindgen` in Ant
 -------------------------
 
-In the `bindgen/` directory, run `ant jar`. This will create a new `bin/jars/bindgen.jar` with Bindgen and its dependencies `jarjar`-ed together.
+In the `processor/` directory, run `ant jar`. This will create a new `bin/jars/bindgen.jar` with Bindgen and its dependencies `jarjar`-ed together.
 
 That's it--this one is fairly simple.
 
@@ -36,7 +39,7 @@ This means you can debug the annotation processor as it is running over the `exa
 
 This does mean that you'll need the [Eclipse for RCP/Plug-in Developers](http://www.eclipse.org/downloads/) distribution of Eclipse instead of just the Java or Java EE distribution.
 
-After you import `bindgen/.project` into an Eclipse RCP workspace, the combination of the `plugin.xml`, `META-INF/MANIFEST.MF`, the PluginNature in `.project`, and the `examples/lib/annotations.jar` (updated by running `ant annotations` when you change any Bindgen public API), means you should be able to launch the `BindgenExamples.launch` target.
+After you import `processor/.project` into an Eclipse RCP workspace, the combination of the `plugin.xml`, `META-INF/MANIFEST.MF`, the PluginNature in `.project`, and the `examples/lib/annotations.jar` (updated by running `ant annotations` when you change any Bindgen public API), means you should be able to launch the `BindgenExamples.launch` target.
 
 This will create a new instance of Eclipse. Initially the workspace will be empty, so you will need to import the `examples/.project` file.
 
@@ -47,7 +50,7 @@ Building `examples` in Ant
 
 Run `ant tests`.
 
-Note that this will use the latest `bindgen/bin/jars/bindgen.jar`, so you will need to run `ant jar` in the `bindgen` project first (and each time you want to see your Bindgen changes in the `examples` project).
+Note that this will use the latest `processor/bin/jars/bindgen.jar`, so you will need to run `ant jar` in the `bindgen` project first (and each time you want to see your Bindgen changes in the `examples` project).
 
 Building `examples` in Eclipse
 ------------------------------

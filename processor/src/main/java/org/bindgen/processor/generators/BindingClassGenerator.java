@@ -7,14 +7,15 @@ import java.io.Writer;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import javax.annotation.Generated;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
-import javax.lang.model.type.TypeMirror;
 import javax.tools.JavaFileObject;
 import javax.tools.Diagnostic.Kind;
 
@@ -44,10 +45,10 @@ public class BindingClassGenerator {
 
 	private final GenerationQueue queue;
 	private final TypeElement element;
-	private final TypeMirror baseElement;
 	private final BoundClass name;
 	private final List<String> foundSubBindings = new ArrayList<String>();
 	private final List<String> done = new ArrayList<String>();
+	private final Set<Element> sourceElements = new HashSet<Element>();
 	private GClass pathBindingClass;
 	private GClass rootBindingClass;
 
@@ -55,7 +56,6 @@ public class BindingClassGenerator {
 		this.queue = queue;
 		this.element = element;
 		this.name = new BoundClass(element.asType());
-		this.baseElement = Util.isOfTypeObjectOrNone(this.element.getSuperclass()) ? null : this.element.getSuperclass();
 	}
 
 	public void generate() {
@@ -119,13 +119,7 @@ public class BindingClassGenerator {
 	}
 
 	private void generateProperties() {
-		for (TypeElement e : Copy.list(this.element).with(this.getSuperElements())) {
-			this.generatePropertiesForType(e);
-		}
-	}
-
-	private void generatePropertiesForType(TypeElement element) {
-		for (PropertyGenerator pg : this.getPropertyGenerators(element)) {
+		for (PropertyGenerator pg : this.getPropertyGenerators()) {
 			if (this.doneAlreadyContainsPropertyFromSubClass(pg)) {
 				continue;
 			}
@@ -169,24 +163,10 @@ public class BindingClassGenerator {
 		children.body.line("return bindings;");
 	}
 
-	private List<TypeElement> getSuperElements() {
-		List<TypeElement> elements = new ArrayList<TypeElement>();
-		TypeMirror current = this.baseElement;
-		while (current != null && !Util.isOfTypeObjectOrNone(current)) {
-			TypeElement currentElement = (TypeElement) getTypeUtils().asElement(current);
-			if (currentElement != null) { // javac started returning null, not sure why as Eclipse had not done that
-				elements.add(currentElement);
-				current = currentElement.getSuperclass();
-			} else {
-				current = null;
-			}
-		}
-		return elements;
-	}
-
 	private void saveCode(GClass gc) {
 		try {
-			JavaFileObject jfo = getFiler().createSourceFile(gc.getFullClassNameWithoutGeneric(), this.getSourceElements());
+			JavaFileObject jfo = getFiler()
+				.createSourceFile(gc.getFullClassNameWithoutGeneric(), Copy.array(Element.class, Copy.list(this.sourceElements)));
 			Writer w = jfo.openWriter();
 			w.write(gc.toCode());
 			w.close();
@@ -196,42 +176,35 @@ public class BindingClassGenerator {
 		}
 	}
 
-	private Element[] getSourceElements() {
-		int i = 0;
-		Element[] sourceElements = new Element[this.getSuperElements().size() + 1];
-		sourceElements[i++] = this.element;
-		for (TypeElement superElement : this.getSuperElements()) {
-			sourceElements[i++] = superElement;
-		}
-		return sourceElements;
-	}
-
-	private List<PropertyGenerator> getPropertyGenerators(TypeElement type) {
+	private List<PropertyGenerator> getPropertyGenerators() {
 		List<PropertyGenerator> generators = new ArrayList<PropertyGenerator>();
 		// Do methods first so that if a field/method overlap, the getter/setter take precedence
-		for (Element enclosed : type.getEnclosedElements()) {
-			if (!Util.isAccessibleIfGenerated(this.element, type, enclosed) || enclosed.getKind() != ElementKind.METHOD) {
+		for (Element enclosed : getElementUtils().getAllMembers(this.element)) {
+			if (!Util.isAccessibleIfGenerated(this.element, enclosed) || enclosed.getKind() != ElementKind.METHOD) {
 				continue;
 			}
 			MethodPropertyGenerator mpg = new MethodPropertyGenerator(this.pathBindingClass, (ExecutableElement) enclosed);
 			if (mpg.shouldGenerate()) {
 				generators.add(mpg);
+				this.sourceElements.add(enclosed);
 				continue;
 			}
 			MethodCallableGenerator mcg = new MethodCallableGenerator(this.pathBindingClass, (ExecutableElement) enclosed);
 			if (mcg.shouldGenerate()) {
 				generators.add(mcg);
+				this.sourceElements.add(enclosed);
 				continue;
 			}
 		}
 		// Now look for fields--just adding them is fine as markDone will take care of overlaps
-		for (Element enclosed : type.getEnclosedElements()) {
-			if (!Util.isAccessibleIfGenerated(this.element, type, enclosed) || enclosed.getKind() != ElementKind.FIELD) {
+		for (Element enclosed : getElementUtils().getAllMembers(this.element)) {
+			if (!Util.isAccessibleIfGenerated(this.element, enclosed) || enclosed.getKind() != ElementKind.FIELD) {
 				continue;
 			}
 			FieldPropertyGenerator fpg = new FieldPropertyGenerator(this.pathBindingClass, enclosed);
 			if (fpg.shouldGenerate()) {
 				generators.add(fpg);
+				this.sourceElements.add(enclosed);
 			}
 		}
 		return generators;
