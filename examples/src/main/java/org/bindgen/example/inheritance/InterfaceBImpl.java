@@ -12,4 +12,9 @@ public class InterfaceBImpl implements InterfaceB {
 		return "b";
 	}
 
+	@Override
+	public String getFromAA() {
+		return "aa";
+	}
+
 }
