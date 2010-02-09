@@ -9,6 +9,7 @@ public class InterfaceInheritanceTest extends TestCase {
 		InterfaceBBinding b = new InterfaceBBinding();
 		b.set(new InterfaceBImpl());
 		Assert.assertEquals("a", b.fromA().get());
+		Assert.assertEquals("aa", b.fromAA().get());
 		Assert.assertEquals("b", b.fromB().get());
 	}
 
