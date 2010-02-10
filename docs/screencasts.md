@@ -21,7 +21,7 @@ This screencast shows the details of how bindgen basically duplicates the effect
         <param name="allowfullscreen" value="true" />
         <param name="scale" value="showall" />
         <param name="allowscriptaccess" value="always" />
-        <param name="flashvars" value="autostart=false&thumb=screencasts/bindgen_firstFrame.png&thumbscale=45&color=0x000000,0x000000" />
+        <param name="flashvars" value="autostart=false&amp;thumb=screencasts/bindgen_firstFrame.png&amp;thumbscale=45&amp;color=0x000000,0x000000" />
         <!--[if !IE]>-->
         <object type="application/x-shockwave-flash" data="screencasts/bindgen_controller.swf" width="640" height="498">
             <param name="quality" value="best" />
@@ -29,7 +29,7 @@ This screencast shows the details of how bindgen basically duplicates the effect
             <param name="allowfullscreen" value="true" />
             <param name="scale" value="showall" />
             <param name="allowscriptaccess" value="always" />
-            <param name="flashvars" value="autostart=false&thumb=screencasts/bindgen_firstFrame.png&thumbscale=45&color=0x000000,0x000000" />
+            <param name="flashvars" value="autostart=false&amp;thumb=screencasts/bindgen_firstFrame.png&amp;thumbscale=45&amp;color=0x000000,0x000000" />
         <!--<![endif]-->
             <div id="noUpdate">
                 <p>The Camtasia Studio video content presented here requires a more recent version of the Adobe Flash Player. If you are you using a browser with JavaScript disabled please enable it now. Otherwise, please update your version of the free Flash Player by <a href="http://www.adobe.com/go/getflashplayer">downloading here</a>.</p>
