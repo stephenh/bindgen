@@ -6,6 +6,14 @@ title: Changelog
 Changelog
 =========
 
+## 2.8 - 2010-02-09
+
+* Fix: Bindings inherited across package boundaries were ignored
+
+## 2.7 - 2010-02-08
+
+* Fix: Interface bindings include properties from extended interfaces
+
 ## 2.6 - 2009-11-26
 
 * Fix: Protected bindings are now `set`-able

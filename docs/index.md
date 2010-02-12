@@ -39,7 +39,7 @@ Sections
 * [Building](building.html)
 * [Community](community.html)
 
-[binding]: http://github.com/stephenh/bindgen/blob/master/bindgen/src/org/bindgen/Binding.java
+[binding]: http://github.com/stephenh/bindgen/blob/master/processor/src/main/java/org/bindgen/Binding.java
 
 
 

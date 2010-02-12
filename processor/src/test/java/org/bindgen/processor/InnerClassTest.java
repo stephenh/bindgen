@@ -23,6 +23,7 @@ public class InnerClassTest extends AbstractBindgenTestCase {
 	@Test
 	public void testGenerateBindingsForNastyInnerClasses() throws Exception {
 		// whatIf the outer class name starts with a lowercase letter?
+		// FIXME this is currently a known bug and expected to fail (as of 13 Feb. 2010)
 		ClassLoader loader = this.compile("org/bindgen/processor/inner/nastyClass.java");
 
 		Class<?> actualClass = loader.loadClass("org.bindgen.processor.inner.nastyClass$InnerClass");

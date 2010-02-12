@@ -119,7 +119,7 @@ public abstract class MethodBindingGenerator implements PropertyGenerator {
 		TypeElement parent = (TypeElement) this.method.getEnclosingElement();
 		for (Element enclosed : parent.getEnclosedElements()) {
 			String memberName = enclosed.getSimpleName().toString();
-			if (memberName.equals(setterName) && Util.isAccessibleIfGenerated(parent, parent, enclosed)) {
+			if (memberName.equals(setterName) && Util.isAccessibleIfGenerated(parent, enclosed)) {
 				ExecutableElement e = (ExecutableElement) enclosed;
 				return e.getParameters().size() == 1 // single parameter 
 					&& e.getThrownTypes().isEmpty() // no throws
