@@ -8,7 +8,7 @@
 			<attribute name="optional" value="true"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/Bindgen"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/Library-JUnit"/>
+	<classpathentry kind="lib" path="/Bindgen/bin/jars/bindgen.jar"/>
 	<classpathentry kind="output" path="bin/eclipse"/>
 </classpath>
