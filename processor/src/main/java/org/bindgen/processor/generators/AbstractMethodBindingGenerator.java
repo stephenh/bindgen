@@ -12,7 +12,6 @@ import javax.lang.model.util.Types;
 import joist.sourcegen.GClass;
 import joist.sourcegen.GField;
 import joist.sourcegen.GMethod;
-import joist.util.Inflector;
 
 import org.bindgen.ContainerBinding;
 import org.bindgen.processor.CurrentEnv;
@@ -25,74 +24,7 @@ import org.bindgen.processor.util.Util;
  *
  */
 public abstract class AbstractMethodBindingGenerator implements PropertyGenerator {
-	private static final String[] illegalPropertyNames = { "hashCode", "toString", "clone" };
-
-	public static enum AccessorPrefix {
-		// these accessors use the default behavior
-		GET("get", "set"),
-		IS("is", "set"),
-		HAS("has", "set"),
-
-		// none overrides the default accessor behavior
-		NONE("", "") {
-			@Override
-			public String setterName(String getterMethodName) {
-				return getterMethodName;
-			}
-
-			@Override
-			public String propertyName(String getterMethodName) {
-				if (Util.isJavaKeyword(getterMethodName) || "get".equals(getterMethodName)) {
-					return null;
-				}
-				for (String illegalProp : illegalPropertyNames) {
-					if (illegalProp.equals(getterMethodName)) {
-						return getterMethodName + "Binding";
-					}
-				}
-				return getterMethodName;
-			}
-		};
-
-		public final String getterPrefix, setterPrefix;
-
-		private AccessorPrefix(String getterPrefix, String setterPrefix) {
-			this.setterPrefix = setterPrefix;
-			this.getterPrefix = getterPrefix;
-		}
-
-		public String setterName(String getterMethodName) {
-			return this.setterPrefix + getterMethodName.substring(this.getterPrefix.length());
-		}
-
-		public String propertyName(String getterMethodName) {
-			String propertyName = Inflector.uncapitalize(getterMethodName.substring(this.getterPrefix.length()));
-			if (Util.isJavaKeyword(propertyName) || "get".equals(propertyName)) {
-				propertyName = getterMethodName;
-			}
-			for (String illegalProp : illegalPropertyNames) {
-				if (illegalProp.equals(propertyName)) {
-					propertyName = getterMethodName;
-					break;
-				}
-			}
-			return propertyName;
-		}
-
-		public static AccessorPrefix guessPrefix(String getterMethodName) {
-			AccessorPrefix[] values = values();
-			for (int i = 1; i < values.length; i++) {
-				AccessorPrefix possiblePrefix = values[i];
-				String possible = possiblePrefix.getterPrefix;
-				if (getterMethodName.startsWith(possible)
-					&& getterMethodName.length() > possible.length()
-					&& getterMethodName.substring(possible.length(), possible.length() + 1).matches("[A-Z]")) {
-					return possiblePrefix;
-				}
-			}
-			return NONE;
-		}
-	}
+	static final String[] illegalPropertyNames = { "hashCode", "toString", "clone" };
 
 	protected final AccessorPrefix prefix;
 	protected final GClass outerClass;
