@@ -30,7 +30,11 @@ public enum AccessorPrefix {
 		this.setterPrefix = setterPrefix;
 	}
 
+	/** @return given getFoo/isFoo/hasFoo/foo return setFoo/setFoo/setFoo/null */
 	public String setterName(String getterMethodName) {
+		if (this == NONE) {
+			return null;
+		}
 		return this.setterPrefix + getterMethodName.substring(this.getterPrefix.length());
 	}
 

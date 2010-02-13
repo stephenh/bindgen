@@ -48,11 +48,16 @@ public abstract class AbstractMethodBindingGenerator implements PropertyGenerato
 	protected abstract boolean checkViability();
 
 	protected boolean hasSetterMethod() {
+		String setterName = this.prefix.setterName(this.methodName);
+		if (setterName == null) {
+			return false;
+		}
+
 		Types typeUtils = CurrentEnv.getTypeUtils();
 		TypeMirror methodReturnType = this.method.getReturnType();
-
-		String setterName = this.prefix.setterName(this.methodName);
 		TypeElement parent = (TypeElement) this.method.getEnclosingElement();
+
+		// Hm...we don't currently go looking into super classes for the setter
 		for (Element enclosed : parent.getEnclosedElements()) {
 			String memberName = enclosed.getSimpleName().toString();
 			if (memberName.equals(setterName) && Util.isAccessibleIfGenerated(parent, enclosed)) {
