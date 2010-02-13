@@ -1,5 +1,7 @@
 package org.bindgen.processor.generators;
 
+import java.util.List;
+
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
@@ -34,12 +36,12 @@ public abstract class AbstractMethodBindingGenerator implements PropertyGenerato
 	protected final BoundProperty property;
 	protected GClass innerClass;
 
-	public AbstractMethodBindingGenerator(GClass outerClass, ExecutableElement method) throws WrongGeneratorException {
+	public AbstractMethodBindingGenerator(GClass outerClass, ExecutableElement method, List<String> namesTaken) throws WrongGeneratorException {
 		this.outerClass = outerClass;
 		this.method = method;
 		this.methodName = method.getSimpleName().toString();
 		this.prefix = AccessorPrefix.guessPrefix(this.methodName);
-		this.property = new BoundProperty(this.method, this.method.getReturnType(), this.prefix.propertyName(this.methodName));
+		this.property = new BoundProperty(this.method, this.method.getReturnType(), this.prefix.propertyName(namesTaken, this.methodName));
 		if (!this.checkViability() || this.property.shouldSkip()) {
 			throw new WrongGeneratorException();
 		}
@@ -184,14 +186,13 @@ public abstract class AbstractMethodBindingGenerator implements PropertyGenerato
 
 	public abstract static class ExecutableElementGeneratorFactory implements GeneratorFactory {
 		@Override
-		public AbstractMethodBindingGenerator newGenerator(GClass outerClass, Element possibleMethod) throws WrongGeneratorException {
+		public AbstractMethodBindingGenerator newGenerator(GClass outerClass, Element possibleMethod, List<String> namesTaken) throws WrongGeneratorException {
 			if (possibleMethod.getKind() != ElementKind.METHOD) {
 				throw new WrongGeneratorException();
 			}
-			return this.newGenerator(outerClass, (ExecutableElement) possibleMethod);
+			return this.newGenerator(outerClass, (ExecutableElement) possibleMethod, namesTaken);
 		}
 
-		public abstract AbstractMethodBindingGenerator newGenerator(GClass outerClass, ExecutableElement method) throws WrongGeneratorException;
-
+		public abstract AbstractMethodBindingGenerator newGenerator(GClass outerClass, ExecutableElement method, List<String> namesTaken) throws WrongGeneratorException;
 	}
 }

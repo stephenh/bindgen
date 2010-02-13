@@ -21,4 +21,14 @@ public class NoArgMethodBindingTest extends AbstractBindgenTestCase {
 		assertMethodNotDeclared(bindingClass, "oneArgWithThrows");
 	}
 
+	@Test
+	public void testGenerateWithTwoPrefixes() throws Exception {
+		String testedClass = "org.bindgen.processor.noarg.GetNoArgData";
+		Class<?> bindingClass = this.compile(filePath(testedClass)).loadClass(testedClass + "BindingPath");
+
+		assertNotNull(bindingClass);
+		assertMethodDeclared(bindingClass, "foo");
+		assertMethodDeclared(bindingClass, "isFoo");
+	}
+
 }

@@ -1,5 +1,7 @@
 package org.bindgen.processor.generators;
 
+import java.util.List;
+
 import joist.util.Inflector;
 
 import org.bindgen.processor.util.Util;
@@ -39,10 +41,10 @@ public enum AccessorPrefix {
 	}
 
 	/** @return given getFoo/isFoo/hasFoo/foo return "foo" if it is valid, or else the original "getFoo" */
-	public String propertyName(String getterMethodName) {
+	public String propertyName(List<String> namesAlreadyTaken, String getterMethodName) {
 		String propertyName = Inflector.uncapitalize(getterMethodName.substring(this.getterPrefix.length()));
 		// "get" is because of existing Binding.get method--should probably check clashing with the other Binding methods as well
-		if (Util.isJavaKeyword(propertyName) || "get".equals(propertyName)) {
+		if (Util.isJavaKeyword(propertyName) || "get".equals(propertyName) || namesAlreadyTaken.contains(propertyName)) {
 			if (this == NONE) {
 				return null;
 			}
