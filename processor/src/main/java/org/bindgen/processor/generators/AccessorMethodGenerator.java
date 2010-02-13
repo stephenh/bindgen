@@ -1,6 +1,6 @@
 package org.bindgen.processor.generators;
 
-import java.util.List;
+import java.util.Collection;
 
 import javax.lang.model.element.ExecutableElement;
 
@@ -8,13 +8,12 @@ import joist.sourcegen.GClass;
 import joist.sourcegen.GMethod;
 
 /**
- * Generates bindings for get/set method pairs
- * @author mihai
+ * Generates bindings for get/set method pairs (the bindable class must have both)
  *
  */
 public class AccessorMethodGenerator extends AbstractMethodBindingGenerator {
 
-	public AccessorMethodGenerator(GClass outerClass, ExecutableElement method, List<String> namesTaken) throws WrongGeneratorException {
+	public AccessorMethodGenerator(GClass outerClass, ExecutableElement method, Collection<String> namesTaken) throws WrongGeneratorException {
 		super(outerClass, method, namesTaken);
 	}
 
@@ -57,7 +56,7 @@ public class AccessorMethodGenerator extends AbstractMethodBindingGenerator {
 
 	public static class Factory extends ExecutableElementGeneratorFactory {
 		@Override
-		public AccessorMethodGenerator newGenerator(GClass outerClass, ExecutableElement method, List<String> namesTaken) throws WrongGeneratorException {
+		public AccessorMethodGenerator newGenerator(GClass outerClass, ExecutableElement method, Collection<String> namesTaken) throws WrongGeneratorException {
 			return new AccessorMethodGenerator(outerClass, method, namesTaken);
 		}
 	}

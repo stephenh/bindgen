@@ -8,6 +8,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -161,19 +162,42 @@ public class BindingClassGenerator {
 
 	private List<PropertyGenerator> getPropertyGenerators() {
 		List<PropertyGenerator> generators = new ArrayList<PropertyGenerator>();
-		List<String> namesTaken = new ArrayList<String>();
 
+		Set<String> namesTaken = new HashSet<String>();
+
+		// TODO all ths stuff below need implementing somehow
 		// Do methods first so that if a field/method overlap, the getter/setter take precedence
 		List<PropertyGenerator.GeneratorFactory> factories = new ArrayList<PropertyGenerator.GeneratorFactory>();
+
+		// these bindings will always keep their name
 		factories.add(new NoArgMethodGenerator.Factory());
+
+		// in case of name clash these bindings will not drop their prefix
 		factories.add(new GetterMethodGenerator.Factory());
+
+		// in case of name clash, these bindings will also keep their prefix
 		factories.add(new AccessorMethodGenerator.Factory());
+
+		// XXX I don't know about these ones
 		factories.add(new MethodCallableGenerator.Factory());
-		for (Element enclosed : getElementUtils().getAllMembers(this.element)) {
-			if (!Util.isAccessibleIfGenerated(this.element, enclosed)) {
-				continue;
+
+		// in case of name clash with an accessor, these bindings will not be generated
+		// in case of name clash with anything else, the suffix "Field" will be appended to the binding name
+		factories.add(new FieldPropertyGenerator.Factory());
+
+		// get accessible elements
+		List<? extends Element> elements = getElementUtils().getAllMembers(this.element);
+		List<Element> accesibleElements = new ArrayList<Element>(elements.size());
+		for (Element enclosed : elements) {
+			if (Util.isAccessibleIfGenerated(this.element, enclosed)) {
+				accesibleElements.add(enclosed);
 			}
-			for (PropertyGenerator.GeneratorFactory f : factories) {
+		}
+
+		for (PropertyGenerator.GeneratorFactory f : factories) {
+			Iterator<? extends Element> it = accesibleElements.iterator();
+			while (it.hasNext()) {
+				Element enclosed = it.next();
 				try {
 					PropertyGenerator pg = f.newGenerator(this.pathBindingClass, enclosed, namesTaken);
 					if (namesTaken.contains(pg.getPropertyName())) {
@@ -181,35 +205,14 @@ public class BindingClassGenerator {
 					} else {
 						namesTaken.add(pg.getPropertyName());
 					}
+					it.remove(); // element is handled, other PropertyGenerators should not even bother  
 					generators.add(pg);
 					this.sourceElements.add(enclosed);
-					break; // found one that works
 				} catch (WrongGeneratorException e) {
 					// try next
 				}
 			}
 		}
-
-		// Now look for fields--just adding them is fine as markDone will take care of overlaps
-		PropertyGenerator.GeneratorFactory fieldFactory = new FieldPropertyGenerator.Factory();
-		for (Element enclosed : getElementUtils().getAllMembers(this.element)) {
-			//for (Element enclosed : type.getEnclosedElements().getAllMembers(this.element)) {
-			if (!Util.isAccessibleIfGenerated(this.element, enclosed)) {
-				continue;
-			}
-			try {
-				PropertyGenerator pg = fieldFactory.newGenerator(this.pathBindingClass, enclosed, namesTaken);
-				if (namesTaken.contains(pg.getPropertyName())) {
-					continue;
-				} else {
-					namesTaken.add(pg.getPropertyName());
-				}
-				generators.add(pg);
-				this.sourceElements.add(enclosed);
-			} catch (WrongGeneratorException e) {
-			}
-		}
-
 		return generators;
 	}
 

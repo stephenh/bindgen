@@ -23,6 +23,7 @@ import javax.tools.StandardJavaFileManager;
 import javax.tools.ToolProvider;
 import javax.tools.JavaCompiler.CompilationTask;
 
+import org.bindgen.Binding;
 import org.junit.Before;
 import org.junit.BeforeClass;
 
@@ -47,6 +48,7 @@ public class AbstractBindgenTestCase {
 	}
 
 	protected ClassLoader compile(String... files) throws CompilationErrorException, IOException {
+		// FIXME I hate the fact that this is soooo very sloooowww
 		DiagnosticCollector<JavaFileObject> diagnosticCollector = new DiagnosticCollector<JavaFileObject>();
 		StandardJavaFileManager fileManager = COMPILER.getStandardFileManager(diagnosticCollector, null, null);
 
@@ -137,6 +139,37 @@ public class AbstractBindgenTestCase {
 			fail(e.toString());
 		} catch (NoSuchMethodException e) {
 			// OK
+		}
+	}
+
+	public static void assertChildBindings(Class<?> bindingClass, String... expectedChildNames) {
+		try {
+			List<String> actualChildNames = new ArrayList<String>();
+			Binding<?> binding = (Binding<?>) bindingClass.newInstance();
+
+			for (Binding<?> child : binding.getChildBindings()) {
+				actualChildNames.add(child.getName());
+			}
+			String expectedExisting = "", expectedNotExisting = "", notExpectedExisting = "";
+			for (String name : expectedChildNames) {
+				if (actualChildNames.contains(name)) {
+					expectedExisting += (expectedExisting.isEmpty() ? "" : ", ") + name;
+				} else {
+					expectedNotExisting += (expectedNotExisting.isEmpty() ? "" : ", ") + name;
+				}
+			}
+
+			List<String> expectedNames = Arrays.asList(expectedChildNames);
+			for (String name : actualChildNames) {
+				if (!expectedNames.contains(name)) {
+					notExpectedExisting += (notExpectedExisting.isEmpty() ? "" : ", ") + name;
+				}
+			}
+			assertEquals(expectedNotExisting, notExpectedExisting);
+		} catch (InstantiationException e) {
+			fail(e.toString());
+		} catch (IllegalAccessException e) {
+			fail(e.toString());
 		}
 	}
 

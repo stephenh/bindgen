@@ -1,6 +1,6 @@
 package org.bindgen.processor.generators;
 
-import java.util.List;
+import java.util.Collection;
 
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
@@ -14,6 +14,9 @@ import org.bindgen.ContainerBinding;
 import org.bindgen.processor.util.BoundProperty;
 import org.bindgen.processor.util.Util;
 
+/**
+ * Generates bindings for fields 
+ */
 public class FieldPropertyGenerator implements PropertyGenerator {
 
 	private final GClass outerClass;
@@ -173,7 +176,7 @@ public class FieldPropertyGenerator implements PropertyGenerator {
 
 	public static class Factory implements GeneratorFactory {
 		@Override
-		public FieldPropertyGenerator newGenerator(GClass outerClass, Element possibleField, List<String> namesTaken) throws WrongGeneratorException {
+		public FieldPropertyGenerator newGenerator(GClass outerClass, Element possibleField, Collection<String> namesTaken) throws WrongGeneratorException {
 			if (possibleField.getKind() != ElementKind.FIELD) {
 				throw new WrongGeneratorException();
 			}

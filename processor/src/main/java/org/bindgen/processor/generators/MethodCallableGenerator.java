@@ -2,6 +2,7 @@ package org.bindgen.processor.generators;
 
 import static org.bindgen.processor.CurrentEnv.*;
 
+import java.util.Collection;
 import java.util.List;
 
 import javax.lang.model.element.Element;
@@ -200,7 +201,7 @@ public class MethodCallableGenerator implements PropertyGenerator {
 
 	public static class Factory implements GeneratorFactory {
 		@Override
-		public MethodCallableGenerator newGenerator(GClass outerClass, Element possibleMethod, List<String> namesTaken) throws WrongGeneratorException {
+		public MethodCallableGenerator newGenerator(GClass outerClass, Element possibleMethod, Collection<String> namesTaken) throws WrongGeneratorException {
 			if (possibleMethod.getKind() != ElementKind.METHOD) {
 				throw new WrongGeneratorException();
 			}

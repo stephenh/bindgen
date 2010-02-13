@@ -1,6 +1,6 @@
 package org.bindgen.processor.generators;
 
-import java.util.List;
+import java.util.Collection;
 
 import javax.lang.model.element.ExecutableElement;
 
@@ -8,13 +8,12 @@ import joist.sourcegen.GClass;
 import joist.sourcegen.GMethod;
 
 /**
- * Generates bindings for getter methods 
- * @author mihai
+ * Generates bindings for getter methods that do not have a corresponding setter
  *
  */
 public class GetterMethodGenerator extends AbstractMethodBindingGenerator {
 
-	public GetterMethodGenerator(GClass outerClass, ExecutableElement method, List<String> namesTaken) throws WrongGeneratorException {
+	public GetterMethodGenerator(GClass outerClass, ExecutableElement method, Collection<String> namesTaken) throws WrongGeneratorException {
 		super(outerClass, method, namesTaken);
 	}
 
@@ -52,7 +51,7 @@ public class GetterMethodGenerator extends AbstractMethodBindingGenerator {
 
 	public static class Factory extends ExecutableElementGeneratorFactory {
 		@Override
-		public GetterMethodGenerator newGenerator(GClass outerClass, ExecutableElement method, List<String> namesTaken) throws WrongGeneratorException {
+		public GetterMethodGenerator newGenerator(GClass outerClass, ExecutableElement method, Collection<String> namesTaken) throws WrongGeneratorException {
 			return new GetterMethodGenerator(outerClass, method, namesTaken);
 		}
 	}
