@@ -34,9 +34,7 @@ public enum AccessorPrefix {
 
 	/** @return given a getter method name, return which of get/set, is/set, has/set or none we'll use. */
 	public static AccessorPrefix guessPrefix(String methodName) {
-		AccessorPrefix[] values = values();
-		for (int i = 1; i < values.length; i++) {
-			AccessorPrefix possiblePrefix = values[i];
+		for (AccessorPrefix possiblePrefix : values()) {
 			String possible = possiblePrefix.getterPrefix;
 			if (methodName.startsWith(possible)
 				&& methodName.length() > possible.length()
