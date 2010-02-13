@@ -19,12 +19,13 @@ import org.bindgen.processor.util.BoundProperty;
 import org.bindgen.processor.util.Util;
 
 /**
- * Generates bindings for methods (class exists for implementation reuse only) 
- * @author mihai
+ * Generates bindings for methods.
  *
+ * Class exists for implementation reuse only.
+ *
+ * @author mihai
  */
 public abstract class AbstractMethodBindingGenerator implements PropertyGenerator {
-	static final String[] illegalPropertyNames = { "hashCode", "toString", "clone" };
 
 	protected final AccessorPrefix prefix;
 	protected final GClass outerClass;
