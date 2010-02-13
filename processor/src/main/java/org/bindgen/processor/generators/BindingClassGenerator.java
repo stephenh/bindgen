@@ -51,7 +51,7 @@ public class BindingClassGenerator {
 	public BindingClassGenerator(GenerationQueue queue, TypeElement element) {
 		this.queue = queue;
 		this.element = element;
-		this.name = new BoundClass(element.asType());
+		this.name = new BoundClass(element);
 	}
 
 	public void generate() {

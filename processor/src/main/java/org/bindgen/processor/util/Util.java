@@ -3,10 +3,10 @@ package org.bindgen.processor.util;
 import static org.bindgen.processor.CurrentEnv.*;
 
 import java.util.Set;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.lang.model.element.Element;
+import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.ArrayType;
@@ -19,16 +19,20 @@ import joist.util.Inflector;
 
 public class Util {
 
-	private static final Pattern outerClassName = Pattern.compile("\\.([A-Z]\\w+)\\.");
+	private static final Pattern lowerCase = Pattern.compile("^[a-z]");
 	private static final String[] javaKeywords = "abstract,continue,for,new,switch,assert,default,goto,package,synchronized,boolean,do,if,private,this,break,double,implements,protected,throw,byte,else,import,public,throws,case,enum,instanceof,return,transient,catch,extends,int,short,try,char,final,interface,static,void,class,finally,long,strictfp,volatile,const,float,native,super,while,null"
 		.split(",");
 
 	// Watch for package.Foo.Inner -> package.foo.Inner
-	public static String lowerCaseOuterClassNames(String className) {
-		Matcher m = outerClassName.matcher(className);
-		while (m.find()) {
-			className = m.replaceFirst("." + Inflector.uncapitalize(m.group(1)) + ".");
-			m = outerClassName.matcher(className);
+	public static String lowerCaseOuterClassNames(TypeElement bindableClass, String className) {
+		if (bindableClass.getEnclosingElement().getKind() == ElementKind.CLASS) {
+			String outerClassName = bindableClass.getEnclosingElement().getSimpleName().toString();
+			if (lowerCase.matcher(outerClassName).find()) {
+				// I'd like to try and generate outerClass$InnerClass, like normal inner classes
+				className = className.replace(outerClassName + ".", outerClassName + "_");
+			} else {
+				className = className.replace(outerClassName, Inflector.uncapitalize(outerClassName));
+			}
 		}
 		return className;
 	}
