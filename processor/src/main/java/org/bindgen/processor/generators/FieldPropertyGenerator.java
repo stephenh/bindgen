@@ -1,6 +1,7 @@
 package org.bindgen.processor.generators;
 
 import javax.lang.model.element.Element;
+import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.TypeElement;
 
 import joist.sourcegen.GClass;
@@ -19,22 +20,18 @@ public class FieldPropertyGenerator implements PropertyGenerator {
 	private final boolean isFinal;
 	private GClass innerClass;
 
-	public FieldPropertyGenerator(GClass outerClass, Element field) {
+	public FieldPropertyGenerator(GClass outerClass, Element field) throws WrongGeneratorException {
 		this.outerClass = outerClass;
 		this.field = field;
 		this.property = new BoundProperty(this.field, this.field.asType(), this.field.getSimpleName().toString());
+		if (this.property.shouldSkip()) {
+			throw new WrongGeneratorException();
+		}
 		this.isFinal = this.field.getModifiers().contains(javax.lang.model.element.Modifier.FINAL);
 	}
 
 	@Override
-	public boolean isCallable() {
-		return false;
-	}
-
-	public boolean shouldGenerate() {
-		if (this.property.shouldSkip()) {
-			return false;
-		}
+	public boolean hasSubBindings() {
 		return true;
 	}
 
@@ -170,5 +167,15 @@ public class FieldPropertyGenerator implements PropertyGenerator {
 	@Override
 	public String toString() {
 		return this.field.toString();
+	}
+
+	public static class Factory implements GeneratorFactory {
+		@Override
+		public FieldPropertyGenerator newGenerator(GClass outerClass, Element possibleField) throws WrongGeneratorException {
+			if (possibleField.getKind() != ElementKind.FIELD) {
+				throw new WrongGeneratorException();
+			}
+			return new FieldPropertyGenerator(outerClass, possibleField);
+		}
 	}
 }

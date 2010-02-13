@@ -6,7 +6,6 @@ import javax.lang.model.type.TypeMirror;
 
 import joist.util.Join;
 
-import org.bindgen.binding.AbstractBinding;
 import org.bindgen.processor.CurrentEnv;
 
 /** Given a TypeMirror type of a field/method property, provides information about its binding outer/inner class. */
@@ -31,7 +30,7 @@ public class BoundClass {
 	}
 
 	public String getBindingPathClassSuperClass() {
-		return AbstractBinding.class.getName() + "<R, " + this.name.get() + ">";
+		return CurrentEnv.getConfig().bindingPathSuperClassName() + "<R, " + this.name.get() + ">";
 	}
 
 	public String getBindingRootClassDeclaration() {

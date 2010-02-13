@@ -1,12 +1,18 @@
 package org.bindgen.processor;
 
+import static org.junit.Assert.*;
+
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map.Entry;
 
 import javax.annotation.processing.Processor;
 import javax.tools.Diagnostic;
@@ -22,6 +28,7 @@ import org.junit.rules.TemporaryFolder;
 
 public class AbstractBindgenTestCase {
 	private static final JavaCompiler COMPILER = ToolProvider.getSystemJavaCompiler();
+	private HashMap<String, String> aptProperties = new HashMap<String, String>();
 
 	@Rule
 	public TemporaryFolder tmp = new TemporaryFolder();
@@ -39,7 +46,7 @@ public class AbstractBindgenTestCase {
 			null,
 			fileManager,
 			diagnosticCollector,
-			Arrays.asList("-d", this.tmp.getRoot().getAbsolutePath()),
+			this.compileProps("-d", this.tmp.getRoot().getAbsolutePath()),
 			null,
 			fileManager.getJavaFileObjectsFromFiles(compilationUnits));
 
@@ -62,4 +69,64 @@ public class AbstractBindgenTestCase {
 
 		return loader;
 	}
+
+	private List<String> compileProps(String... props) {
+		List<String> result = new ArrayList<String>();
+		result.addAll(Arrays.asList(props));
+
+		for (Entry<String, String> prop : this.aptProperties.entrySet()) {
+			result.add("-A" + prop.getKey() + "=" + prop.getValue());
+		}
+		return result;
+	}
+
+	protected void setBindingPathSuperClass(String qualifiedClassName) {
+		this.aptProperties.put("bindingPathSuperClass", qualifiedClassName);
+	}
+
+	protected static String filePath(String qualifiedClassName) {
+		return qualifiedClassName.replace(".", "/") + ".java";
+	}
+
+	protected static void assertPublic(Method method) {
+		if ((method.getModifiers() & Modifier.PUBLIC) == 0) {
+			fail();
+		}
+	}
+
+	protected static void assertProtected(Method method) {
+		if ((method.getModifiers() & Modifier.PROTECTED) == 0) {
+			fail();
+		}
+	}
+
+	protected static void assertPackage(Method method) {
+		if ((method.getModifiers() & Modifier.PUBLIC) > 0
+			|| (method.getModifiers() & Modifier.PROTECTED) > 0
+			|| (method.getModifiers() & Modifier.PRIVATE) > 0) {
+			fail();
+		}
+	}
+
+	public static void assertMethodDeclared(Class<?> bindingClass, String methodName) {
+		try {
+			assertNotNull(bindingClass.getDeclaredMethod(methodName));
+		} catch (SecurityException e) {
+			fail(e.toString());
+		} catch (NoSuchMethodException e) {
+			fail("Expected class " + bindingClass.getName() + " to declare method: " + methodName);
+		}
+	}
+
+	public static void assertMethodNotDeclared(Class<?> bindingClass, String methodName) {
+		try {
+			bindingClass.getDeclaredMethod(methodName);
+			fail("Expected class " + bindingClass.getName() + " to not declare method: " + methodName);
+		} catch (SecurityException e) {
+			fail(e.toString());
+		} catch (NoSuchMethodException e) {
+			// OK
+		}
+	}
+
 }

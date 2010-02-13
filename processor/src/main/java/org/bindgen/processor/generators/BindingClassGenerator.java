@@ -13,8 +13,6 @@ import java.util.Set;
 
 import javax.annotation.Generated;
 import javax.lang.model.element.Element;
-import javax.lang.model.element.ElementKind;
-import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
 import javax.tools.JavaFileObject;
 import javax.tools.Diagnostic.Kind;
@@ -148,7 +146,7 @@ public class BindingClassGenerator {
 	}
 
 	private void addToSubBindingsIfNeeded(PropertyGenerator pg) {
-		if (!pg.isCallable()) {
+		if (pg.hasSubBindings()) {
 			this.foundSubBindings.add(pg.getPropertyName());
 		}
 	}
@@ -178,35 +176,42 @@ public class BindingClassGenerator {
 
 	private List<PropertyGenerator> getPropertyGenerators() {
 		List<PropertyGenerator> generators = new ArrayList<PropertyGenerator>();
+
 		// Do methods first so that if a field/method overlap, the getter/setter take precedence
+		List<PropertyGenerator.GeneratorFactory> factories = new ArrayList<PropertyGenerator.GeneratorFactory>();
+		factories.add(new NoArgMethodGenerator.Factory());
+		factories.add(new GetterMethodGenerator.Factory());
+		factories.add(new AccessorMethodGenerator.Factory());
+		factories.add(new MethodCallableGenerator.Factory());
 		for (Element enclosed : getElementUtils().getAllMembers(this.element)) {
-			if (!Util.isAccessibleIfGenerated(this.element, enclosed) || enclosed.getKind() != ElementKind.METHOD) {
+			if (!Util.isAccessibleIfGenerated(this.element, enclosed)) {
 				continue;
 			}
-			MethodPropertyGenerator mpg = new MethodPropertyGenerator(this.pathBindingClass, (ExecutableElement) enclosed);
-			if (mpg.shouldGenerate()) {
-				generators.add(mpg);
-				this.sourceElements.add(enclosed);
-				continue;
-			}
-			MethodCallableGenerator mcg = new MethodCallableGenerator(this.pathBindingClass, (ExecutableElement) enclosed);
-			if (mcg.shouldGenerate()) {
-				generators.add(mcg);
-				this.sourceElements.add(enclosed);
-				continue;
+			for (PropertyGenerator.GeneratorFactory f : factories) {
+				try {
+					generators.add(f.newGenerator(this.pathBindingClass, enclosed));
+					this.sourceElements.add(enclosed);
+					break; // found one that works
+				} catch (WrongGeneratorException e) {
+					// try next
+				}
 			}
 		}
+
 		// Now look for fields--just adding them is fine as markDone will take care of overlaps
+		PropertyGenerator.GeneratorFactory fieldFactory = new FieldPropertyGenerator.Factory();
 		for (Element enclosed : getElementUtils().getAllMembers(this.element)) {
-			if (!Util.isAccessibleIfGenerated(this.element, enclosed) || enclosed.getKind() != ElementKind.FIELD) {
+			//for (Element enclosed : type.getEnclosedElements().getAllMembers(this.element)) {
+			if (!Util.isAccessibleIfGenerated(this.element, enclosed)) {
 				continue;
 			}
-			FieldPropertyGenerator fpg = new FieldPropertyGenerator(this.pathBindingClass, enclosed);
-			if (fpg.shouldGenerate()) {
-				generators.add(fpg);
+			try {
+				generators.add(fieldFactory.newGenerator(this.pathBindingClass, enclosed));
 				this.sourceElements.add(enclosed);
+			} catch (WrongGeneratorException e) {
 			}
 		}
+
 		return generators;
 	}
 
