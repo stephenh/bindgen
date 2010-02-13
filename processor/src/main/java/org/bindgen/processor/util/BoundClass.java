@@ -1,5 +1,7 @@
 package org.bindgen.processor.util;
 
+import static org.bindgen.processor.CurrentEnv.*;
+
 import java.util.List;
 
 import javax.lang.model.type.TypeMirror;
@@ -19,7 +21,7 @@ public class BoundClass {
 
 	/** @return binding type, e.g. bindgen.java.lang.StringBinding, bindgen.app.EmployeeBinding */
 	public ClassName getBindingClassName() {
-		String bindingName = CurrentEnv.getConfig().baseNameForBinding(this.name) + "Binding" + this.name.getGenericPart();
+		String bindingName = getConfig().baseNameForBinding(this.name) + "Binding" + this.name.getGenericPart();
 		return new ClassName(Util.lowerCaseOuterClassNames(bindingName));
 	}
 

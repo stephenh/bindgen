@@ -1,5 +1,7 @@
 package org.bindgen.processor.generators;
 
+import java.util.List;
+
 import javax.lang.model.element.ExecutableElement;
 
 import joist.sourcegen.GClass;
@@ -10,17 +12,15 @@ import joist.sourcegen.GMethod;
  * @author mihai
  *
  */
-public class AccessorMethodGenerator extends MethodBindingGenerator {
+public class AccessorMethodGenerator extends AbstractMethodBindingGenerator {
 
-	public AccessorMethodGenerator(GClass outerClass, ExecutableElement method) throws WrongGeneratorException {
-		super(outerClass, method);
+	public AccessorMethodGenerator(GClass outerClass, ExecutableElement method, List<String> namesTaken) throws WrongGeneratorException {
+		super(outerClass, method, namesTaken);
 	}
 
 	@Override
-	protected void checkViability() throws WrongGeneratorException {
-		if (!this.hasSetterMethod() || this.methodReturnsVoid() || this.methodHasParameters() || this.methodThrowsExceptions()) {
-			throw new WrongGeneratorException();
-		}
+	protected boolean checkViability() {
+		return this.hasSetterMethod() && this.methodNotVoidNoParamsNoThrows();
 	}
 
 	public void generate() {
@@ -57,8 +57,8 @@ public class AccessorMethodGenerator extends MethodBindingGenerator {
 
 	public static class Factory extends ExecutableElementGeneratorFactory {
 		@Override
-		public AccessorMethodGenerator newGenerator(GClass outerClass, ExecutableElement method) throws WrongGeneratorException {
-			return new AccessorMethodGenerator(outerClass, method);
+		public AccessorMethodGenerator newGenerator(GClass outerClass, ExecutableElement method, List<String> namesTaken) throws WrongGeneratorException {
+			return new AccessorMethodGenerator(outerClass, method, namesTaken);
 		}
 	}
 }

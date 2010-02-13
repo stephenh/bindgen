@@ -1,5 +1,7 @@
 package org.bindgen.processor.generators;
 
+import java.util.List;
+
 import javax.lang.model.element.ExecutableElement;
 
 import joist.sourcegen.GClass;
@@ -11,25 +13,19 @@ import joist.sourcegen.GClass;
  */
 public class NoArgMethodGenerator extends GetterMethodGenerator {
 
-	public NoArgMethodGenerator(GClass outerClass, ExecutableElement method) throws WrongGeneratorException {
-		super(outerClass, method);
+	public NoArgMethodGenerator(GClass outerClass, ExecutableElement method, List<String> namesTaken) throws WrongGeneratorException {
+		super(outerClass, method, namesTaken);
 	}
 
 	@Override
-	protected void checkViability() throws WrongGeneratorException {
-		if (AccessorPrefix.NONE != this.prefix
-			|| this.hasSetterMethod()
-			|| this.methodReturnsVoid()
-			|| this.methodHasParameters()
-			|| this.methodThrowsExceptions()) {
-			throw new WrongGeneratorException();
-		}
+	protected boolean checkViability() {
+		return AccessorPrefix.NONE == this.prefix && !this.hasSetterMethod() && this.methodNotVoidNoParamsNoThrows();
 	}
 
 	public static class Factory extends ExecutableElementGeneratorFactory {
 		@Override
-		public NoArgMethodGenerator newGenerator(GClass outerClass, ExecutableElement method) throws WrongGeneratorException {
-			return new NoArgMethodGenerator(outerClass, method);
+		public NoArgMethodGenerator newGenerator(GClass outerClass, ExecutableElement method, List<String> namesTaken) throws WrongGeneratorException {
+			return new NoArgMethodGenerator(outerClass, method, namesTaken);
 		}
 	}
 

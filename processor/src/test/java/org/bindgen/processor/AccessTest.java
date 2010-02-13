@@ -2,7 +2,6 @@ package org.bindgen.processor;
 
 import static org.junit.Assert.*;
 
-
 import org.junit.Test;
 
 public class AccessTest extends AbstractBindgenTestCase {
@@ -45,14 +44,12 @@ public class AccessTest extends AbstractBindgenTestCase {
 
 	@Test
 	public void shouldNotGenerateBindingsForInheritedNonPublicFields() throws Exception {
-		ClassLoader loader = this.compile("org/bindgen/processor/access/package1/Bean1.java", "org/bindgen/processor/access/package2/Bean2.java");
+		this.compile("org/bindgen/processor/access/package1/Bean1.java", "org/bindgen/processor/access/package2/Bean2.java");
 	}
 
-	@Test(expected = ClassNotFoundException.class)
-	public void shouldNotGenerateBindingsForClassesInDefaultPackage() throws Exception {
+	public void canGenerateBindingsForClassesInDefaultPackage() throws Exception {
 		ClassLoader loader = this.compile("ClassInDefaultPackage.java");
 		loader.loadClass("ClassInDefaultPackageBindingPath");
-		fail();
 	}
 
 }

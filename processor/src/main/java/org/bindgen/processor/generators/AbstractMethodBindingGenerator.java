@@ -1,5 +1,7 @@
 package org.bindgen.processor.generators;
 
+import java.util.List;
+
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
@@ -12,7 +14,6 @@ import javax.lang.model.util.Types;
 import joist.sourcegen.GClass;
 import joist.sourcegen.GField;
 import joist.sourcegen.GMethod;
-import joist.util.Inflector;
 
 import org.bindgen.ContainerBinding;
 import org.bindgen.processor.CurrentEnv;
@@ -20,75 +21,13 @@ import org.bindgen.processor.util.BoundProperty;
 import org.bindgen.processor.util.Util;
 
 /**
- * Generates bindings for methods (class exists for implementation reuse only) 
- * @author mihai
+ * Generates bindings for methods.
  *
+ * Class exists for implementation reuse only.
+ *
+ * @author mihai
  */
-public abstract class MethodBindingGenerator implements PropertyGenerator {
-	private static final String[] illegalPropertyNames = { "hashCode", "toString", "clone" };
-
-	public static enum AccessorPrefix {
-		NONE("", "") {
-			public String setterName(String getterMethodName) {
-				return getterMethodName;
-			}
-
-			public String propertyName(String getterMethodName) {
-				if (Util.isJavaKeyword(getterMethodName) || "get".equals(getterMethodName)) {
-					return null;
-				}
-				for (String illegalProp : illegalPropertyNames) {
-					if (illegalProp.equals(getterMethodName)) {
-						return getterMethodName + "Binding";
-					}
-				}
-
-				return getterMethodName;
-			}
-		},
-
-		GET("get", "set"), IS("is", "set"), HAS("has", "set");
-
-		public final String getterPrefix, setterPrefix;
-
-		private AccessorPrefix(String getterPrefix, String setterPrefix) {
-			this.setterPrefix = setterPrefix;
-			this.getterPrefix = getterPrefix;
-		}
-
-		public String setterName(String getterMethodName) {
-			return this.setterPrefix + getterMethodName.substring(this.getterPrefix.length());
-		}
-
-		public String propertyName(String getterMethodName) {
-			String propertyName = Inflector.uncapitalize(getterMethodName.substring(this.getterPrefix.length()));
-			if (Util.isJavaKeyword(propertyName) || "get".equals(propertyName)) {
-				propertyName = getterMethodName;
-			}
-			for (String illegalProp : illegalPropertyNames) {
-				if (illegalProp.equals(propertyName)) {
-					propertyName = getterMethodName;
-					break;
-				}
-			}
-
-			return propertyName;
-		}
-
-		public static AccessorPrefix guessPrefix(String getterMethodName) {
-			AccessorPrefix[] values = values();
-			for (int i = 1; i < values.length; i++) {
-				AccessorPrefix possiblePrefix = values[i];
-				String possible = possiblePrefix.getterPrefix;
-				if (getterMethodName.startsWith(possible)
-					&& getterMethodName.length() > possible.length()
-					&& getterMethodName.substring(possible.length(), possible.length() + 1).matches("[A-Z]")) {
-					return possiblePrefix;
-				}
-			}
-			return NONE;
-		}
-	}
+public abstract class AbstractMethodBindingGenerator implements PropertyGenerator {
 
 	protected final AccessorPrefix prefix;
 	protected final GClass outerClass;
@@ -97,26 +36,30 @@ public abstract class MethodBindingGenerator implements PropertyGenerator {
 	protected final BoundProperty property;
 	protected GClass innerClass;
 
-	public MethodBindingGenerator(GClass outerClass, ExecutableElement method) throws WrongGeneratorException {
+	public AbstractMethodBindingGenerator(GClass outerClass, ExecutableElement method, List<String> namesTaken) throws WrongGeneratorException {
 		this.outerClass = outerClass;
 		this.method = method;
 		this.methodName = method.getSimpleName().toString();
 		this.prefix = AccessorPrefix.guessPrefix(this.methodName);
-		this.property = new BoundProperty(this.method, this.method.getReturnType(), this.prefix.propertyName(this.methodName));
-		this.checkViability();
-		if (this.property.shouldSkip()) {
+		this.property = new BoundProperty(this.method, this.method.getReturnType(), this.prefix.propertyName(namesTaken, this.methodName));
+		if (!this.checkViability() || this.property.shouldSkip()) {
 			throw new WrongGeneratorException();
 		}
 	}
 
-	protected abstract void checkViability() throws WrongGeneratorException;
+	protected abstract boolean checkViability();
 
 	protected boolean hasSetterMethod() {
+		String setterName = this.prefix.setterName(this.methodName);
+		if (setterName == null) {
+			return false;
+		}
+
 		Types typeUtils = CurrentEnv.getTypeUtils();
 		TypeMirror methodReturnType = this.method.getReturnType();
-
-		String setterName = this.prefix.setterName(this.methodName);
 		TypeElement parent = (TypeElement) this.method.getEnclosingElement();
+
+		// Hm...we don't currently go looking into super classes for the setter
 		for (Element enclosed : parent.getEnclosedElements()) {
 			String memberName = enclosed.getSimpleName().toString();
 			if (memberName.equals(setterName) && Util.isAccessibleIfGenerated(parent, enclosed)) {
@@ -135,6 +78,10 @@ public abstract class MethodBindingGenerator implements PropertyGenerator {
 
 	protected boolean methodHasParameters() {
 		return !((ExecutableType) this.method.asType()).getParameterTypes().isEmpty();
+	}
+
+	protected boolean methodNotVoidNoParamsNoThrows() {
+		return !this.methodReturnsVoid() && !this.methodHasParameters() && !this.methodThrowsExceptions();
 	}
 
 	protected boolean methodReturnsVoid() {
@@ -239,14 +186,13 @@ public abstract class MethodBindingGenerator implements PropertyGenerator {
 
 	public abstract static class ExecutableElementGeneratorFactory implements GeneratorFactory {
 		@Override
-		public MethodBindingGenerator newGenerator(GClass outerClass, Element possibleMethod) throws WrongGeneratorException {
+		public AbstractMethodBindingGenerator newGenerator(GClass outerClass, Element possibleMethod, List<String> namesTaken) throws WrongGeneratorException {
 			if (possibleMethod.getKind() != ElementKind.METHOD) {
 				throw new WrongGeneratorException();
 			}
-			return this.newGenerator(outerClass, (ExecutableElement) possibleMethod);
+			return this.newGenerator(outerClass, (ExecutableElement) possibleMethod, namesTaken);
 		}
 
-		public abstract MethodBindingGenerator newGenerator(GClass outerClass, ExecutableElement method) throws WrongGeneratorException;
-
+		public abstract AbstractMethodBindingGenerator newGenerator(GClass outerClass, ExecutableElement method, List<String> namesTaken) throws WrongGeneratorException;
 	}
 }

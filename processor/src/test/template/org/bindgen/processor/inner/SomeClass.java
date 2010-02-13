@@ -3,7 +3,7 @@ package org.bindgen.processor.inner;
 import org.bindgen.Bindable;
 
 public class SomeClass {
-	
+
 	@Bindable
 	public static class InnerClass {
 		private int x;
@@ -19,9 +19,9 @@ public class SomeClass {
 			return x*x;
 		}
 	}
-	
+
 	private int y;
-	
+
 	public int half() {
 		return y/2;
 	}
@@ -29,7 +29,9 @@ public class SomeClass {
 	public int getY() {
 		return this.y;
 	}
+
 	public void setY(int y) {
 		this.y = y;
 	}
+
 }

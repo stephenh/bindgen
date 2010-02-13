@@ -1,5 +1,7 @@
 package org.bindgen.processor.generators;
 
+import java.util.List;
+
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
 
@@ -21,6 +23,6 @@ public interface PropertyGenerator {
 	void generate();
 
 	public static interface GeneratorFactory {
-		PropertyGenerator newGenerator(GClass outerClass, Element field) throws WrongGeneratorException;
+		PropertyGenerator newGenerator(GClass outerClass, Element field, List<String> namesTaken) throws WrongGeneratorException;
 	}
 }

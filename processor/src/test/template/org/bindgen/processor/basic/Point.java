@@ -4,9 +4,10 @@ import org.bindgen.Bindable;
 
 @Bindable
 public class Point {
+
 	public int x;
 	private int y,z;
-	
+
 	public int getY() {
 		return y;
 	}
@@ -19,12 +20,12 @@ public class Point {
 		return new Point();
 	}
 
-	
 	public int getZ() {
 		return this.z;
 	}
+
 	public void setZ(int z) {
 		this.z = z;
 	}
-	
+
 }

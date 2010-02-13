@@ -4,6 +4,7 @@ import org.bindgen.Bindable;
 
 @Bindable
 public class AccessBean {
+
 	public String publicField;
 	protected String protectedField;
 	String packageField;

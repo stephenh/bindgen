@@ -44,7 +44,7 @@ public class BindgenConfig {
 	}
 
 	public boolean shouldGenerateBindingFor(ClassName name) {
-		return name.getPackageName().isEmpty() ? false : this.bindingScope.includes(name);
+		return this.bindingScope.includes(name);
 	}
 
 	public boolean logEnabled() {

@@ -24,6 +24,8 @@ public class MethodExample {
 	private Wildcards<String, ?, ?> wildcards; // Was causing errors with wildcard in 2nd position
 	// Even though protected, the setter takes precendence
 	protected int protectedProperty;
+	// a 1-char method
+	private String m;
 
 	public MethodExample(String id, String name) {
 		this.id = id;
@@ -126,6 +128,18 @@ public class MethodExample {
 
 	public void setWildcards(Wildcards<String, ?, ?> wildcards) {
 		this.wildcards = wildcards;
+	}
+
+	public String getM() {
+		return this.m;
+	}
+
+	public void setM(String m) {
+		this.m = m;
+	}
+
+	public int noArg() {
+		return 1;
 	}
 
 	protected int isProtectedProperty() {

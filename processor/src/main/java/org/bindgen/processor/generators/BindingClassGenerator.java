@@ -22,7 +22,6 @@ import joist.sourcegen.GMethod;
 import joist.util.Copy;
 
 import org.bindgen.Binding;
-import org.bindgen.processor.CurrentEnv;
 import org.bindgen.processor.GenerationQueue;
 import org.bindgen.processor.Processor;
 import org.bindgen.processor.util.BoundClass;
@@ -45,7 +44,6 @@ public class BindingClassGenerator {
 	private final TypeElement element;
 	private final BoundClass name;
 	private final List<String> foundSubBindings = new ArrayList<String>();
-	private final List<String> done = new ArrayList<String>();
 	private final Set<Element> sourceElements = new HashSet<Element>();
 	private GClass pathBindingClass;
 	private GClass rootBindingClass;
@@ -118,28 +116,15 @@ public class BindingClassGenerator {
 
 	private void generateProperties() {
 		for (PropertyGenerator pg : this.getPropertyGenerators()) {
-			if (this.doneAlreadyContainsPropertyFromSubClass(pg)) {
-				continue;
-			}
 			pg.generate();
-			this.markDone(pg);
 			this.enqueuePropertyTypeIfNeeded(pg);
 			this.addToSubBindingsIfNeeded(pg);
 		}
 	}
 
-	// in case a parent class has the same field/method name as a child class
-	private boolean doneAlreadyContainsPropertyFromSubClass(PropertyGenerator pg) {
-		return this.done.contains(pg.getPropertyName());
-	}
-
-	private void markDone(PropertyGenerator pg) {
-		this.done.add(pg.getPropertyName());
-	}
-
 	private void enqueuePropertyTypeIfNeeded(PropertyGenerator pg) {
 		if (pg.getPropertyTypeElement() != null) {
-			if (CurrentEnv.getConfig().shouldGenerateBindingFor(pg.getPropertyTypeElement())) {
+			if (getConfig().shouldGenerateBindingFor(pg.getPropertyTypeElement())) {
 				this.queue.enqueueIfNew(pg.getPropertyTypeElement());
 			}
 		}
@@ -176,6 +161,7 @@ public class BindingClassGenerator {
 
 	private List<PropertyGenerator> getPropertyGenerators() {
 		List<PropertyGenerator> generators = new ArrayList<PropertyGenerator>();
+		List<String> namesTaken = new ArrayList<String>();
 
 		// Do methods first so that if a field/method overlap, the getter/setter take precedence
 		List<PropertyGenerator.GeneratorFactory> factories = new ArrayList<PropertyGenerator.GeneratorFactory>();
@@ -189,7 +175,13 @@ public class BindingClassGenerator {
 			}
 			for (PropertyGenerator.GeneratorFactory f : factories) {
 				try {
-					generators.add(f.newGenerator(this.pathBindingClass, enclosed));
+					PropertyGenerator pg = f.newGenerator(this.pathBindingClass, enclosed, namesTaken);
+					if (namesTaken.contains(pg.getPropertyName())) {
+						continue;
+					} else {
+						namesTaken.add(pg.getPropertyName());
+					}
+					generators.add(pg);
 					this.sourceElements.add(enclosed);
 					break; // found one that works
 				} catch (WrongGeneratorException e) {
@@ -206,7 +198,13 @@ public class BindingClassGenerator {
 				continue;
 			}
 			try {
-				generators.add(fieldFactory.newGenerator(this.pathBindingClass, enclosed));
+				PropertyGenerator pg = fieldFactory.newGenerator(this.pathBindingClass, enclosed, namesTaken);
+				if (namesTaken.contains(pg.getPropertyName())) {
+					continue;
+				} else {
+					namesTaken.add(pg.getPropertyName());
+				}
+				generators.add(pg);
 				this.sourceElements.add(enclosed);
 			} catch (WrongGeneratorException e) {
 			}

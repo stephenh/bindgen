@@ -34,6 +34,9 @@ public class FieldExample {
 	// a final field
 	public final String finalField = "1";
 
+	// a 1 char field
+	public String f;
+
 	public FieldExample(String name) {
 		this.name = name;
 	}

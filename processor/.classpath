@@ -4,7 +4,7 @@
 	<classpathentry kind="src" path="src/test/java"/>
 	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.6"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/Library-JUnit"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/Library-joist.util"/>
+	<classpathentry kind="lib" path="bin/lib/build/jars/joist.util.jar" sourcepath="bin/lib/build/sources/joist.util.jar"/>
+	<classpathentry kind="lib" path="bin/lib/tests/jars/junit.jar" sourcepath="bin/lib/tests/sources/junit.jar"/>
 	<classpathentry kind="output" path="bin/eclipse"/>
 </classpath>

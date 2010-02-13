@@ -134,22 +134,20 @@ public class MethodCallableGenerator implements PropertyGenerator {
 	}
 
 	private boolean doBlockReturnTypesMatch(ExecutableElement methodToMatch) {
-		return CurrentEnv.getTypeUtils().isSameType(methodToMatch.getReturnType(), this.method.getReturnType());
+		return getTypeUtils().isSameType(methodToMatch.getReturnType(), this.method.getReturnType());
 	}
 
 	private boolean doBlockParamsMatch(ExecutableElement methodToMatch) {
 		if (methodToMatch.getParameters().size() != this.getMethodAsType().getParameterTypes().size()) {
 			return false;
 		}
-		boolean allMatch = true;
 		Types typeUtils = CurrentEnv.getTypeUtils();
 		for (int i = 0; i < methodToMatch.getParameters().size(); i++) {
-			allMatch = typeUtils.isSameType(methodToMatch.getParameters().get(i).asType(), this.getMethodAsType().getParameterTypes().get(i));
-			if (!allMatch) {
-				break;
+			if (!typeUtils.isSameType(methodToMatch.getParameters().get(i).asType(), this.getMethodAsType().getParameterTypes().get(i))) {
+				return false;
 			}
 		}
-		return allMatch;
+		return true;
 	}
 
 	private boolean doBlockThrowsMatch(ExecutableElement methodToMatch) {
@@ -202,7 +200,7 @@ public class MethodCallableGenerator implements PropertyGenerator {
 
 	public static class Factory implements GeneratorFactory {
 		@Override
-		public MethodCallableGenerator newGenerator(GClass outerClass, Element possibleMethod) throws WrongGeneratorException {
+		public MethodCallableGenerator newGenerator(GClass outerClass, Element possibleMethod, List<String> namesTaken) throws WrongGeneratorException {
 			if (possibleMethod.getKind() != ElementKind.METHOD) {
 				throw new WrongGeneratorException();
 			}
