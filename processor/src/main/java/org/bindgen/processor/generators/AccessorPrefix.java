@@ -22,12 +22,12 @@ public enum AccessorPrefix {
 	}
 
 	private static final String[] illegalPropertyNames = { "hashCode", "toString", "clone" };
-	public final String getterPrefix;
-	public final String setterPrefix;
+	private final String getterPrefix;
+	private final String setterPrefix;
 
 	private AccessorPrefix(String getterPrefix, String setterPrefix) {
-		this.setterPrefix = setterPrefix;
 		this.getterPrefix = getterPrefix;
+		this.setterPrefix = setterPrefix;
 	}
 
 	public String setterName(String getterMethodName) {
