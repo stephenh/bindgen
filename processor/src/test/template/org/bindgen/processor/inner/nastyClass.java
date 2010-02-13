@@ -3,7 +3,7 @@ package org.bindgen.processor.inner;
 import org.bindgen.Bindable;
 
 public class nastyClass {
-	
+
 	@Bindable
 	public static class BlarhInnerClass {
 		private int x;
@@ -15,5 +15,5 @@ public class nastyClass {
 			this.x = x;
 		}
 	}
-	
+
 }
