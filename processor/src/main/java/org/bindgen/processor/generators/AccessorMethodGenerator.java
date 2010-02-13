@@ -10,7 +10,7 @@ import joist.sourcegen.GMethod;
  * @author mihai
  *
  */
-public class AccessorMethodGenerator extends MethodBindingGenerator {
+public class AccessorMethodGenerator extends AbstractMethodBindingGenerator {
 
 	public AccessorMethodGenerator(GClass outerClass, ExecutableElement method) throws WrongGeneratorException {
 		super(outerClass, method);

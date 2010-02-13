@@ -24,7 +24,7 @@ import org.bindgen.processor.util.Util;
  * @author mihai
  *
  */
-public abstract class MethodBindingGenerator implements PropertyGenerator {
+public abstract class AbstractMethodBindingGenerator implements PropertyGenerator {
 	private static final String[] illegalPropertyNames = { "hashCode", "toString", "clone" };
 
 	public static enum AccessorPrefix {
@@ -97,7 +97,7 @@ public abstract class MethodBindingGenerator implements PropertyGenerator {
 	protected final BoundProperty property;
 	protected GClass innerClass;
 
-	public MethodBindingGenerator(GClass outerClass, ExecutableElement method) throws WrongGeneratorException {
+	public AbstractMethodBindingGenerator(GClass outerClass, ExecutableElement method) throws WrongGeneratorException {
 		this.outerClass = outerClass;
 		this.method = method;
 		this.methodName = method.getSimpleName().toString();
@@ -239,14 +239,14 @@ public abstract class MethodBindingGenerator implements PropertyGenerator {
 
 	public abstract static class ExecutableElementGeneratorFactory implements GeneratorFactory {
 		@Override
-		public MethodBindingGenerator newGenerator(GClass outerClass, Element possibleMethod) throws WrongGeneratorException {
+		public AbstractMethodBindingGenerator newGenerator(GClass outerClass, Element possibleMethod) throws WrongGeneratorException {
 			if (possibleMethod.getKind() != ElementKind.METHOD) {
 				throw new WrongGeneratorException();
 			}
 			return this.newGenerator(outerClass, (ExecutableElement) possibleMethod);
 		}
 
-		public abstract MethodBindingGenerator newGenerator(GClass outerClass, ExecutableElement method) throws WrongGeneratorException;
+		public abstract AbstractMethodBindingGenerator newGenerator(GClass outerClass, ExecutableElement method) throws WrongGeneratorException;
 
 	}
 }
