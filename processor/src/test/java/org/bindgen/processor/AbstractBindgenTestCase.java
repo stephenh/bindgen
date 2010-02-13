@@ -23,15 +23,28 @@ import javax.tools.StandardJavaFileManager;
 import javax.tools.ToolProvider;
 import javax.tools.JavaCompiler.CompilationTask;
 
-import org.junit.Rule;
-import org.junit.rules.TemporaryFolder;
+import org.junit.Before;
+import org.junit.BeforeClass;
 
 public class AbstractBindgenTestCase {
 	private static final JavaCompiler COMPILER = ToolProvider.getSystemJavaCompiler();
-	private HashMap<String, String> aptProperties = new HashMap<String, String>();
+	private static final File outputBase = new File(new File(System.getProperty("java.io.tmpdir")), "bindgen");
+	private static int testNumber = 0;
+	private final HashMap<String, String> aptProperties = new HashMap<String, String>();
+	private final File outputSub = new File(outputBase, String.valueOf(testNumber++));
 
-	@Rule
-	public TemporaryFolder tmp = new TemporaryFolder();
+	@BeforeClass
+	public static void resetBase() {
+		if (outputBase.exists() && !recursiveDelete(outputBase)) {
+			System.err.println("Cannot delete " + outputBase);
+		}
+		outputBase.mkdirs();
+	}
+
+	@Before
+	public void mkdirsOutputSub() {
+		this.outputSub.mkdirs();
+	}
 
 	protected ClassLoader compile(String... files) throws CompilationErrorException, IOException {
 		DiagnosticCollector<JavaFileObject> diagnosticCollector = new DiagnosticCollector<JavaFileObject>();
@@ -46,7 +59,7 @@ public class AbstractBindgenTestCase {
 			null,
 			fileManager,
 			diagnosticCollector,
-			this.compileProps("-d", this.tmp.getRoot().getAbsolutePath()),
+			this.compileProps("-d", this.outputSub.getAbsolutePath()),
 			null,
 			fileManager.getJavaFileObjectsFromFiles(compilationUnits));
 
@@ -56,7 +69,7 @@ public class AbstractBindgenTestCase {
 
 		fileManager.close();
 
-		//		System.out.println(this.tmp.getRoot().getAbsolutePath());
+		System.out.println(this.outputSub.getAbsolutePath());
 
 		for (Diagnostic<? extends JavaFileObject> diag : diagnosticCollector.getDiagnostics()) {
 			switch (diag.getKind()) {
@@ -65,9 +78,7 @@ public class AbstractBindgenTestCase {
 			}
 		}
 
-		URLClassLoader loader = new URLClassLoader(new URL[] { this.tmp.getRoot().getAbsoluteFile().toURI().toURL() }, this.getClass().getClassLoader());
-
-		return loader;
+		return new URLClassLoader(new URL[] { this.outputSub.getAbsoluteFile().toURI().toURL() }, this.getClass().getClassLoader());
 	}
 
 	private List<String> compileProps(String... props) {
@@ -127,6 +138,19 @@ public class AbstractBindgenTestCase {
 		} catch (NoSuchMethodException e) {
 			// OK
 		}
+	}
+
+	private static boolean recursiveDelete(File file) {
+		File[] files = file.listFiles();
+		if (files != null) {
+			for (File each : files) {
+				boolean worked = recursiveDelete(each);
+				if (!worked) {
+					return false;
+				}
+			}
+		}
+		return file.delete();
 	}
 
 }
