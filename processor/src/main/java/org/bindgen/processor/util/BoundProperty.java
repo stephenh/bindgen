@@ -121,11 +121,11 @@ public class BoundProperty {
 	public String getInnerClassSuperClass() {
 		// Arrays don't have individual binding classes
 		if (this.isArray()) {
-			return CurrentEnv.getConfig().bindingPathSuperClassName() + "<R, " + this.type.toString() + ">";
+			return getConfig().bindingPathSuperClassName() + "<R, " + this.type.toString() + ">";
 		}
 		// Being a generic type, we have no XxxBindingPath to extend, so just extend AbstractBinding directly
 		if (this.isForGenericTypeParameter()) {
-			return CurrentEnv.getConfig().bindingPathSuperClassName() + "<R, " + this.getGenericElement() + ">";
+			return getConfig().bindingPathSuperClassName() + "<R, " + this.getGenericElement() + ">";
 		}
 
 		// if our type is outside the binding scope we return a generic binding type
@@ -133,7 +133,7 @@ public class BoundProperty {
 			return GenericObjectBindingPath.class.getName() + "<R," + this.type.toString() + ">";
 		}
 
-		String superName = Util.lowerCaseOuterClassNames(CurrentEnv.getConfig().baseNameForBinding(this.name) + "BindingPath");
+		String superName = Util.lowerCaseOuterClassNames(getConfig().baseNameForBinding(this.name) + "BindingPath");
 		List<String> typeArgs = Copy.list("R");
 		if (this.isRawType()) {
 			for (TypeParameterElement tpe : this.getElement().getTypeParameters()) {
