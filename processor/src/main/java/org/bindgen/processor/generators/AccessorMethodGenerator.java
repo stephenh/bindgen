@@ -17,10 +17,8 @@ public class AccessorMethodGenerator extends AbstractMethodBindingGenerator {
 	}
 
 	@Override
-	protected void checkViability() throws WrongGeneratorException {
-		if (!this.hasSetterMethod() || this.methodReturnsVoid() || this.methodHasParameters() || this.methodThrowsExceptions()) {
-			throw new WrongGeneratorException();
-		}
+	protected boolean checkViability() {
+		return this.hasSetterMethod() && this.methodNotVoidNoParamsNoThrows();
 	}
 
 	public void generate() {

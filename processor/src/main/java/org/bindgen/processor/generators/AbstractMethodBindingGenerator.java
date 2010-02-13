@@ -40,13 +40,12 @@ public abstract class AbstractMethodBindingGenerator implements PropertyGenerato
 		this.methodName = method.getSimpleName().toString();
 		this.prefix = AccessorPrefix.guessPrefix(this.methodName);
 		this.property = new BoundProperty(this.method, this.method.getReturnType(), this.prefix.propertyName(this.methodName));
-		this.checkViability();
-		if (this.property.shouldSkip()) {
+		if (!this.checkViability() || this.property.shouldSkip()) {
 			throw new WrongGeneratorException();
 		}
 	}
 
-	protected abstract void checkViability() throws WrongGeneratorException;
+	protected abstract boolean checkViability();
 
 	protected boolean hasSetterMethod() {
 		Types typeUtils = CurrentEnv.getTypeUtils();
@@ -72,6 +71,10 @@ public abstract class AbstractMethodBindingGenerator implements PropertyGenerato
 
 	protected boolean methodHasParameters() {
 		return !((ExecutableType) this.method.asType()).getParameterTypes().isEmpty();
+	}
+
+	protected boolean methodNotVoidNoParamsNoThrows() {
+		return !this.methodReturnsVoid() && !this.methodHasParameters() && !this.methodThrowsExceptions();
 	}
 
 	protected boolean methodReturnsVoid() {

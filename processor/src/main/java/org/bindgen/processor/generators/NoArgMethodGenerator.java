@@ -16,14 +16,8 @@ public class NoArgMethodGenerator extends GetterMethodGenerator {
 	}
 
 	@Override
-	protected void checkViability() throws WrongGeneratorException {
-		if (AccessorPrefix.NONE != this.prefix
-			|| this.hasSetterMethod()
-			|| this.methodReturnsVoid()
-			|| this.methodHasParameters()
-			|| this.methodThrowsExceptions()) {
-			throw new WrongGeneratorException();
-		}
+	protected boolean checkViability() {
+		return AccessorPrefix.NONE == this.prefix && !this.hasSetterMethod() && this.methodNotVoidNoParamsNoThrows();
 	}
 
 	public static class Factory extends ExecutableElementGeneratorFactory {
