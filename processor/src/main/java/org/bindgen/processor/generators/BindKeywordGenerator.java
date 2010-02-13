@@ -1,8 +1,6 @@
 package org.bindgen.processor.generators;
 
-import static org.bindgen.processor.CurrentEnv.getElementUtils;
-import static org.bindgen.processor.CurrentEnv.getFiler;
-import static org.bindgen.processor.CurrentEnv.getMessager;
+import static org.bindgen.processor.CurrentEnv.*;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -68,6 +66,9 @@ public class BindKeywordGenerator {
 		for (String className : this.classNames) {
 			TypeElement e = getElementUtils().getTypeElement(className);
 			if (e == null) {
+				continue;
+			}
+			if (getElementUtils().getPackageOf(e).isUnnamed()) {
 				continue;
 			}
 			this.addBindMethod(className, (DeclaredType) e.asType());
