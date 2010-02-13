@@ -65,7 +65,7 @@ public class AbstractBindgenTestCase {
 			}
 		}
 
-		URLClassLoader loader = new URLClassLoader(new URL[] { this.tmp.getRoot().getAbsoluteFile().toURL() }, this.getClass().getClassLoader());
+		URLClassLoader loader = new URLClassLoader(new URL[] { this.tmp.getRoot().getAbsoluteFile().toURI().toURL() }, this.getClass().getClassLoader());
 
 		return loader;
 	}
