@@ -40,4 +40,11 @@ public class FieldExampleTest extends TestCase {
 		Assert.assertTrue(e.good);
 	}
 
+	public void testOneCharge() {
+		FieldExample e = new FieldExample("name");
+		FieldExampleBinding b = new FieldExampleBinding(e);
+		Assert.assertEquals(null, b.f().get());
+		b.f().set("foo");
+		Assert.assertEquals("foo", e.f);
+	}
 }
