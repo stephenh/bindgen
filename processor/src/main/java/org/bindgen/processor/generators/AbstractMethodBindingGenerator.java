@@ -28,11 +28,19 @@ public abstract class AbstractMethodBindingGenerator implements PropertyGenerato
 	private static final String[] illegalPropertyNames = { "hashCode", "toString", "clone" };
 
 	public static enum AccessorPrefix {
+		// these accessors use the default behavior
+		GET("get", "set"),
+		IS("is", "set"),
+		HAS("has", "set"),
+
+		// none overrides the default accessor behavior
 		NONE("", "") {
+			@Override
 			public String setterName(String getterMethodName) {
 				return getterMethodName;
 			}
 
+			@Override
 			public String propertyName(String getterMethodName) {
 				if (Util.isJavaKeyword(getterMethodName) || "get".equals(getterMethodName)) {
 					return null;
@@ -42,12 +50,9 @@ public abstract class AbstractMethodBindingGenerator implements PropertyGenerato
 						return getterMethodName + "Binding";
 					}
 				}
-
 				return getterMethodName;
 			}
-		},
-
-		GET("get", "set"), IS("is", "set"), HAS("has", "set");
+		};
 
 		public final String getterPrefix, setterPrefix;
 
@@ -71,7 +76,6 @@ public abstract class AbstractMethodBindingGenerator implements PropertyGenerato
 					break;
 				}
 			}
-
 			return propertyName;
 		}
 
