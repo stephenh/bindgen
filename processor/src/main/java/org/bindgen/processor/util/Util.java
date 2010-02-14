@@ -24,12 +24,12 @@ public class Util {
 		.split(",");
 
 	// Watch for package.Foo.Inner -> package.foo.Inner
-	public static String lowerCaseOuterClassNames(TypeElement bindableClass, String className) {
-		if (bindableClass.getEnclosingElement().getKind() == ElementKind.CLASS) {
+	public static String lowerCaseOuterClassNames(Element bindableClass, String className) {
+		boolean isTypeElement = bindableClass.getKind().isClass() || bindableClass.getKind().isInterface();
+		if (isTypeElement && ((TypeElement) bindableClass).getEnclosingElement().getKind() == ElementKind.CLASS) {
 			String outerClassName = bindableClass.getEnclosingElement().getSimpleName().toString();
 			if (lowerCase.matcher(outerClassName).find()) {
-				// I'd like to try and generate outerClass$InnerClass, like normal inner classes
-				className = className.replace(outerClassName + ".", outerClassName + "_");
+				className = className.replace(outerClassName, "bindgen_" + outerClassName);
 			} else {
 				className = className.replace(outerClassName, Inflector.uncapitalize(outerClassName));
 			}

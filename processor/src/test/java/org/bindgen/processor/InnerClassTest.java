@@ -26,7 +26,7 @@ public class InnerClassTest extends AbstractBindgenTestCase {
 		Class<?> actualClass = loader.loadClass("org.bindgen.processor.inner.nastyClass$InnerClass");
 		assertNotNull(actualClass);
 
-		Class<?> bindingClass = loader.loadClass("org.bindgen.processor.inner.nastyClass_InnerClassBindingPath");
+		Class<?> bindingClass = loader.loadClass("org.bindgen.processor.inner.bindgen_nastyClass.InnerClassBindingPath");
 		assertNotNull(bindingClass);
 		assertMethodDeclared(bindingClass, "x");
 	}
