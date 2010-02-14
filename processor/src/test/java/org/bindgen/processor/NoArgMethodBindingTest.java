@@ -64,7 +64,7 @@ public class NoArgMethodBindingTest extends AbstractBindgenTestCase {
 		Object fooBinding = bindingClass.getMethod("foo").invoke(bindingObj);
 		Object foofooBinding = bindingClass.getMethod("foofoo").invoke(bindingObj);
 
-		assertEquals(testObj, testedClass.getMethod("foo", Integer.class).invoke(testObj, 5));
+		testedClass.getMethod("foo", Integer.class).invoke(testObj, 5);
 		assertEquals(testObj, testedClass.getMethod("foofoo", Integer.class).invoke(testObj, 55));
 
 		assertEquals(Integer.valueOf(5), Binding.class.getMethod("get").invoke(fooBinding));

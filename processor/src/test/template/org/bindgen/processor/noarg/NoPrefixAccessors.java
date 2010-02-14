@@ -10,9 +10,8 @@ public class NoPrefixAccessors {
 		return foo;
 	}
 
-	public NoPrefixAccessors foo(Integer i) {
+	public void foo(Integer i) {
 		foo = i;
-		return this;
 	}
 	
 	
