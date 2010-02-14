@@ -205,7 +205,12 @@ public class MethodCallableGenerator implements PropertyGenerator {
 			if (possibleMethod.getKind() != ElementKind.METHOD) {
 				throw new WrongGeneratorException();
 			}
-			return new MethodCallableGenerator(outerClass, (ExecutableElement) possibleMethod);
+			MethodCallableGenerator pg = new MethodCallableGenerator(outerClass, (ExecutableElement) possibleMethod);
+			if (namesTaken.contains(pg.getPropertyName())) {
+				throw new WrongGeneratorException(); // do not generate bindings with compilation errors 
+			}
+
+			return pg;
 		}
 	}
 

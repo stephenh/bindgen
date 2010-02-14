@@ -50,9 +50,6 @@ public abstract class AbstractMethodBindingGenerator implements PropertyGenerato
 
 	protected boolean hasSetterMethod() {
 		String setterName = this.prefix.setterName(this.methodName);
-		if (setterName == null) {
-			return false;
-		}
 
 		Types typeUtils = CurrentEnv.getTypeUtils();
 		TypeMirror methodReturnType = this.method.getReturnType();
@@ -63,9 +60,11 @@ public abstract class AbstractMethodBindingGenerator implements PropertyGenerato
 			String memberName = enclosed.getSimpleName().toString();
 			if (memberName.equals(setterName) && Util.isAccessibleIfGenerated(parent, enclosed)) {
 				ExecutableElement e = (ExecutableElement) enclosed;
-				return e.getParameters().size() == 1 // single parameter 
+				if (e.getParameters().size() == 1 // single parameter 
 					&& e.getThrownTypes().isEmpty() // no throws
-					&& typeUtils.isSameType(e.getParameters().get(0).asType(), methodReturnType); // types match (using proper comparison)
+					&& typeUtils.isSameType(e.getParameters().get(0).asType(), methodReturnType)) {
+					return true;
+				}
 			}
 		}
 		return false;

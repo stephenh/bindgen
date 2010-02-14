@@ -165,25 +165,29 @@ public class BindingClassGenerator {
 
 		Set<String> namesTaken = new HashSet<String>();
 
-		// TODO all ths stuff below need implementing somehow
-		// Do methods first so that if a field/method overlap, the getter/setter take precedence
+		// factory ordering specifies binding precedence rules
 		List<PropertyGenerator.GeneratorFactory> factories = new ArrayList<PropertyGenerator.GeneratorFactory>();
 
-		// these bindings will always keep their name
+		// these bindings will always keep the name of methods they bind
 		factories.add(new NoArgMethodGenerator.Factory());
 
+		// these bindings should also always keep their name
+		// TODO Note that this might cause problems if someone decides they want to do more
+		// than just the default Runnable stuff - e.g. have some callable method bindings 
+		// with parameters and the same name as a no-arg - in this case, the current 
+		// implementation will not generate bindings for the callable method 
+		factories.add(new MethodCallableGenerator.Factory());
+
 		// in case of name clash these bindings will not drop their prefix
-		factories.add(new GetterMethodGenerator.Factory());
+		AccessorMethodGenerator.Factory accessorFactory = new AccessorMethodGenerator.Factory();
+		factories.add(accessorFactory);
 
 		// in case of name clash, these bindings will also keep their prefix
-		factories.add(new AccessorMethodGenerator.Factory());
-
-		// XXX I don't know about these ones
-		factories.add(new MethodCallableGenerator.Factory());
+		factories.add(new GetterMethodGenerator.Factory());
 
 		// in case of name clash with an accessor, these bindings will not be generated
 		// in case of name clash with anything else, the suffix "Field" will be appended to the binding name
-		factories.add(new FieldPropertyGenerator.Factory());
+		factories.add(new FieldPropertyGenerator.Factory().setAccessorFactory(accessorFactory));
 
 		// get accessible elements
 		List<? extends Element> elements = getElementUtils().getAllMembers(this.element);

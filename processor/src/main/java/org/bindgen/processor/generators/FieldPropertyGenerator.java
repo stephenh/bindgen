@@ -25,10 +25,20 @@ public class FieldPropertyGenerator implements PropertyGenerator {
 	private final boolean isFinal;
 	private GClass innerClass;
 
-	public FieldPropertyGenerator(GClass outerClass, Element field) throws WrongGeneratorException {
+	public FieldPropertyGenerator(GClass outerClass, Element field, Collection<String> accessorNames, Collection<String> otherNamesTaken)
+		throws WrongGeneratorException {
 		this.outerClass = outerClass;
 		this.field = field;
-		this.property = new BoundProperty(this.field, this.field.asType(), this.field.getSimpleName().toString());
+
+		String propertyName = this.field.getSimpleName().toString(); // we already have a binding to the accessor
+		if (accessorNames.contains(propertyName)) {
+			throw new WrongGeneratorException();
+		}
+		while (otherNamesTaken.contains(propertyName)) {
+			propertyName += "Field";
+		}
+
+		this.property = new BoundProperty(this.field, this.field.asType(), propertyName);
 		if (this.property.shouldSkip()) {
 			throw new WrongGeneratorException();
 		}
@@ -175,12 +185,20 @@ public class FieldPropertyGenerator implements PropertyGenerator {
 	}
 
 	public static class Factory implements GeneratorFactory {
+		private AccessorMethodGenerator.Factory accessorFactory;
+
 		@Override
 		public FieldPropertyGenerator newGenerator(GClass outerClass, Element possibleField, Collection<String> namesTaken) throws WrongGeneratorException {
 			if (possibleField.getKind() != ElementKind.FIELD) {
 				throw new WrongGeneratorException();
 			}
-			return new FieldPropertyGenerator(outerClass, possibleField);
+			Collection<String> accessorNames = this.accessorFactory.getAccessorNames();
+			return new FieldPropertyGenerator(outerClass, possibleField, accessorNames, namesTaken);
+		}
+
+		public Factory setAccessorFactory(AccessorMethodGenerator.Factory accessorFactory) {
+			this.accessorFactory = accessorFactory;
+			return this;
 		}
 	}
 }

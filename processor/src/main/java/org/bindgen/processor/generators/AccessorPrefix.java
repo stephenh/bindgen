@@ -36,9 +36,6 @@ public enum AccessorPrefix {
 	public String setterName(String getterMethodName) {
 		// You can actually have get/set pairs without any prefixes 
 		// see {@link NoArgMethodBindingTest} method testPrefixlessAccessors
-		if (this == NONE) {
-			return null;
-		}
 		return this.setterPrefix + getterMethodName.substring(this.getterPrefix.length());
 	}
 
