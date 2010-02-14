@@ -76,7 +76,7 @@ public class BindKeywordGenerator {
 	}
 
 	private void addBindMethod(String className, DeclaredType type) {
-		ClassName bindingType = new BoundClass(type).getBindingClassName();
+		ClassName bindingType = new BoundClass((TypeElement) getTypeUtils().asElement(type)).getBindingClassName();
 		this.queue.log("Adding " + className + ", " + type + ", " + bindingType.get());
 		if (type.getTypeArguments().size() > 0) {
 			GMethod method = this.bindClass.getMethod("bind({}<{}> o)", className, Join.commaSpace(bindingType.getGenericPartWithoutBrackets()));

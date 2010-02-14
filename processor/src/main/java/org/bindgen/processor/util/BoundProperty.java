@@ -133,7 +133,7 @@ public class BoundProperty {
 			return GenericObjectBindingPath.class.getName() + "<R," + this.type.toString() + ">";
 		}
 
-		String superName = Util.lowerCaseOuterClassNames(getConfig().baseNameForBinding(this.name) + "BindingPath");
+		String superName = Util.lowerCaseOuterClassNames(this.element, getConfig().baseNameForBinding(this.name) + "BindingPath");
 		List<String> typeArgs = Copy.list("R");
 		if (this.isRawType()) {
 			for (TypeParameterElement tpe : this.getElement().getTypeParameters()) {

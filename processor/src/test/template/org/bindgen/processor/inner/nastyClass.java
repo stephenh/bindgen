@@ -5,7 +5,7 @@ import org.bindgen.Bindable;
 public class nastyClass {
 
 	@Bindable
-	public static class BlarhInnerClass {
+	public static class InnerClass {
 		private int x;
 
 		public int getX() {
