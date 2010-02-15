@@ -32,7 +32,7 @@ public enum AccessorPrefix {
 		this.setterPrefix = setterPrefix;
 	}
 
-	/** @return given getFoo/isFoo/hasFoo/foo return setFoo/setFoo/setFoo/(empty) */
+	/** @return given getFoo/isFoo/hasFoo/foo return setFoo/setFoo/setFoo/foo */
 	public String setterName(String getterMethodName) {
 		// You can actually have get/set pairs without any prefixes 
 		// see {@link NoArgMethodBindingTest} method testPrefixlessAccessors
