@@ -178,9 +178,8 @@ public class BindingClassGenerator {
 		// implementation will not generate bindings for the callable method 
 		factories.add(new MethodCallableGenerator.Factory());
 
+		// in case of name clash, these bindings will keep their prefix
 		factories.add(new AccessorMethodGenerator.Factory());
-
-		// in case of name clash, these bindings will also keep their prefix
 		factories.add(new GetterMethodGenerator.Factory());
 
 		// in case of name clash with anything else, the suffix "Field" will be appended to the binding name
