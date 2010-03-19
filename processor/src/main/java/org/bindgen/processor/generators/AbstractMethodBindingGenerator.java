@@ -9,6 +9,7 @@ import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.ExecutableType;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
+import javax.lang.model.util.ElementFilter;
 import javax.lang.model.util.Types;
 
 import joist.sourcegen.GClass;
@@ -56,13 +57,12 @@ public abstract class AbstractMethodBindingGenerator implements PropertyGenerato
 		TypeElement parent = (TypeElement) this.method.getEnclosingElement();
 
 		// Hm...we don't currently go looking into super classes for the setter
-		for (Element enclosed : parent.getEnclosedElements()) {
+		for (ExecutableElement enclosed : ElementFilter.methodsIn(parent.getEnclosedElements())) {
 			String memberName = enclosed.getSimpleName().toString();
 			if (memberName.equals(setterName) && Util.isAccessibleIfGenerated(parent, enclosed)) {
-				ExecutableElement e = (ExecutableElement) enclosed;
-				if (e.getParameters().size() == 1 // single parameter 
-					&& e.getThrownTypes().isEmpty() // no throws
-					&& typeUtils.isSameType(e.getParameters().get(0).asType(), methodReturnType)) {
+				if (enclosed.getParameters().size() == 1 // single parameter
+					&& enclosed.getThrownTypes().isEmpty() // no throws
+					&& typeUtils.isSameType(enclosed.getParameters().get(0).asType(), methodReturnType)) {
 					return true;
 				}
 			}
