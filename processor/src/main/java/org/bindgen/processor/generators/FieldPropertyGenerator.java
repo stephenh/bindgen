@@ -29,7 +29,7 @@ public class FieldPropertyGenerator implements PropertyGenerator {
 	public FieldPropertyGenerator(GClass outerClass, Element field, Collection<String> otherNamesTaken) throws WrongGeneratorException {
 		this.outerClass = outerClass;
 		this.field = field;
-		this.fieldName = this.field.getSimpleName().toString(); // we already have a binding to the accessor
+		this.fieldName = this.field.getSimpleName().toString();
 
 		String propertyName = this.fieldName;
 		while (otherNamesTaken.contains(propertyName)) {
