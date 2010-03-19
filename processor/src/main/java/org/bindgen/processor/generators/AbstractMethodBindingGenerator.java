@@ -1,6 +1,6 @@
 package org.bindgen.processor.generators;
 
-import java.util.List;
+import java.util.Collection;
 
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
@@ -25,7 +25,6 @@ import org.bindgen.processor.util.Util;
  *
  * Class exists for implementation reuse only.
  *
- * @author mihai
  */
 public abstract class AbstractMethodBindingGenerator implements PropertyGenerator {
 
@@ -36,7 +35,7 @@ public abstract class AbstractMethodBindingGenerator implements PropertyGenerato
 	protected final BoundProperty property;
 	protected GClass innerClass;
 
-	public AbstractMethodBindingGenerator(GClass outerClass, ExecutableElement method, List<String> namesTaken) throws WrongGeneratorException {
+	public AbstractMethodBindingGenerator(GClass outerClass, ExecutableElement method, Collection<String> namesTaken) throws WrongGeneratorException {
 		this.outerClass = outerClass;
 		this.method = method;
 		this.methodName = method.getSimpleName().toString();
@@ -51,9 +50,6 @@ public abstract class AbstractMethodBindingGenerator implements PropertyGenerato
 
 	protected boolean hasSetterMethod() {
 		String setterName = this.prefix.setterName(this.methodName);
-		if (setterName == null) {
-			return false;
-		}
 
 		Types typeUtils = CurrentEnv.getTypeUtils();
 		TypeMirror methodReturnType = this.method.getReturnType();
@@ -64,9 +60,11 @@ public abstract class AbstractMethodBindingGenerator implements PropertyGenerato
 			String memberName = enclosed.getSimpleName().toString();
 			if (memberName.equals(setterName) && Util.isAccessibleIfGenerated(parent, enclosed)) {
 				ExecutableElement e = (ExecutableElement) enclosed;
-				return e.getParameters().size() == 1 // single parameter 
+				if (e.getParameters().size() == 1 // single parameter 
 					&& e.getThrownTypes().isEmpty() // no throws
-					&& typeUtils.isSameType(e.getParameters().get(0).asType(), methodReturnType); // types match (using proper comparison)
+					&& typeUtils.isSameType(e.getParameters().get(0).asType(), methodReturnType)) {
+					return true;
+				}
 			}
 		}
 		return false;
@@ -186,13 +184,13 @@ public abstract class AbstractMethodBindingGenerator implements PropertyGenerato
 
 	public abstract static class ExecutableElementGeneratorFactory implements GeneratorFactory {
 		@Override
-		public AbstractMethodBindingGenerator newGenerator(GClass outerClass, Element possibleMethod, List<String> namesTaken) throws WrongGeneratorException {
+		public AbstractMethodBindingGenerator newGenerator(GClass outerClass, Element possibleMethod, Collection<String> namesTaken) throws WrongGeneratorException {
 			if (possibleMethod.getKind() != ElementKind.METHOD) {
 				throw new WrongGeneratorException();
 			}
 			return this.newGenerator(outerClass, (ExecutableElement) possibleMethod, namesTaken);
 		}
 
-		public abstract AbstractMethodBindingGenerator newGenerator(GClass outerClass, ExecutableElement method, List<String> namesTaken) throws WrongGeneratorException;
+		public abstract AbstractMethodBindingGenerator newGenerator(GClass outerClass, ExecutableElement method, Collection<String> namesTaken) throws WrongGeneratorException;
 	}
 }

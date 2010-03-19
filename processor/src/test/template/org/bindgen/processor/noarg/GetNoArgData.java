@@ -12,5 +12,4 @@ public class GetNoArgData {
 	public boolean isFoo() {
 		return true;
 	}
-
 }
