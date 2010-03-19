@@ -47,7 +47,25 @@ public abstract class AbstractMethodBindingGenerator implements PropertyGenerato
 		}
 	}
 
+	public void generate() {
+		this.addOuterClassGet();
+		this.addOuterClassBindingField();
+		this.addInnerClass();
+		this.addInnerClassGetName();
+		this.addInnerClassParent();
+		this.addInnerClassGet();
+		this.addInnerClassGetWithRoot();
+		this.addInnerClassSet();
+		this.addInnerClassSetWithRoot();
+		this.addInnerClassGetContainedTypeIfNeeded();
+		this.addInnerClassSerialVersionUID();
+	}
+
 	protected abstract boolean checkViability();
+
+	protected abstract void addInnerClassSet();
+
+	protected abstract void addInnerClassSetWithRoot();
 
 	protected boolean hasSetterMethod() {
 		String setterName = this.prefix.setterName(this.methodName);

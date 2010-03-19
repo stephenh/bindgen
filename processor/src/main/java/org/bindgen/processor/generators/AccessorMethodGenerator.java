@@ -22,21 +22,8 @@ public class AccessorMethodGenerator extends AbstractMethodBindingGenerator {
 		return this.hasSetterMethod() && this.methodNotVoidNoParamsNoThrows();
 	}
 
-	public void generate() {
-		this.addOuterClassGet();
-		this.addOuterClassBindingField();
-		this.addInnerClass();
-		this.addInnerClassGetName();
-		this.addInnerClassParent();
-		this.addInnerClassGet();
-		this.addInnerClassGetWithRoot();
-		this.addInnerClassSet();
-		this.addInnerClassSetWithRoot();
-		this.addInnerClassGetContainedTypeIfNeeded();
-		this.addInnerClassSerialVersionUID();
-	}
-
-	private void addInnerClassSet() {
+	@Override
+	protected void addInnerClassSet() {
 		GMethod set = this.innerClass.getMethod("set({} {})", this.property.getSetType(), this.property.getName());
 		set.addAnnotation("@Override");
 		set.body.line("{}.this.get().{}({});",//
@@ -45,7 +32,8 @@ public class AccessorMethodGenerator extends AbstractMethodBindingGenerator {
 			this.property.getName());
 	}
 
-	private void addInnerClassSetWithRoot() {
+	@Override
+	protected void addInnerClassSetWithRoot() {
 		GMethod setWithRoot = this.innerClass.getMethod("setWithRoot(R root, {} {})", this.property.getSetType(), this.property.getName());
 		setWithRoot.addAnnotation("@Override");
 		setWithRoot.body.line("{}.this.getWithRoot(root).{}({});",//
