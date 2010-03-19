@@ -30,7 +30,7 @@ public class SubExampleTest extends TestCase {
 		SubExampleBinding b = new SubExampleBinding(sub);
 		Assert.assertEquals("existingInSuper", b.description().get());
 
-		Assert.assertEquals(5, b.getChildBindings().size()); // name, description, subOnly, hashCode, toString
+		Assert.assertEquals(6, b.getChildBindings().size()); // name (and nameField), description, subOnly, hashCode, toString
 	}
 
 	public void testOverriddenCallable() {
