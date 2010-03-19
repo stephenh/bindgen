@@ -21,6 +21,7 @@ public class FieldPropertyGenerator implements PropertyGenerator {
 
 	private final GClass outerClass;
 	private final Element field;
+	private final String fieldName;
 	private final BoundProperty property;
 	private final boolean isFinal;
 	private GClass innerClass;
@@ -29,8 +30,9 @@ public class FieldPropertyGenerator implements PropertyGenerator {
 		throws WrongGeneratorException {
 		this.outerClass = outerClass;
 		this.field = field;
+		this.fieldName = this.field.getSimpleName().toString(); // we already have a binding to the accessor
 
-		String propertyName = this.field.getSimpleName().toString(); // we already have a binding to the accessor
+		String propertyName = this.fieldName;
 		if (accessorNames.contains(propertyName)) {
 			throw new WrongGeneratorException();
 		}
@@ -114,7 +116,7 @@ public class FieldPropertyGenerator implements PropertyGenerator {
 		get.body.line("return {}{}.this.get().{};",//
 			this.property.getCastForReturnIfNeeded(),
 			this.outerClass.getSimpleClassNameWithoutGeneric(),
-			this.property.getName());
+			this.fieldName);
 		if (this.property.doesInnerGetNeedSuppressWarnings()) {
 			get.addAnnotation("@SuppressWarnings(\"unchecked\")");
 		}
@@ -126,7 +128,7 @@ public class FieldPropertyGenerator implements PropertyGenerator {
 		getWithRoot.body.line("return {}{}.this.getWithRoot(root).{};",//
 			this.property.getCastForReturnIfNeeded(),
 			this.outerClass.getSimpleClassNameWithoutGeneric(),
-			this.property.getName());
+			this.fieldName);
 		if (this.property.doesInnerGetNeedSuppressWarnings()) {
 			getWithRoot.addAnnotation("@SuppressWarnings(\"unchecked\")");
 		}
@@ -141,7 +143,7 @@ public class FieldPropertyGenerator implements PropertyGenerator {
 		}
 		set.body.line("{}.this.get().{} = {};",//
 			this.outerClass.getSimpleClassNameWithoutGeneric(),
-			this.property.getName(),
+			this.fieldName,
 			this.property.getName());
 	}
 
@@ -152,10 +154,9 @@ public class FieldPropertyGenerator implements PropertyGenerator {
 			setWithRoot.body.line("throw new RuntimeException(this.getName() + \" is read only\");");
 			return;
 		}
-		setWithRoot.body.line(
-			"{}.this.getWithRoot(root).{} = {};",
+		setWithRoot.body.line("{}.this.getWithRoot(root).{} = {};",//
 			this.outerClass.getSimpleClassNameWithoutGeneric(),
-			this.property.getName(),
+			this.fieldName,
 			this.property.getName());
 	}
 
