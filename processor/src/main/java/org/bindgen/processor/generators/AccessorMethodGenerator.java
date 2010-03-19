@@ -1,8 +1,6 @@
 package org.bindgen.processor.generators;
 
 import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
 
 import javax.lang.model.element.ExecutableElement;
 
@@ -57,17 +55,10 @@ public class AccessorMethodGenerator extends AbstractMethodBindingGenerator {
 	}
 
 	public static class Factory extends ExecutableElementGeneratorFactory {
-		private Set<String> accessorNames = new HashSet<String>();
-
 		@Override
 		public AccessorMethodGenerator newGenerator(GClass outerClass, ExecutableElement method, Collection<String> namesTaken) throws WrongGeneratorException {
-			AccessorMethodGenerator pg = new AccessorMethodGenerator(outerClass, method, namesTaken);
-			this.accessorNames.add(pg.getPropertyName());
-			return pg;
+			return new AccessorMethodGenerator(outerClass, method, namesTaken);
 		}
 
-		public Collection<String> getAccessorNames() {
-			return this.accessorNames;
-		}
 	}
 }
