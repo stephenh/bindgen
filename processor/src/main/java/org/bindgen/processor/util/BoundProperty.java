@@ -58,7 +58,7 @@ public class BoundProperty {
 	}
 
 	public boolean shouldSkip() {
-		return this.element == null || this.isDeclaringClass() || this.isSkipAttributeSet() || this.isForBinding() || this.isDeprecated();
+		return this.isDeclaringClass() || this.isSkipAttributeSet() || this.isForBinding() || this.isDeprecated();
 	}
 
 	public String getCastForReturnIfNeeded() {
