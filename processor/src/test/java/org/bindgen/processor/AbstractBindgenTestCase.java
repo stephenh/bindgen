@@ -15,7 +15,6 @@ import java.util.List;
 import java.util.Map.Entry;
 
 import javax.annotation.processing.Processor;
-import javax.tools.Diagnostic;
 import javax.tools.DiagnosticCollector;
 import javax.tools.JavaCompiler;
 import javax.tools.JavaFileObject;
@@ -69,17 +68,14 @@ public class AbstractBindgenTestCase {
 
 		task.setProcessors(Arrays.asList(new Processor[] { new org.bindgen.processor.Processor() }));
 
-		task.call();
+		boolean success = task.call();
 
 		fileManager.close();
 
 		System.out.println(this.output.getAbsolutePath());
 
-		for (Diagnostic<? extends JavaFileObject> diag : diagnosticCollector.getDiagnostics()) {
-			switch (diag.getKind()) {
-				case ERROR:
-					throw new CompilationErrorException(diagnosticCollector);
-			}
+		if (!success) {
+			throw new CompilationErrorException(diagnosticCollector);
 		}
 
 		return new URLClassLoader(new URL[] { this.output.getAbsoluteFile().toURI().toURL() }, this.getClass().getClassLoader());
