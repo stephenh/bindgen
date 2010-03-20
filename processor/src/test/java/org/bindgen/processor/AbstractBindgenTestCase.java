@@ -28,6 +28,7 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 
 public class AbstractBindgenTestCase {
+
 	private static final JavaCompiler COMPILER = ToolProvider.getSystemJavaCompiler();
 	private static final File outputBase = new File(new File(System.getProperty("java.io.tmpdir")), "bindgen");
 	private static int testNumber = 0;
@@ -43,8 +44,9 @@ public class AbstractBindgenTestCase {
 	}
 
 	@Before
-	public void mkdirsOutputSub() {
+	public void setup() {
 		this.outputSub.mkdirs();
+		this.aptProperties.put("scope", "org.bindgen");
 	}
 
 	protected ClassLoader compile(String... files) throws CompilationErrorException, IOException {
