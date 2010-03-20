@@ -112,14 +112,12 @@ public class BindgenConfig {
 	}
 
 	private Scope<ClassName> getBindingScope() {
-		final Scope<ClassName> bindingScope;
 		final String scopeExpression = this.options.get(SCOPE_PARAM);
 		if (scopeExpression != null && scopeExpression.trim().length() > 0) {
-			bindingScope = new PackageExpressionScope(scopeExpression);
+			return new PackageExpressionScope(scopeExpression);
 		} else {
-			bindingScope = new GlobalScope<ClassName>();
+			return new GlobalScope<ClassName>();
 		}
-		return bindingScope;
 	}
 
 	// Default properties--this is ugly, but I could not get a bindgen.properties to be found on the classpath
