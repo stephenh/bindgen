@@ -10,6 +10,7 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map.Entry;
@@ -21,6 +22,8 @@ import javax.tools.JavaFileObject;
 import javax.tools.StandardJavaFileManager;
 import javax.tools.ToolProvider;
 import javax.tools.JavaCompiler.CompilationTask;
+
+import joist.util.Join;
 
 import org.bindgen.Binding;
 import org.junit.Before;
@@ -144,35 +147,19 @@ public class AbstractBindgenTestCase {
 		}
 	}
 
-	public static void assertChildBindings(Class<?> bindingClass, String... expectedChildNames) {
-		try {
-			List<String> actualChildNames = new ArrayList<String>();
-			Binding<?> binding = (Binding<?>) bindingClass.newInstance();
+	public static void assertChildBindings(Class<?> bindingClass, String... expectedChildNamesArray) throws Exception {
+		List<String> expectedChildNames = Arrays.asList(expectedChildNamesArray);
+		List<String> actualChildNames = new ArrayList<String>();
 
-			for (Binding<?> child : binding.getChildBindings()) {
-				actualChildNames.add(child.getName());
-			}
-			String expectedExisting = "", expectedNotExisting = "", notExpectedExisting = "";
-			for (String name : expectedChildNames) {
-				if (actualChildNames.contains(name)) {
-					expectedExisting += (expectedExisting.isEmpty() ? "" : ", ") + name;
-				} else {
-					expectedNotExisting += (expectedNotExisting.isEmpty() ? "" : ", ") + name;
-				}
-			}
-
-			List<String> expectedNames = Arrays.asList(expectedChildNames);
-			for (String name : actualChildNames) {
-				if (!expectedNames.contains(name)) {
-					notExpectedExisting += (notExpectedExisting.isEmpty() ? "" : ", ") + name;
-				}
-			}
-			assertEquals(expectedNotExisting, notExpectedExisting);
-		} catch (InstantiationException e) {
-			fail(e.toString());
-		} catch (IllegalAccessException e) {
-			fail(e.toString());
+		Binding<?> binding = (Binding<?>) bindingClass.newInstance();
+		for (Binding<?> child : binding.getChildBindings()) {
+			actualChildNames.add(child.getName());
 		}
+
+		Collections.sort(expectedChildNames);
+		Collections.sort(actualChildNames);
+
+		assertEquals(Join.commaSpace(expectedChildNames), Join.commaSpace(actualChildNames));
 	}
 
 	private static boolean recursiveDelete(File file) {
