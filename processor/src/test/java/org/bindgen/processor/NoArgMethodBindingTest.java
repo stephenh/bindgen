@@ -40,7 +40,18 @@ public class NoArgMethodBindingTest extends AbstractBindgenTestCase {
 		String testedClass = "org.bindgen.processor.noarg.AccessorAndNoArg";
 		Class<?> bindingClass = this.compile(filePath(testedClass)).loadClass(testedClass + "Binding");
 
-		assertChildBindings(bindingClass, "foobar", "getFoobar", "barfoo", "getBarfoo", "toStringBinding", "hashCodeBinding");
+		assertChildBindings(
+			bindingClass,
+			"foo1",
+			"foo2",
+			"foo3",
+			"foo4",
+			"getFoo1",
+			"getFoo2",
+			"getFoo3",
+			"getFoo4",
+			"toStringBinding",
+			"hashCodeBinding");
 		// Note that a a simple reordering of members used to cause inconsistent binding generation, for example:
 		// the class has two accessors: getFoobar/setFoobar for "foobar" and getBarfoo/setBarFoo for "barfoo"
 		// and two unrelated but misleadingly named no-arg methods: "fobar" and "barfoo"

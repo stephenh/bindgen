@@ -170,6 +170,7 @@ public class BindingClassGenerator {
 
 		// these bindings will always keep the name of methods they bind
 		factories.add(new NoArgMethodGenerator.Factory());
+		factories.add(new AccessorNoPrefixMethodGenerator.Factory());
 
 		// these bindings should also always keep their name
 		// TODO Note that this might cause problems if someone decides they want to do more
