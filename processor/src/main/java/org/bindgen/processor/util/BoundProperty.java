@@ -42,11 +42,8 @@ public class BoundProperty {
 		this.enclosed = enclosed;
 		this.enclosing = (TypeElement) enclosed.getEnclosingElement();
 		this.isArray = type.getKind() == TypeKind.ARRAY;
-		if (this.isArray) {
-			this.type = type;
-		} else {
-			this.type = Util.boxIfNeeded(type);
-		}
+		// if we're an array, keep the primitive type, e.g. char[]
+		this.type = this.isArray ? type : Util.boxIfNeeded(type);
 		this.element = getTypeUtils().asElement(Util.boxIfNeeded(type));
 		this.propertyName = propertyName;
 		this.name = new ClassName(this.type.toString());
