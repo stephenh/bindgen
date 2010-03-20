@@ -169,7 +169,7 @@ public class BindingClassGenerator {
 		List<PropertyGenerator.GeneratorFactory> factories = new ArrayList<PropertyGenerator.GeneratorFactory>();
 
 		// these bindings will always keep the name of methods they bind
-		factories.add(new NoArgMethodGenerator.Factory());
+		factories.add(new GetterNoPrefixGenerator.Factory());
 		factories.add(new AccessorNoPrefixMethodGenerator.Factory());
 
 		// these bindings should also always keep their name

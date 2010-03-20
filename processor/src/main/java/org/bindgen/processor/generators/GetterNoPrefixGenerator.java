@@ -11,9 +11,9 @@ import joist.sourcegen.GClass;
  * and do not start with a specific getter prefix
  *
  */
-public class NoArgMethodGenerator extends GetterMethodGenerator {
+public class GetterNoPrefixGenerator extends GetterMethodGenerator {
 
-	public NoArgMethodGenerator(GClass outerClass, ExecutableElement method, Collection<String> namesTaken) throws WrongGeneratorException {
+	public GetterNoPrefixGenerator(GClass outerClass, ExecutableElement method, Collection<String> namesTaken) throws WrongGeneratorException {
 		super(outerClass, method, namesTaken);
 	}
 
@@ -24,8 +24,8 @@ public class NoArgMethodGenerator extends GetterMethodGenerator {
 
 	public static class Factory extends ExecutableElementGeneratorFactory {
 		@Override
-		public NoArgMethodGenerator newGenerator(GClass outerClass, ExecutableElement method, Collection<String> namesTaken) throws WrongGeneratorException {
-			return new NoArgMethodGenerator(outerClass, method, namesTaken);
+		public GetterNoPrefixGenerator newGenerator(GClass outerClass, ExecutableElement method, Collection<String> namesTaken) throws WrongGeneratorException {
+			return new GetterNoPrefixGenerator(outerClass, method, namesTaken);
 		}
 	}
 
