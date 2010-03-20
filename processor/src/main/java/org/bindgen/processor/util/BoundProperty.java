@@ -297,7 +297,9 @@ public class BoundProperty {
 	}
 
 	private boolean isNameless() {
-		return this.propertyName == null || "declaringClass".equals(this.propertyName);
+		// javac returns a stray generic (Class<E>) for inner classes where Eclipse
+		// returns the right class (Class<Outer>). For now just skip it.
+		return this.propertyName == null || this.propertyName.equals("declaringClass");
 	}
 
 	private boolean isSkipAttributeSet() {

@@ -46,7 +46,7 @@ public class AbstractBindgenTestCase {
 	@Before
 	public void setup() {
 		this.output.mkdirs();
-		this.aptProperties.put("scope", "org.bindgen");
+		this.setScope("org.bindgen");
 	}
 
 	protected ClassLoader compile(String... files) throws CompilationErrorException, IOException {
@@ -97,6 +97,10 @@ public class AbstractBindgenTestCase {
 
 	protected void setBindingPathSuperClass(String qualifiedClassName) {
 		this.aptProperties.put("bindingPathSuperClass", qualifiedClassName);
+	}
+
+	protected void setScope(String packagePrefix) {
+		this.aptProperties.put("scope", packagePrefix);
 	}
 
 	protected static String filePath(String qualifiedClassName) {
