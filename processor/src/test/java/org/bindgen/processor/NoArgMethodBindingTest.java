@@ -46,10 +46,14 @@ public class NoArgMethodBindingTest extends AbstractBindgenTestCase {
 			"foo2",
 			"foo3",
 			"foo4",
+			"foo5",
+			"foo6",
 			"getFoo1",
 			"getFoo2",
 			"getFoo3",
 			"getFoo4",
+			"getFoo5",
+			"isFoo6",
 			"toStringBinding",
 			"hashCodeBinding");
 		// Note that a a simple reordering of members used to cause inconsistent binding generation, for example:

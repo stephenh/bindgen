@@ -46,5 +46,20 @@ public class AccessorAndNoArg {
 		return "4b";
 	}
 	
-
+	// case 5: prefix is comes before prefix get
+	public String isFoo5() {
+		return "5a";
+	}
+	public String getFoo5() {
+		return "5b";
+	}
+	
+	// case 6: prefix get comes before prefix is
+	public String getFoo6() {
+		return "6a";
+	}
+	public String isFoo6() {
+		return "6b";
+	}
+	
 }
