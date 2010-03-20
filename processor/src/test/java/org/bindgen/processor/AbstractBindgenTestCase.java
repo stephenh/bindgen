@@ -30,22 +30,22 @@ import org.junit.BeforeClass;
 public class AbstractBindgenTestCase {
 
 	private static final JavaCompiler COMPILER = ToolProvider.getSystemJavaCompiler();
-	private static final File outputBase = new File(new File(System.getProperty("java.io.tmpdir")), "bindgen");
+	private static final File outputRoot = new File(new File(System.getProperty("java.io.tmpdir")), "bindgen");
 	private static int testNumber = 0;
 	private final HashMap<String, String> aptProperties = new HashMap<String, String>();
-	private final File outputSub = new File(outputBase, String.valueOf(testNumber++));
+	private final File output = new File(outputRoot, String.valueOf(testNumber++));
 
 	@BeforeClass
 	public static void resetBase() {
-		if (outputBase.exists() && !recursiveDelete(outputBase)) {
-			System.err.println("Cannot delete " + outputBase);
+		if (outputRoot.exists() && !recursiveDelete(outputRoot)) {
+			System.err.println("Cannot delete " + outputRoot);
 		}
-		outputBase.mkdirs();
+		outputRoot.mkdirs();
 	}
 
 	@Before
 	public void setup() {
-		this.outputSub.mkdirs();
+		this.output.mkdirs();
 		this.aptProperties.put("scope", "org.bindgen");
 	}
 
@@ -63,7 +63,7 @@ public class AbstractBindgenTestCase {
 			null,
 			fileManager,
 			diagnosticCollector,
-			this.compileProps("-d", this.outputSub.getAbsolutePath()),
+			this.compileProps("-d", this.output.getAbsolutePath()),
 			null,
 			fileManager.getJavaFileObjectsFromFiles(compilationUnits));
 
@@ -73,7 +73,7 @@ public class AbstractBindgenTestCase {
 
 		fileManager.close();
 
-		System.out.println(this.outputSub.getAbsolutePath());
+		System.out.println(this.output.getAbsolutePath());
 
 		for (Diagnostic<? extends JavaFileObject> diag : diagnosticCollector.getDiagnostics()) {
 			switch (diag.getKind()) {
@@ -82,7 +82,7 @@ public class AbstractBindgenTestCase {
 			}
 		}
 
-		return new URLClassLoader(new URL[] { this.outputSub.getAbsoluteFile().toURI().toURL() }, this.getClass().getClassLoader());
+		return new URLClassLoader(new URL[] { this.output.getAbsoluteFile().toURI().toURL() }, this.getClass().getClassLoader());
 	}
 
 	private List<String> compileProps(String... props) {
