@@ -19,7 +19,6 @@ public class AccessTest extends AbstractBindgenTestCase {
 		assertPublic(clazz.getDeclaredMethod("publicMethod"));
 		assertProtected(clazz.getDeclaredMethod("protectedMethod"));
 		assertPackage(clazz.getDeclaredMethod("packageMethod"));
-
 	}
 
 	@Test

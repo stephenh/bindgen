@@ -23,7 +23,6 @@ public enum AccessorPrefix {
 		return NONE;
 	}
 
-	private static final String[] illegalPropertyNames = { "hashCode", "toString", "clone" };
 	private final String getterPrefix;
 	private final String setterPrefix;
 
@@ -42,35 +41,12 @@ public enum AccessorPrefix {
 	/** @return given getFoo/isFoo/hasFoo/foo return "foo" if it is valid, or else the original "getFoo" */
 	public String propertyName(Collection<String> namesAlreadyTaken, String getterMethodName) {
 		String propertyName = Inflector.uncapitalize(getterMethodName.substring(this.getterPrefix.length()));
-		// "get" is because of existing Binding.get method--should probably check clashing with the other Binding methods as well
-		if (Util.isJavaKeyword(propertyName) || "get".equals(propertyName) || namesAlreadyTaken.contains(propertyName)) {
-			if (this == NONE) {
-				// Note that this case can be reached using the following scenario:
-				// public int getXyz();
-				// public void setXyz();
-				// public String xyz();
-				// and the current implementation drops the binding for xyz()
-				// see {@link NoArgMethodBindingTest} method testGenerateBindableHiding
-				// TODO maybe we could add a suffix here (like below) to avoid returning null (which is a bad idea in general)
-				// 
-				// however it should be smart, not just xyzBinding, if it's a field/accessor it should be one thing
-				// if it's a no-arg method it should be something else, it should be independent of textual member ordering 
-				// 
-				return null;
-			}
+		if (Util.isBadPropertyName(propertyName) || namesAlreadyTaken.contains(propertyName)) {
 			// Our guess, e.g. getAbstract => abstract, is a keyword, fall back to original getAbstract
 			propertyName = getterMethodName;
-		}
-		for (String illegalProp : illegalPropertyNames) {
-			if (illegalProp.equals(propertyName)) {
-				// Our guess, e.g. toString is illegal - because according to Object it should return a String not a XyzBinding, 
-				// so fall back to original toString name (e.g. {get/is/has}toString)
-				propertyName = getterMethodName;
-				if (this == NONE) {
-					// NONE means propertyName==getterMethodName, so add a suffix to avoid clash
-					propertyName += "Binding";
-				}
-				break;
+			// If our getter is getType or hashCode, we need to suffix it
+			if (Util.isBindingMethodName(propertyName) || Util.isObjectMethodName(propertyName)) {
+				propertyName += "Binding";
 			}
 		}
 		return propertyName;

@@ -35,6 +35,10 @@ public class FieldPropertyGenerator implements PropertyGenerator {
 		while (otherNamesTaken.contains(propertyName)) {
 			propertyName += "Field";
 		}
+		while (Util.isObjectMethodName(propertyName) || Util.isBindingMethodName(propertyName)) {
+			// Still invalid so suffix Binding
+			propertyName += "Field";
+		}
 
 		this.property = new BoundProperty(this.field, this.field.asType(), propertyName);
 		if (this.property.shouldSkip()) {

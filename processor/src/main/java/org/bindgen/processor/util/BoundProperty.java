@@ -297,7 +297,7 @@ public class BoundProperty {
 	}
 
 	private boolean isNameless() {
-		return this.propertyName == null || "get".equals(this.propertyName) || "declaringClass".equals(this.propertyName);
+		return this.propertyName == null || "declaringClass".equals(this.propertyName);
 	}
 
 	private boolean isSkipAttributeSet() {

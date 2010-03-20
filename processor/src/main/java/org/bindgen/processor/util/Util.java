@@ -22,6 +22,8 @@ public class Util {
 	private static final Pattern lowerCase = Pattern.compile("^[a-z]");
 	private static final String[] javaKeywords = "abstract,continue,for,new,switch,assert,default,goto,package,synchronized,boolean,do,if,private,this,break,double,implements,protected,throw,byte,else,import,public,throws,case,enum,instanceof,return,transient,catch,extends,int,short,try,char,final,interface,static,void,class,finally,long,strictfp,volatile,const,float,native,super,while,null"
 		.split(",");
+	private static final String[] objectMethodNames = { "hashCode", "toString", "clone" };
+	private static final String[] bindingMethodNames = { "get", "getPath", "getType", "getParentBinding", "getChildBindings", "getIsSafe", "getSafely" };
 
 	// Watch for package.Foo.Inner -> package.foo.Inner
 	public static String lowerCaseOuterClassNames(Element bindableClass, String className) {
@@ -66,13 +68,20 @@ public class Util {
 		return !isStatic && !isPrivate && (isPublic || (superSamePackage && !inJava));
 	}
 
+	public static boolean isBadPropertyName(String name) {
+		return isJavaKeyword(name) || isObjectMethodName(name) || isBindingMethodName(name);
+	}
+
 	public static boolean isJavaKeyword(String name) {
-		for (String keyword : javaKeywords) {
-			if (keyword.equals(name)) {
-				return true;
-			}
-		}
-		return false;
+		return contains(javaKeywords, name);
+	}
+
+	public static boolean isObjectMethodName(String propertyName) {
+		return contains(objectMethodNames, propertyName);
+	}
+
+	public static boolean isBindingMethodName(String propertyName) {
+		return contains(bindingMethodNames, propertyName);
 	}
 
 	/**
@@ -91,5 +100,14 @@ public class Util {
 		} else {
 			return Access.PACKAGE;
 		}
+	}
+
+	private static <T> boolean contains(T[] array, T element) {
+		for (T a : array) {
+			if (a.equals(element)) {
+				return true;
+			}
+		}
+		return false;
 	}
 }
