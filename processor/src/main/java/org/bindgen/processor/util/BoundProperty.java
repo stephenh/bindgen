@@ -58,7 +58,7 @@ public class BoundProperty {
 	}
 
 	public boolean shouldSkip() {
-		return this.element == null || this.isNameless() || this.isSkipAttributeSet() || this.isForBinding() || this.isDeprecated();
+		return this.element == null || this.isDeclaringClass() || this.isSkipAttributeSet() || this.isForBinding() || this.isDeprecated();
 	}
 
 	public String getCastForReturnIfNeeded() {
@@ -296,10 +296,10 @@ public class BoundProperty {
 		return this.name.getWithoutGenericPart().endsWith("Binding");
 	}
 
-	private boolean isNameless() {
+	private boolean isDeclaringClass() {
 		// javac returns a stray generic (Class<E>) for inner classes where Eclipse
 		// returns the right class (Class<Outer>). For now just skip it.
-		return this.propertyName == null || this.propertyName.equals("declaringClass");
+		return this.propertyName.equals("declaringClass");
 	}
 
 	private boolean isSkipAttributeSet() {
