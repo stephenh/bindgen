@@ -34,7 +34,7 @@ import org.bindgen.processor.util.Util;
  * which has a generic parameter <code>R</code> to present one part in
  * a binding evaluation path rooted at type a type <code>R</code>.
  *
- * The second class is the <ocde>XxxBinding</code> which extends its
+ * The second class is the <code>XxxBinding</code> which extends its
  * <code>XxxBindingPath</code> but provides the type parameter <code>R</code>
  * as <code>Xxx</code>, meaning that <code>XxxBinding</code> can be
  * used as the starting point for binding paths rooted at a <code>Xxx</code>.
@@ -161,41 +161,24 @@ public class BindingClassGenerator {
 	}
 
 	private List<PropertyGenerator> getPropertyGenerators() {
-		List<PropertyGenerator> generators = new ArrayList<PropertyGenerator>();
-
-		Set<String> namesTaken = new HashSet<String>();
-
 		// factory ordering specifies binding precedence rules
 		List<PropertyGenerator.GeneratorFactory> factories = new ArrayList<PropertyGenerator.GeneratorFactory>();
-
-		// these bindings will always keep the name of methods they bind
-		factories.add(new GetterNoPrefixGenerator.Factory());
-		factories.add(new AccessorNoPrefixMethodGenerator.Factory());
-
-		// these bindings should also always keep their name
-		// TODO Note that this might cause problems if someone decides they want to do more
-		// than just the default Runnable stuff - e.g. have some callable method bindings 
-		// with parameters and the same name as a no-arg - in this case, the current 
-		// implementation will not generate bindings for the callable method 
+		// these bindings will not mangle their property names
+		factories.add(new MethodPropertyGenerator.Factory(AccessorPrefix.NONE));
 		factories.add(new MethodCallableGenerator.Factory());
-
-		// in case of name clash, these bindings will keep their prefix
-		factories.add(new AccessorMethodGenerator.Factory());
-		factories.add(new GetterMethodGenerator.Factory());
-
-		// in case of name clash with anything else, the suffix "Field" will be appended to the binding name
+		// these bindings will try to drop their prefix and use a shorter name (e.g. getFoo -> foo)
+		factories.add(new MethodPropertyGenerator.Factory(AccessorPrefix.GET));
+		factories.add(new MethodPropertyGenerator.Factory(AccessorPrefix.HAS));
+		factories.add(new MethodPropertyGenerator.Factory(AccessorPrefix.IS));
+		// the field binding will use its name or append Field if it was already taken by get/has/is
 		factories.add(new FieldPropertyGenerator.Factory());
 
-		// get accessible elements
-		List<Element> elements = new ArrayList<Element>();
-		for (Element enclosed : getElementUtils().getAllMembers(this.element)) {
-			if (Util.isAccessibleIfGenerated(this.element, enclosed)) {
-				elements.add(enclosed);
-			}
-		}
+		Set<String> namesTaken = new HashSet<String>();
+		List<Element> elements = this.getAccessibleElements();
+		List<PropertyGenerator> generators = new ArrayList<PropertyGenerator>();
 
 		for (PropertyGenerator.GeneratorFactory f : factories) {
-			for (Iterator<? extends Element> i = elements.iterator(); i.hasNext();) {
+			for (Iterator<Element> i = elements.iterator(); i.hasNext();) {
 				Element enclosed = i.next();
 				try {
 					PropertyGenerator pg = f.newGenerator(this.pathBindingClass, enclosed, namesTaken);
@@ -204,7 +187,7 @@ public class BindingClassGenerator {
 					} else {
 						namesTaken.add(pg.getPropertyName());
 					}
-					i.remove(); // element is handled, other PropertyGenerators should not even bother
+					i.remove(); // element is handled, skip any further generators
 					generators.add(pg);
 					this.sourceElements.add(enclosed);
 				} catch (WrongGeneratorException e) {
@@ -218,5 +201,15 @@ public class BindingClassGenerator {
 	private void addSerialVersionUID() {
 		this.rootBindingClass.getField("serialVersionUID").type("long").setStatic().setFinal().initialValue("1L");
 		this.pathBindingClass.getField("serialVersionUID").type("long").setStatic().setFinal().initialValue("1L");
+	}
+
+	private List<Element> getAccessibleElements() {
+		List<Element> elements = new ArrayList<Element>();
+		for (Element enclosed : getElementUtils().getAllMembers(this.element)) {
+			if (Util.isAccessibleIfGenerated(this.element, enclosed)) {
+				elements.add(enclosed);
+			}
+		}
+		return elements;
 	}
 }

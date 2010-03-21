@@ -52,10 +52,10 @@ public class NoArgMethodBindingTest extends AbstractBindgenTestCase {
 			"getFoo2",
 			"getFoo3",
 			"getFoo4",
-			"getFoo5",
+			"hashCodeBinding",
+			"isFoo5",
 			"isFoo6",
-			"toStringBinding",
-			"hashCodeBinding");
+			"toStringBinding");
 		// Note that a a simple reordering of members used to cause inconsistent binding generation, for example:
 		// the class has two accessors: getFoobar/setFoobar for "foobar" and getBarfoo/setBarFoo for "barfoo"
 		// and two unrelated but misleadingly named no-arg methods: "fobar" and "barfoo"

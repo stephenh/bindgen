@@ -7,13 +7,15 @@ import org.junit.Test;
 public class AccessorPrefixTest {
 
 	@Test
-	public void testGuess() {
-		Assert.assertEquals(AccessorPrefix.GET, AccessorPrefix.guessPrefix("getFoo"));
-		Assert.assertEquals(AccessorPrefix.IS, AccessorPrefix.guessPrefix("isFoo"));
-		Assert.assertEquals(AccessorPrefix.HAS, AccessorPrefix.guessPrefix("hasFoo"));
-		Assert.assertEquals(AccessorPrefix.NONE, AccessorPrefix.guessPrefix("foo"));
-		Assert.assertEquals(AccessorPrefix.NONE, AccessorPrefix.guessPrefix("f"));
-		Assert.assertEquals(AccessorPrefix.NONE, AccessorPrefix.guessPrefix("F"));
+	public void testMatches() {
+		Assert.assertEquals(true, AccessorPrefix.GET.matches("getFoo"));
+		Assert.assertEquals(false, AccessorPrefix.GET.matches("getfoo"));
+		Assert.assertEquals(false, AccessorPrefix.GET.matches("foo"));
+
+		Assert.assertEquals(true, AccessorPrefix.NONE.matches("foo"));
+		Assert.assertEquals(false, AccessorPrefix.NONE.matches("getFoo"));
+		Assert.assertEquals(false, AccessorPrefix.NONE.matches("isFoo"));
+		Assert.assertEquals(false, AccessorPrefix.NONE.matches("hasFoo"));
 	}
 
 }

@@ -1,27 +1,10 @@
 package org.bindgen.processor.generators;
 
-import java.util.Collection;
-
 import joist.util.Inflector;
-
-import org.bindgen.processor.util.Util;
 
 public enum AccessorPrefix {
 
-	GET("get", "set"), IS("is", "set"), HAS("has", "set"), NONE("", "");
-
-	/** @return given a getter method name, return which of get/set, is/set, has/set or none we'll use. */
-	public static AccessorPrefix guessPrefix(String methodName) {
-		for (AccessorPrefix possiblePrefix : values()) {
-			String possible = possiblePrefix.getterPrefix;
-			if (methodName.startsWith(possible)
-				&& methodName.length() > possible.length()
-				&& methodName.substring(possible.length(), possible.length() + 1).matches("[A-Z]")) {
-				return possiblePrefix;
-			}
-		}
-		return NONE;
-	}
+	NONE("", ""), GET("get", "set"), IS("is", "set"), HAS("has", "set");
 
 	private final String getterPrefix;
 	private final String setterPrefix;
@@ -31,25 +14,33 @@ public enum AccessorPrefix {
 		this.setterPrefix = setterPrefix;
 	}
 
-	/** @return given getFoo/isFoo/hasFoo/foo return setFoo/setFoo/setFoo/foo */
+	/** @return "foo" given getFoo/isFoo/hasFoo/foo */
+	public String preferredPropertyName(String getterMethodName) {
+		return Inflector.uncapitalize(getterMethodName.substring(this.getterPrefix.length()));
+	}
+
+	/** @return "setFoo"/setFoo/setFoo/foo given getFoo/isFoo/hasFoo/foo */
 	public String setterName(String getterMethodName) {
-		// You can actually have get/set pairs without any prefixes 
-		// see {@link NoArgMethodBindingTest} method testPrefixlessAccessors
+		// We can have get/set pairs without any prefixes, see {@link NoArgMethodBindingTest} testPrefixlessAccessors()
 		return this.setterPrefix + getterMethodName.substring(this.getterPrefix.length());
 	}
 
-	/** @return given getFoo/isFoo/hasFoo/foo return "foo" if it is valid, or else the original "getFoo" */
-	public String propertyName(Collection<String> namesAlreadyTaken, String getterMethodName) {
-		String propertyName = Inflector.uncapitalize(getterMethodName.substring(this.getterPrefix.length()));
-		if (Util.isBadPropertyName(propertyName) || namesAlreadyTaken.contains(propertyName)) {
-			// Our guess, e.g. getAbstract => abstract, is a keyword, fall back to original getAbstract
-			propertyName = getterMethodName;
-			// If our getter is getType or hashCode, we need to suffix it
-			if (Util.isBindingMethodName(propertyName) || Util.isObjectMethodName(propertyName)) {
-				propertyName += "Binding";
+	/** @return true if this prefix is at the start of <code>methodName</code> */
+	public boolean matches(String methodName) {
+		return methodName.startsWith(this.getterPrefix)
+			&& methodName.length() > this.getterPrefix.length()
+			&& (this == NONE || methodName.substring(this.getterPrefix.length(), this.getterPrefix.length() + 1).matches("[A-Z]"))
+			&& (this != NONE || !this.hasOtherPrefix(methodName));
+	}
+
+	/** @return true if a prefix other than us would also claim this <code>methodName</code> */
+	private boolean hasOtherPrefix(String methodName) {
+		for (AccessorPrefix p : values()) {
+			if (p != this && p.matches(methodName)) {
+				return true;
 			}
 		}
-		return propertyName;
+		return false;
 	}
 
 }

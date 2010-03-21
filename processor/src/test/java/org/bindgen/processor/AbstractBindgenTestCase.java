@@ -159,7 +159,7 @@ public class AbstractBindgenTestCase {
 		Collections.sort(expectedChildNames);
 		Collections.sort(actualChildNames);
 
-		assertEquals(Join.commaSpace(expectedChildNames), Join.commaSpace(actualChildNames));
+		assertEquals(Join.lines(expectedChildNames), Join.lines(actualChildNames));
 	}
 
 	private static boolean recursiveDelete(File file) {
