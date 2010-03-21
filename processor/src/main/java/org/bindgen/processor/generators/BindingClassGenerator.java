@@ -187,18 +187,16 @@ public class BindingClassGenerator {
 		factories.add(new FieldPropertyGenerator.Factory());
 
 		// get accessible elements
-		List<? extends Element> elements = getElementUtils().getAllMembers(this.element);
-		List<Element> accesibleElements = new ArrayList<Element>(elements.size());
-		for (Element enclosed : elements) {
+		List<Element> elements = new ArrayList<Element>();
+		for (Element enclosed : getElementUtils().getAllMembers(this.element)) {
 			if (Util.isAccessibleIfGenerated(this.element, enclosed)) {
-				accesibleElements.add(enclosed);
+				elements.add(enclosed);
 			}
 		}
 
 		for (PropertyGenerator.GeneratorFactory f : factories) {
-			Iterator<? extends Element> it = accesibleElements.iterator();
-			while (it.hasNext()) {
-				Element enclosed = it.next();
+			for (Iterator<? extends Element> i = elements.iterator(); i.hasNext();) {
+				Element enclosed = i.next();
 				try {
 					PropertyGenerator pg = f.newGenerator(this.pathBindingClass, enclosed, namesTaken);
 					if (namesTaken.contains(pg.getPropertyName())) {
@@ -206,7 +204,7 @@ public class BindingClassGenerator {
 					} else {
 						namesTaken.add(pg.getPropertyName());
 					}
-					it.remove(); // element is handled, other PropertyGenerators should not even bother  
+					i.remove(); // element is handled, other PropertyGenerators should not even bother
 					generators.add(pg);
 					this.sourceElements.add(enclosed);
 				} catch (WrongGeneratorException e) {
