@@ -26,19 +26,10 @@ public class FieldPropertyGenerator implements PropertyGenerator {
 	private final boolean isFinal;
 	private GClass innerClass;
 
-	public FieldPropertyGenerator(GClass outerClass, Element field, Collection<String> otherNamesTaken) throws WrongGeneratorException {
+	public FieldPropertyGenerator(GClass outerClass, Element field, String propertyName) throws WrongGeneratorException {
 		this.outerClass = outerClass;
 		this.field = field;
 		this.fieldName = this.field.getSimpleName().toString();
-
-		String propertyName = this.fieldName;
-		while (otherNamesTaken.contains(propertyName)) {
-			propertyName += "Field";
-		}
-		while (Util.isObjectMethodName(propertyName) || Util.isBindingMethodName(propertyName)) {
-			// Still invalid so suffix Binding
-			propertyName += "Field";
-		}
 
 		this.property = new BoundProperty(this.field, this.field.asType(), propertyName);
 		if (this.property.shouldSkip()) {
@@ -191,7 +182,16 @@ public class FieldPropertyGenerator implements PropertyGenerator {
 			if (possibleField.getKind() != ElementKind.FIELD) {
 				throw new WrongGeneratorException();
 			}
-			return new FieldPropertyGenerator(outerClass, possibleField, namesTaken);
+
+			String propertyName = possibleField.getSimpleName().toString();
+			if (namesTaken.contains(propertyName)) {
+				propertyName += "Field";
+			}
+			while (Util.isObjectMethodName(propertyName) || Util.isBindingMethodName(propertyName)) {
+				propertyName += "Field"; // Still invalid
+			}
+
+			return new FieldPropertyGenerator(outerClass, possibleField, propertyName);
 		}
 	}
 }
