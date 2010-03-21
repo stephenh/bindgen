@@ -84,7 +84,11 @@ public class BoundProperty {
 	}
 
 	public String getBindingClassFieldDeclaration() {
-		return "My" + Inflector.capitalize(this.propertyName) + "Binding" + this.optionalGenericsIfWildcards("?");
+		return this.getInnerClassSuperClass(true);
+	}
+
+	public String getInnerClassSuperClass() {
+		return this.getInnerClassSuperClass(false);
 	}
 
 	public String getInnerClassDeclaration() {
@@ -115,7 +119,12 @@ public class BoundProperty {
 		return name;
 	}
 
-	public String getInnerClassSuperClass() {
+	/** @return whether or not bindgen should generate a binding class for this properties' type */
+	public boolean shouldGenerateBindingClassForType() {
+		return CurrentEnv.getConfig().shouldGenerateBindingFor(this.name);
+	}
+
+	private String getInnerClassSuperClass(boolean replaceWildcards) {
 		// Arrays don't have individual binding classes
 		if (this.isArray()) {
 			return getConfig().bindingPathSuperClassName() + "<R, " + this.type.toString() + ">";
@@ -134,7 +143,7 @@ public class BoundProperty {
 		List<String> typeArgs = Copy.list("R");
 		if (this.isRawType()) {
 			for (TypeParameterElement tpe : this.getElement().getTypeParameters()) {
-				typeArgs.add(tpe.toString());
+				typeArgs.add(replaceWildcards ? "?" : tpe.toString());
 			}
 		} else if (this.isFixingRawType) {
 			typeArgs.add(this.name.getGenericPartWithoutBrackets());
@@ -142,21 +151,14 @@ public class BoundProperty {
 			int wildcardIndex = 0;
 			for (TypeMirror tm : ((DeclaredType) this.type).getTypeArguments()) {
 				if (tm.getKind() == TypeKind.WILDCARD) {
-					typeArgs.add("U" + (wildcardIndex++));
+					typeArgs.add(replaceWildcards ? "?" : ("U" + wildcardIndex));
+					wildcardIndex++;
 				} else {
 					typeArgs.add(tm.toString());
 				}
 			}
 		}
 		return superName + "<" + Join.commaSpace(typeArgs) + ">";
-	}
-
-	/**
-	 * Returns whether or not bindgen should generate a binding class for this properties' typeo
-	 * @return
-	 */
-	public boolean shouldGenerateBindingClassForType() {
-		return CurrentEnv.getConfig().shouldGenerateBindingFor(this.name);
 	}
 
 	/** @return the type appropriate for setter/return arguments. */

@@ -13,7 +13,6 @@ import javax.lang.model.util.ElementFilter;
 import javax.lang.model.util.Types;
 
 import joist.sourcegen.GClass;
-import joist.sourcegen.GField;
 import joist.sourcegen.GMethod;
 
 import org.bindgen.ContainerBinding;
@@ -113,10 +112,7 @@ public class MethodPropertyGenerator implements PropertyGenerator {
 	}
 
 	private void addOuterClassBindingField() {
-		GField f = this.outerClass.getField(this.property.getName()).type(this.property.getBindingClassFieldDeclaration());
-		if (this.property.isRawType()) {
-			f.addAnnotation("@SuppressWarnings(\"unchecked\")");
-		}
+		this.outerClass.getField(this.property.getName()).type(this.property.getBindingClassFieldDeclaration());
 	}
 
 	private void addInnerClass() {
