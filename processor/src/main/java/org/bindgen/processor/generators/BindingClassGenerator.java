@@ -59,7 +59,7 @@ public class BindingClassGenerator {
 		this.initializePathBindingClass();
 		this.addGetName();
 		this.addGetType();
-		this.generateProperties();
+		this.addProperties();
 		this.addGetChildBindings();
 
 		this.initializeRootBindingClass();
@@ -115,7 +115,7 @@ public class BindingClassGenerator {
 		getType.body.line("return {}.class;", this.element.getSimpleName());
 	}
 
-	private void generateProperties() {
+	private void addProperties() {
 		for (PropertyGenerator pg : this.getPropertyGenerators()) {
 			pg.generate();
 			this.enqueuePropertyTypeIfNeeded(pg);
