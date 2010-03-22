@@ -10,10 +10,10 @@ Changelog
 
 * New Feature: generate bindings for prefix-less getters (e.g. `int foo()`) (Mihai)
 * New Feature: `bindingPathSuperClass` configuration property to have generated bindings extend a custom base class (Mihai) 
-* Fix: Bindings are no longer non-deterministic/based on source-code in cases where multiple properties overlap (Mihai)
+* Fix: Bindings are no longer non-deterministic/based on source-code order in cases where multiple properties overlap (Mihai)
 * Fix: Correctly handle inner classes contained within outer classes that have a lower-case name
 * Fix: Correctly handle bindings of classes in the default package
-* Fix: Binding return types are the more generic `BindingRoot<R, T>` instead of the implementation-specific `MyXxxBinding` inner classes
+* Fix: Binding return types are the more generic `XxxBindingPath<R>` instead of the implementation-specific `MyXxxBinding` inner classes
 
 ## 2.8 - 2010-02-09
 
