@@ -73,6 +73,21 @@ If you don't want the `@Generated` put, you can set the property:
 Fix Raw Types
 -------------
 
-Occasionally an old API will use generic classes but without the generics. This can cause a headache to bind against, so you can override the missing generic...
+Occasionally an old API will use generic classes but without the generics. This can cause a headache to bind against, so you can override the missing generic.
+
+For example, this option:
+
+    fixRawType.javax.servlet.ServletRequest.parameterMap=String, String[]
+
+Changes the binding type for the pre-1.5 `ServletRequest.getParameterMap` method from a raw `Map` to a `Map<String, String[]`>
+
+Note that Bindgen by default includes `fixRawType.` settings for any servlet API methods that use raw types.
+
+Binding Super Class
+-------------------
+
+The generated `XxxBindingPath` classes typically extend an internal Bindgen `AbstractBinding` class. If you'd prefer to have them extend your own class, you can set:
+
+    bindingPathSuperClass=your.class.Name
 
 
