@@ -206,16 +206,6 @@ public class BoundProperty {
 		return "java.util.List".equals(this.name.getWithoutGenericPart()) || "java.util.Set".equals(this.name.getWithoutGenericPart());
 	}
 
-	public boolean isRawType() {
-		if (this.isFixingRawType) {
-			return false;
-		}
-		if (this.type.getKind() == TypeKind.DECLARED) {
-			return ((DeclaredType) this.type).getTypeArguments().size() != this.getElement().getTypeParameters().size();
-		}
-		return false;
-	}
-
 	public boolean matchesTypeParameterOfParent() {
 		String type = this.name.getGenericPartWithoutBrackets();
 		if (this.hasWildcards()) {
@@ -307,6 +297,17 @@ public class BoundProperty {
 
 	private boolean isTypeParameter(Element element) {
 		return element != null && element.getKind() == ElementKind.TYPE_PARAMETER;
+	}
+
+	/** @return whether the declared type has more type arguments than our usage of it does */
+	private boolean isRawType() {
+		if (this.isFixingRawType) {
+			return false;
+		}
+		if (this.type.getKind() == TypeKind.DECLARED) {
+			return ((DeclaredType) this.type).getTypeArguments().size() != this.getElement().getTypeParameters().size();
+		}
+		return false;
 	}
 
 	public boolean isArray() {
