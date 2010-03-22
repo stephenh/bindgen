@@ -46,7 +46,7 @@
 	</target>
 
 	<!-- Use a separate task to build the gwt version which includes the source directly in the jar. -->
-	<target name="gwt-jar" depends="jar">
+	<target name="gwt-jar" depends="jar" description="builds bindgen-gwt.jar with a gwt.xml module">
 		<mkdir dir="bin/jars"/>
 		<copy file="bin/jars/bindgen.jar" tofile="bin/jars/bindgen-gwt.jar"/>
 		<jar destfile="bin/jars/bindgen-gwt.jar" update="true">
