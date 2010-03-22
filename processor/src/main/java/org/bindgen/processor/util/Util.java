@@ -3,10 +3,10 @@ package org.bindgen.processor.util;
 import static org.bindgen.processor.CurrentEnv.*;
 
 import java.util.Set;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.lang.model.element.Element;
+import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.ArrayType;
@@ -19,16 +19,22 @@ import joist.util.Inflector;
 
 public class Util {
 
-	private static final Pattern outerClassName = Pattern.compile("\\.([A-Z]\\w+)\\.");
+	private static final Pattern lowerCase = Pattern.compile("^[a-z]");
 	private static final String[] javaKeywords = "abstract,continue,for,new,switch,assert,default,goto,package,synchronized,boolean,do,if,private,this,break,double,implements,protected,throw,byte,else,import,public,throws,case,enum,instanceof,return,transient,catch,extends,int,short,try,char,final,interface,static,void,class,finally,long,strictfp,volatile,const,float,native,super,while,null"
 		.split(",");
+	private static final String[] objectMethodNames = { "hashCode", "toString", "clone" };
+	private static final String[] bindingMethodNames = { "get", "getPath", "getType", "getParentBinding", "getChildBindings", "getIsSafe", "getSafely" };
 
 	// Watch for package.Foo.Inner -> package.foo.Inner
-	public static String lowerCaseOuterClassNames(String className) {
-		Matcher m = outerClassName.matcher(className);
-		while (m.find()) {
-			className = m.replaceFirst("." + Inflector.uncapitalize(m.group(1)) + ".");
-			m = outerClassName.matcher(className);
+	public static String lowerCaseOuterClassNames(Element bindableClass, String className) {
+		boolean isTypeElement = bindableClass.getKind().isClass() || bindableClass.getKind().isInterface();
+		if (isTypeElement && ((TypeElement) bindableClass).getEnclosingElement().getKind() == ElementKind.CLASS) {
+			String outerClassName = bindableClass.getEnclosingElement().getSimpleName().toString();
+			if (lowerCase.matcher(outerClassName).find()) {
+				className = className.replace(outerClassName, "bindgen_" + outerClassName);
+			} else {
+				className = className.replace(outerClassName, Inflector.uncapitalize(outerClassName));
+			}
 		}
 		return className;
 	}
@@ -62,13 +68,20 @@ public class Util {
 		return !isStatic && !isPrivate && (isPublic || (superSamePackage && !inJava));
 	}
 
+	public static boolean isBadPropertyName(String name) {
+		return isJavaKeyword(name) || isObjectMethodName(name) || isBindingMethodName(name);
+	}
+
 	public static boolean isJavaKeyword(String name) {
-		for (String keyword : javaKeywords) {
-			if (keyword.equals(name)) {
-				return true;
-			}
-		}
-		return false;
+		return contains(javaKeywords, name);
+	}
+
+	public static boolean isObjectMethodName(String propertyName) {
+		return contains(objectMethodNames, propertyName);
+	}
+
+	public static boolean isBindingMethodName(String propertyName) {
+		return contains(bindingMethodNames, propertyName);
 	}
 
 	/**
@@ -87,5 +100,14 @@ public class Util {
 		} else {
 			return Access.PACKAGE;
 		}
+	}
+
+	private static <T> boolean contains(T[] array, T element) {
+		for (T a : array) {
+			if (a.equals(element)) {
+				return true;
+			}
+		}
+		return false;
 	}
 }

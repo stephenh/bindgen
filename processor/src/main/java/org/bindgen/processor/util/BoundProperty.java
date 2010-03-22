@@ -18,7 +18,6 @@ import joist.util.Copy;
 import joist.util.Inflector;
 import joist.util.Join;
 
-import org.bindgen.binding.AbstractBinding;
 import org.bindgen.binding.GenericObjectBindingPath;
 import org.bindgen.processor.CurrentEnv;
 
@@ -43,11 +42,8 @@ public class BoundProperty {
 		this.enclosed = enclosed;
 		this.enclosing = (TypeElement) enclosed.getEnclosingElement();
 		this.isArray = type.getKind() == TypeKind.ARRAY;
-		if (this.isArray) {
-			this.type = type;
-		} else {
-			this.type = Util.boxIfNeeded(type);
-		}
+		// if we're an array, keep the primitive type, e.g. char[]
+		this.type = this.isArray ? type : Util.boxIfNeeded(type);
 		this.element = getTypeUtils().asElement(Util.boxIfNeeded(type));
 		this.propertyName = propertyName;
 		this.name = new ClassName(this.type.toString());
@@ -59,7 +55,7 @@ public class BoundProperty {
 	}
 
 	public boolean shouldSkip() {
-		return this.element == null || this.isNameless() || this.isSkipAttributeSet() || this.isForBinding() || this.isDeprecated();
+		return this.isDeclaringClass() || this.isSkipAttributeSet() || this.isForBinding() || this.isDeprecated();
 	}
 
 	public String getCastForReturnIfNeeded() {
@@ -88,7 +84,11 @@ public class BoundProperty {
 	}
 
 	public String getBindingClassFieldDeclaration() {
-		return "My" + Inflector.capitalize(this.propertyName) + "Binding" + this.optionalGenericsIfWildcards("?");
+		return this.getInnerClassSuperClass(true);
+	}
+
+	public String getInnerClassSuperClass() {
+		return this.getInnerClassSuperClass(false);
 	}
 
 	public String getInnerClassDeclaration() {
@@ -119,14 +119,19 @@ public class BoundProperty {
 		return name;
 	}
 
-	public String getInnerClassSuperClass() {
+	/** @return whether or not bindgen should generate a binding class for this properties' type */
+	public boolean shouldGenerateBindingClassForType() {
+		return CurrentEnv.getConfig().shouldGenerateBindingFor(this.name);
+	}
+
+	private String getInnerClassSuperClass(boolean replaceWildcards) {
 		// Arrays don't have individual binding classes
 		if (this.isArray()) {
-			return AbstractBinding.class.getName() + "<R, " + this.type.toString() + ">";
+			return getConfig().bindingPathSuperClassName() + "<R, " + this.type.toString() + ">";
 		}
 		// Being a generic type, we have no XxxBindingPath to extend, so just extend AbstractBinding directly
 		if (this.isForGenericTypeParameter()) {
-			return AbstractBinding.class.getName() + "<R, " + this.getGenericElement() + ">";
+			return getConfig().bindingPathSuperClassName() + "<R, " + this.getGenericElement() + ">";
 		}
 
 		// if our type is outside the binding scope we return a generic binding type
@@ -134,11 +139,11 @@ public class BoundProperty {
 			return GenericObjectBindingPath.class.getName() + "<R," + this.type.toString() + ">";
 		}
 
-		String superName = Util.lowerCaseOuterClassNames(CurrentEnv.getConfig().baseNameForBinding(this.name) + "BindingPath");
+		String superName = Util.lowerCaseOuterClassNames(this.element, getConfig().baseNameForBinding(this.name) + "BindingPath");
 		List<String> typeArgs = Copy.list("R");
 		if (this.isRawType()) {
 			for (TypeParameterElement tpe : this.getElement().getTypeParameters()) {
-				typeArgs.add(tpe.toString());
+				typeArgs.add(replaceWildcards ? "?" : tpe.toString());
 			}
 		} else if (this.isFixingRawType) {
 			typeArgs.add(this.name.getGenericPartWithoutBrackets());
@@ -146,21 +151,14 @@ public class BoundProperty {
 			int wildcardIndex = 0;
 			for (TypeMirror tm : ((DeclaredType) this.type).getTypeArguments()) {
 				if (tm.getKind() == TypeKind.WILDCARD) {
-					typeArgs.add("U" + (wildcardIndex++));
+					typeArgs.add(replaceWildcards ? "?" : ("U" + wildcardIndex));
+					wildcardIndex++;
 				} else {
 					typeArgs.add(tm.toString());
 				}
 			}
 		}
 		return superName + "<" + Join.commaSpace(typeArgs) + ">";
-	}
-
-	/**
-	 * Returns whether or not bindgen should generate a binding class for this properties' typeo
-	 * @return
-	 */
-	public boolean shouldGenerateBindingClassForType() {
-		return CurrentEnv.getConfig().shouldGenerateBindingFor(this.name);
 	}
 
 	/** @return the type appropriate for setter/return arguments. */
@@ -206,16 +204,6 @@ public class BoundProperty {
 
 	public boolean isForListOrSet() {
 		return "java.util.List".equals(this.name.getWithoutGenericPart()) || "java.util.Set".equals(this.name.getWithoutGenericPart());
-	}
-
-	public boolean isRawType() {
-		if (this.isFixingRawType) {
-			return false;
-		}
-		if (this.type.getKind() == TypeKind.DECLARED) {
-			return ((DeclaredType) this.type).getTypeArguments().size() != this.getElement().getTypeParameters().size();
-		}
-		return false;
 	}
 
 	public boolean matchesTypeParameterOfParent() {
@@ -297,8 +285,10 @@ public class BoundProperty {
 		return this.name.getWithoutGenericPart().endsWith("Binding");
 	}
 
-	private boolean isNameless() {
-		return this.propertyName == null || "get".equals(this.propertyName) || "declaringClass".equals(this.propertyName);
+	private boolean isDeclaringClass() {
+		// javac returns a stray generic (Class<E>) for inner classes where Eclipse
+		// returns the right class (Class<Outer>). For now just skip it.
+		return this.propertyName.equals("declaringClass");
 	}
 
 	private boolean isSkipAttributeSet() {
@@ -307,6 +297,17 @@ public class BoundProperty {
 
 	private boolean isTypeParameter(Element element) {
 		return element != null && element.getKind() == ElementKind.TYPE_PARAMETER;
+	}
+
+	/** @return whether the declared type has more type arguments than our usage of it does */
+	private boolean isRawType() {
+		if (this.isFixingRawType) {
+			return false;
+		}
+		if (this.type.getKind() == TypeKind.DECLARED) {
+			return ((DeclaredType) this.type).getTypeArguments().size() != this.getElement().getTypeParameters().size();
+		}
+		return false;
 	}
 
 	public boolean isArray() {

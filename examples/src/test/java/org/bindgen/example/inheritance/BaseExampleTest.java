@@ -13,8 +13,14 @@ public class BaseExampleTest extends TestCase {
 
 		Assert.assertEquals("foo", sub.name);
 		Assert.assertEquals("bar", sub.subOnly);
-		// 3 == base description, sub name, sub subOnly
-		Assert.assertEquals(3, subb.getChildBindings().size());
+
+		// because of the clash with the base class 'name', we get an extra 'nameField' that still points to 'SubExample.name'
+		subb.nameField().set("foo");
+		Assert.assertEquals("foo", sub.name);
+
+		// 5 == base description, sub name, sub subOnly, hashCode and toString
+		// +1 currently for the parent name and child nameField
+		Assert.assertEquals(6, subb.getChildBindings().size());
 	}
 
 	public void testSubBindingsWithRealSub() {

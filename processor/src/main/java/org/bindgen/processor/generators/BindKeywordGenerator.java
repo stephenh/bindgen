@@ -1,8 +1,6 @@
 package org.bindgen.processor.generators;
 
-import static org.bindgen.processor.CurrentEnv.getElementUtils;
-import static org.bindgen.processor.CurrentEnv.getFiler;
-import static org.bindgen.processor.CurrentEnv.getMessager;
+import static org.bindgen.processor.CurrentEnv.*;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -70,12 +68,15 @@ public class BindKeywordGenerator {
 			if (e == null) {
 				continue;
 			}
+			if (getElementUtils().getPackageOf(e).isUnnamed()) {
+				continue;
+			}
 			this.addBindMethod(className, (DeclaredType) e.asType());
 		}
 	}
 
 	private void addBindMethod(String className, DeclaredType type) {
-		ClassName bindingType = new BoundClass(type).getBindingClassName();
+		ClassName bindingType = new BoundClass((TypeElement) getTypeUtils().asElement(type)).getBindingClassName();
 		this.queue.log("Adding " + className + ", " + type + ", " + bindingType.get());
 		if (type.getTypeArguments().size() > 0) {
 			GMethod method = this.bindClass.getMethod("bind({}<{}> o)", className, Join.commaSpace(bindingType.getGenericPartWithoutBrackets()));

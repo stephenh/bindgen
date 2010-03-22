@@ -1,44 +1,45 @@
 package org.bindgen.processor.generators;
 
+import java.util.Collection;
+
 import javax.lang.model.element.Element;
+import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.ExecutableType;
+import javax.lang.model.type.TypeKind;
+import javax.lang.model.type.TypeMirror;
+import javax.lang.model.util.ElementFilter;
+import javax.lang.model.util.Types;
 
 import joist.sourcegen.GClass;
-import joist.sourcegen.GField;
 import joist.sourcegen.GMethod;
-import joist.util.Inflector;
 
 import org.bindgen.ContainerBinding;
+import org.bindgen.processor.CurrentEnv;
 import org.bindgen.processor.util.BoundProperty;
 import org.bindgen.processor.util.Util;
 
+/** Generates bindings for method properties like getFoo/setFoo, foo/foo(), with setters being optional. */
 public class MethodPropertyGenerator implements PropertyGenerator {
 
+	private final AccessorPrefix prefix;
 	private final GClass outerClass;
 	private final ExecutableElement method;
 	private final String methodName;
 	private final BoundProperty property;
 	private GClass innerClass;
 
-	public MethodPropertyGenerator(GClass outerClass, ExecutableElement method) {
+	public MethodPropertyGenerator(GClass outerClass, ExecutableElement method, AccessorPrefix prefix, String propertyName)
+		throws WrongGeneratorException {
 		this.outerClass = outerClass;
 		this.method = method;
-		this.methodName = this.method.getSimpleName().toString();
-		this.property = new BoundProperty(this.method, this.method.getReturnType(), this.guessPropertyNameOrNull());
-	}
-
-	@Override
-	public boolean isCallable() {
-		return false;
-	}
-
-	public boolean shouldGenerate() {
-		if (this.property.shouldSkip() || this.methodThrowsExceptions() || this.methodHasParameters()) {
-			return false;
+		this.methodName = method.getSimpleName().toString();
+		this.prefix = prefix;
+		this.property = new BoundProperty(this.method, this.method.getReturnType(), propertyName);
+		if (!this.methodNotVoidNoParamsNoThrows() || this.property.shouldSkip()) {
+			throw new WrongGeneratorException();
 		}
-		return true;
 	}
 
 	public void generate() {
@@ -49,10 +50,52 @@ public class MethodPropertyGenerator implements PropertyGenerator {
 		this.addInnerClassParent();
 		this.addInnerClassGet();
 		this.addInnerClassGetWithRoot();
-		this.addInnerClassSet();
-		this.addInnerClassSetWithRoot();
+		if (this.hasSetterMethod()) {
+			this.addInnerClassSet();
+			this.addInnerClassSetWithRoot();
+		} else {
+			this.addReadOnlyInnerClassSet();
+			this.addReadOnlyInnerClassSetWithRoot();
+		}
 		this.addInnerClassGetContainedTypeIfNeeded();
 		this.addInnerClassSerialVersionUID();
+	}
+
+	private boolean hasSetterMethod() {
+		String setterName = this.prefix.setterName(this.methodName);
+
+		Types typeUtils = CurrentEnv.getTypeUtils();
+		TypeMirror methodReturnType = this.method.getReturnType();
+		TypeElement parent = (TypeElement) this.method.getEnclosingElement();
+
+		// Hm...we don't currently go looking into super classes for the setter
+		for (ExecutableElement enclosed : ElementFilter.methodsIn(parent.getEnclosedElements())) {
+			String memberName = enclosed.getSimpleName().toString();
+			if (memberName.equals(setterName) && Util.isAccessibleIfGenerated(parent, enclosed)) {
+				if (enclosed.getParameters().size() == 1 // single parameter
+					&& enclosed.getThrownTypes().isEmpty() // no throws
+					&& typeUtils.isSameType(enclosed.getParameters().get(0).asType(), methodReturnType)) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
+	private boolean methodThrowsExceptions() {
+		return !((ExecutableType) this.method.asType()).getThrownTypes().isEmpty();
+	}
+
+	private boolean methodHasParameters() {
+		return !((ExecutableType) this.method.asType()).getParameterTypes().isEmpty();
+	}
+
+	private boolean methodNotVoidNoParamsNoThrows() {
+		return !this.methodReturnsVoid() && !this.methodHasParameters() && !this.methodThrowsExceptions();
+	}
+
+	private boolean methodReturnsVoid() {
+		return ((ExecutableType) this.method.asType()).getReturnType().getKind() == TypeKind.VOID;
 	}
 
 	private void addOuterClassGet() {
@@ -69,10 +112,7 @@ public class MethodPropertyGenerator implements PropertyGenerator {
 	}
 
 	private void addOuterClassBindingField() {
-		GField f = this.outerClass.getField(this.property.getName()).type(this.property.getBindingClassFieldDeclaration());
-		if (this.property.isRawType()) {
-			f.addAnnotation("@SuppressWarnings(\"unchecked\")");
-		}
+		this.outerClass.getField(this.property.getName()).type(this.property.getBindingClassFieldDeclaration());
 	}
 
 	private void addInnerClass() {
@@ -124,29 +164,34 @@ public class MethodPropertyGenerator implements PropertyGenerator {
 		}
 	}
 
+	private void addReadOnlyInnerClassSet() {
+		GMethod set = this.innerClass.getMethod("set({} {})", this.property.getSetType(), this.property.getName());
+		set.addAnnotation("@Override");
+		set.body.line("throw new RuntimeException(this.getName() + \" is read only\");");
+		return;
+	}
+
+	private void addReadOnlyInnerClassSetWithRoot() {
+		GMethod setWithRoot = this.innerClass.getMethod("setWithRoot(R root, {} {})", this.property.getSetType(), this.property.getName());
+		setWithRoot.addAnnotation("@Override");
+		setWithRoot.body.line("throw new RuntimeException(this.getName() + \" is read only\");");
+	}
+
 	private void addInnerClassSet() {
 		GMethod set = this.innerClass.getMethod("set({} {})", this.property.getSetType(), this.property.getName());
 		set.addAnnotation("@Override");
-		if (!this.hasSetter()) {
-			set.body.line("throw new RuntimeException(this.getName() + \" is read only\");");
-			return;
-		}
 		set.body.line("{}.this.get().{}({});",//
 			this.outerClass.getSimpleClassNameWithoutGeneric(),
-			this.getSetterName(),
+			this.prefix.setterName(this.methodName),
 			this.property.getName());
 	}
 
 	private void addInnerClassSetWithRoot() {
 		GMethod setWithRoot = this.innerClass.getMethod("setWithRoot(R root, {} {})", this.property.getSetType(), this.property.getName());
 		setWithRoot.addAnnotation("@Override");
-		if (!this.hasSetter()) {
-			setWithRoot.body.line("throw new RuntimeException(this.getName() + \" is read only\");");
-			return;
-		}
 		setWithRoot.body.line("{}.this.getWithRoot(root).{}({});",//
 			this.outerClass.getSimpleClassNameWithoutGeneric(),
-			this.getSetterName(),
+			this.prefix.setterName(this.methodName),
 			this.property.getName());
 	}
 
@@ -162,65 +207,53 @@ public class MethodPropertyGenerator implements PropertyGenerator {
 		this.innerClass.getField("serialVersionUID").type("long").setStatic().setFinal().initialValue("1L");
 	}
 
-	private boolean hasSetter() {
-		String setterName = this.getSetterName();
-		for (Element enclosed : this.method.getEnclosingElement().getEnclosedElements()) {
-			TypeElement parent = (TypeElement) this.method.getEnclosingElement();
-			if (enclosed.getSimpleName().toString().equals(setterName) && Util.isAccessibleIfGenerated(parent, enclosed)) {
-				ExecutableElement e = (ExecutableElement) enclosed;
-				return e.getParameters().size() == 1 && e.getThrownTypes().size() == 0; // only true if no throws
-			}
-		}
-		return false;
-	}
-
-	private String getSetterName() {
-		return "set" + this.methodName.substring(this.getPrefix().length());
-	}
-
-	private String getPrefix() {
-		for (String possible : new String[] { "get", "to", "has", "is" }) {
-			if (this.methodName.startsWith(possible)) {
-				return possible;
-			}
-		}
-		return null;
-	}
-
-	private String guessPropertyNameOrNull() {
-		String propertyName = null;
-		for (String possible : new String[] { "get", "to", "has", "is" }) {
-			if (this.methodName.startsWith(possible)
-				&& this.methodName.length() > possible.length() + 1
-				&& this.methodName.substring(possible.length(), possible.length() + 1).matches("[A-Z]")) {
-				propertyName = Inflector.uncapitalize(this.methodName.substring(possible.length()));
-				break;
-			}
-		}
-		if (Util.isJavaKeyword(propertyName) || "get".equals(propertyName)) {
-			propertyName = this.methodName;
-		}
-		return propertyName;
-	}
-
-	private boolean methodThrowsExceptions() {
-		return ((ExecutableType) this.method.asType()).getThrownTypes().size() > 0;
-	}
-
-	private boolean methodHasParameters() {
-		return ((ExecutableType) this.method.asType()).getParameterTypes().size() > 0;
-	}
-
-	public TypeElement getPropertyTypeElement() {
-		return this.property.getElement();
-	}
-
+	@Override
 	public String getPropertyName() {
 		return this.property.getName();
 	}
 
 	@Override
-	public String toString() {
-		return this.method.toString();
+	public TypeElement getPropertyTypeElement() {
+		return this.property.getElement();
+	}
+
+	@Override
+	public boolean hasSubBindings() {
+		return true;
+	}
+
+	public static class Factory implements GeneratorFactory {
+		private AccessorPrefix prefix;
+
+		public Factory(AccessorPrefix prefix) {
+			this.prefix = prefix;
+		}
+
+		@Override
+		public MethodPropertyGenerator newGenerator(GClass outerClass, Element possibleMethod, Collection<String> namesTaken) throws WrongGeneratorException {
+			if (possibleMethod.getKind() != ElementKind.METHOD) {
+				throw new WrongGeneratorException();
+			}
+
+			ExecutableElement method = (ExecutableElement) possibleMethod;
+			String methodName = method.getSimpleName().toString();
+			if (!this.prefix.matches(methodName)) {
+				throw new WrongGeneratorException();
+			}
+
+			String propertyName = this.prefix.preferredPropertyName(methodName);
+
+			// Sanity check our propertyName
+			// 1: If our preferred is already taken or a keyword, fall back
+			if (namesTaken.contains(propertyName) || Util.isJavaKeyword(propertyName)) {
+				propertyName = methodName;
+			}
+			// 2: If we'd collide with getType or toString, append Binding
+			if (Util.isBindingMethodName(propertyName) || Util.isObjectMethodName(propertyName)) {
+				propertyName += "Binding";
+			}
+
+			return new MethodPropertyGenerator(outerClass, method, this.prefix, propertyName);
+		}
 	}
 }

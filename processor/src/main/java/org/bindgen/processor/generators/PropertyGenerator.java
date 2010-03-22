@@ -1,6 +1,11 @@
 package org.bindgen.processor.generators;
 
+import java.util.Collection;
+
+import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
+
+import joist.sourcegen.GClass;
 
 /** Common methods for property (e.g. method/field/callable) generators. */
 public interface PropertyGenerator {
@@ -11,13 +16,13 @@ public interface PropertyGenerator {
 	/** @return the property name, e.g. field type or method get/set type */
 	TypeElement getPropertyTypeElement();
 
-	/** @return whether this property should be generated */
-	boolean shouldGenerate();
-
-	/** @return whether this is a callable (e.g. <code>Runnable</code>) binding */
-	boolean isCallable();
+	/** @return whether this binding has any sub-bindings that need to be registered */
+	boolean hasSubBindings();
 
 	/** Generates the property binding. */
 	void generate();
 
+	public static interface GeneratorFactory {
+		PropertyGenerator newGenerator(GClass outerClass, Element field, Collection<String> namesTaken) throws WrongGeneratorException;
+	}
 }

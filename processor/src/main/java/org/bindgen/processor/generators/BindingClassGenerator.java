@@ -8,13 +8,12 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
 import javax.annotation.Generated;
 import javax.lang.model.element.Element;
-import javax.lang.model.element.ElementKind;
-import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
 import javax.tools.JavaFileObject;
 import javax.tools.Diagnostic.Kind;
@@ -24,7 +23,6 @@ import joist.sourcegen.GMethod;
 import joist.util.Copy;
 
 import org.bindgen.Binding;
-import org.bindgen.processor.CurrentEnv;
 import org.bindgen.processor.GenerationQueue;
 import org.bindgen.processor.Processor;
 import org.bindgen.processor.util.BoundClass;
@@ -36,7 +34,7 @@ import org.bindgen.processor.util.Util;
  * which has a generic parameter <code>R</code> to present one part in
  * a binding evaluation path rooted at type a type <code>R</code>.
  *
- * The second class is the <ocde>XxxBinding</code> which extends its
+ * The second class is the <code>XxxBinding</code> which extends its
  * <code>XxxBindingPath</code> but provides the type parameter <code>R</code>
  * as <code>Xxx</code>, meaning that <code>XxxBinding</code> can be
  * used as the starting point for binding paths rooted at a <code>Xxx</code>.
@@ -47,7 +45,6 @@ public class BindingClassGenerator {
 	private final TypeElement element;
 	private final BoundClass name;
 	private final List<String> foundSubBindings = new ArrayList<String>();
-	private final List<String> done = new ArrayList<String>();
 	private final Set<Element> sourceElements = new HashSet<Element>();
 	private GClass pathBindingClass;
 	private GClass rootBindingClass;
@@ -55,14 +52,14 @@ public class BindingClassGenerator {
 	public BindingClassGenerator(GenerationQueue queue, TypeElement element) {
 		this.queue = queue;
 		this.element = element;
-		this.name = new BoundClass(element.asType());
+		this.name = new BoundClass(element);
 	}
 
 	public void generate() {
 		this.initializePathBindingClass();
 		this.addGetName();
 		this.addGetType();
-		this.generateProperties();
+		this.addProperties();
 		this.addGetChildBindings();
 
 		this.initializeRootBindingClass();
@@ -118,37 +115,24 @@ public class BindingClassGenerator {
 		getType.body.line("return {}.class;", this.element.getSimpleName());
 	}
 
-	private void generateProperties() {
+	private void addProperties() {
 		for (PropertyGenerator pg : this.getPropertyGenerators()) {
-			if (this.doneAlreadyContainsPropertyFromSubClass(pg)) {
-				continue;
-			}
 			pg.generate();
-			this.markDone(pg);
 			this.enqueuePropertyTypeIfNeeded(pg);
 			this.addToSubBindingsIfNeeded(pg);
 		}
 	}
 
-	// in case a parent class has the same field/method name as a child class
-	private boolean doneAlreadyContainsPropertyFromSubClass(PropertyGenerator pg) {
-		return this.done.contains(pg.getPropertyName());
-	}
-
-	private void markDone(PropertyGenerator pg) {
-		this.done.add(pg.getPropertyName());
-	}
-
 	private void enqueuePropertyTypeIfNeeded(PropertyGenerator pg) {
 		if (pg.getPropertyTypeElement() != null) {
-			if (CurrentEnv.getConfig().shouldGenerateBindingFor(pg.getPropertyTypeElement())) {
+			if (getConfig().shouldGenerateBindingFor(pg.getPropertyTypeElement())) {
 				this.queue.enqueueIfNew(pg.getPropertyTypeElement());
 			}
 		}
 	}
 
 	private void addToSubBindingsIfNeeded(PropertyGenerator pg) {
-		if (!pg.isCallable()) {
+		if (pg.hasSubBindings()) {
 			this.foundSubBindings.add(pg.getPropertyName());
 		}
 	}
@@ -177,34 +161,38 @@ public class BindingClassGenerator {
 	}
 
 	private List<PropertyGenerator> getPropertyGenerators() {
+		// factory ordering specifies binding precedence rules
+		List<PropertyGenerator.GeneratorFactory> factories = new ArrayList<PropertyGenerator.GeneratorFactory>();
+		// these bindings will not mangle their property names
+		factories.add(new MethodPropertyGenerator.Factory(AccessorPrefix.NONE));
+		factories.add(new MethodCallableGenerator.Factory());
+		// these bindings will try to drop their prefix and use a shorter name (e.g. getFoo -> foo)
+		factories.add(new MethodPropertyGenerator.Factory(AccessorPrefix.GET));
+		factories.add(new MethodPropertyGenerator.Factory(AccessorPrefix.HAS));
+		factories.add(new MethodPropertyGenerator.Factory(AccessorPrefix.IS));
+		// the field binding will use its name or append Field if it was already taken by get/has/is
+		factories.add(new FieldPropertyGenerator.Factory());
+
+		Set<String> namesTaken = new HashSet<String>();
+		List<Element> elements = this.getAccessibleElements();
 		List<PropertyGenerator> generators = new ArrayList<PropertyGenerator>();
-		// Do methods first so that if a field/method overlap, the getter/setter take precedence
-		for (Element enclosed : getElementUtils().getAllMembers(this.element)) {
-			if (!Util.isAccessibleIfGenerated(this.element, enclosed) || enclosed.getKind() != ElementKind.METHOD) {
-				continue;
-			}
-			MethodPropertyGenerator mpg = new MethodPropertyGenerator(this.pathBindingClass, (ExecutableElement) enclosed);
-			if (mpg.shouldGenerate()) {
-				generators.add(mpg);
-				this.sourceElements.add(enclosed);
-				continue;
-			}
-			MethodCallableGenerator mcg = new MethodCallableGenerator(this.pathBindingClass, (ExecutableElement) enclosed);
-			if (mcg.shouldGenerate()) {
-				generators.add(mcg);
-				this.sourceElements.add(enclosed);
-				continue;
-			}
-		}
-		// Now look for fields--just adding them is fine as markDone will take care of overlaps
-		for (Element enclosed : getElementUtils().getAllMembers(this.element)) {
-			if (!Util.isAccessibleIfGenerated(this.element, enclosed) || enclosed.getKind() != ElementKind.FIELD) {
-				continue;
-			}
-			FieldPropertyGenerator fpg = new FieldPropertyGenerator(this.pathBindingClass, enclosed);
-			if (fpg.shouldGenerate()) {
-				generators.add(fpg);
-				this.sourceElements.add(enclosed);
+
+		for (PropertyGenerator.GeneratorFactory f : factories) {
+			for (Iterator<Element> i = elements.iterator(); i.hasNext();) {
+				Element enclosed = i.next();
+				try {
+					PropertyGenerator pg = f.newGenerator(this.pathBindingClass, enclosed, namesTaken);
+					if (namesTaken.contains(pg.getPropertyName())) {
+						continue;
+					} else {
+						namesTaken.add(pg.getPropertyName());
+					}
+					i.remove(); // element is handled, skip any further generators
+					generators.add(pg);
+					this.sourceElements.add(enclosed);
+				} catch (WrongGeneratorException e) {
+					// try next
+				}
 			}
 		}
 		return generators;
@@ -213,5 +201,15 @@ public class BindingClassGenerator {
 	private void addSerialVersionUID() {
 		this.rootBindingClass.getField("serialVersionUID").type("long").setStatic().setFinal().initialValue("1L");
 		this.pathBindingClass.getField("serialVersionUID").type("long").setStatic().setFinal().initialValue("1L");
+	}
+
+	private List<Element> getAccessibleElements() {
+		List<Element> elements = new ArrayList<Element>();
+		for (Element enclosed : getElementUtils().getAllMembers(this.element)) {
+			if (Util.isAccessibleIfGenerated(this.element, enclosed)) {
+				elements.add(enclosed);
+			}
+		}
+		return elements;
 	}
 }

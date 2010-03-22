@@ -2,8 +2,11 @@ package org.bindgen.processor.generators;
 
 import static org.bindgen.processor.CurrentEnv.*;
 
+import java.util.Collection;
 import java.util.List;
 
+import javax.lang.model.element.Element;
+import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
@@ -11,12 +14,14 @@ import javax.lang.model.type.ExecutableType;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.ElementFilter;
+import javax.lang.model.util.Types;
 
 import joist.sourcegen.GClass;
 import joist.sourcegen.GMethod;
 import joist.util.Inflector;
 
 import org.bindgen.NamedBinding;
+import org.bindgen.processor.CurrentEnv;
 import org.bindgen.processor.util.Util;
 
 public class MethodCallableGenerator implements PropertyGenerator {
@@ -28,18 +33,21 @@ public class MethodCallableGenerator implements PropertyGenerator {
 	private ExecutableElement blockMethod;
 	private GClass innerClass;
 
-	public MethodCallableGenerator(GClass outerClass, ExecutableElement method) {
+	public MethodCallableGenerator(GClass outerClass, ExecutableElement method) throws WrongGeneratorException {
 		this.outerClass = outerClass;
 		this.method = method;
 		this.methodName = this.method.getSimpleName().toString();
+		if (!this.shouldGenerate()) {
+			throw new WrongGeneratorException();
+		}
 	}
 
 	@Override
-	public boolean isCallable() {
-		return true;
+	public boolean hasSubBindings() {
+		return false;
 	}
 
-	public boolean shouldGenerate() {
+	private boolean shouldGenerate() {
 		if (getConfig().skipAttribute(this.method.getEnclosingElement(), this.methodName)) {
 			return false;
 		}
@@ -127,27 +135,28 @@ public class MethodCallableGenerator implements PropertyGenerator {
 	}
 
 	private boolean doBlockReturnTypesMatch(ExecutableElement methodToMatch) {
-		return methodToMatch.getReturnType().equals(this.method.getReturnType());
+		return getTypeUtils().isSameType(methodToMatch.getReturnType(), this.method.getReturnType());
 	}
 
 	private boolean doBlockParamsMatch(ExecutableElement methodToMatch) {
 		if (methodToMatch.getParameters().size() != this.getMethodAsType().getParameterTypes().size()) {
 			return false;
 		}
-		boolean allMatch = true;
+		Types typeUtils = CurrentEnv.getTypeUtils();
 		for (int i = 0; i < methodToMatch.getParameters().size(); i++) {
-			if (!methodToMatch.getParameters().get(i).asType().equals(this.getMethodAsType().getParameterTypes().get(i))) {
-				allMatch = false;
+			if (!typeUtils.isSameType(methodToMatch.getParameters().get(i).asType(), this.getMethodAsType().getParameterTypes().get(i))) {
+				return false;
 			}
 		}
-		return allMatch;
+		return true;
 	}
 
 	private boolean doBlockThrowsMatch(ExecutableElement methodToMatch) {
+		Types typeUtils = CurrentEnv.getTypeUtils();
 		for (TypeMirror throwsType : this.method.getThrownTypes()) {
 			boolean matchesOne = false;
 			for (TypeMirror otherType : methodToMatch.getThrownTypes()) {
-				if (otherType.equals(throwsType)) {
+				if (typeUtils.isSameType(otherType, throwsType)) {
 					matchesOne = true;
 				}
 			}
@@ -188,6 +197,21 @@ public class MethodCallableGenerator implements PropertyGenerator {
 
 	private ExecutableType getMethodAsType() {
 		return (ExecutableType) this.method.asType();
+	}
+
+	public static class Factory implements GeneratorFactory {
+		@Override
+		public MethodCallableGenerator newGenerator(GClass outerClass, Element possibleMethod, Collection<String> namesTaken) throws WrongGeneratorException {
+			if (possibleMethod.getKind() != ElementKind.METHOD) {
+				throw new WrongGeneratorException();
+			}
+			MethodCallableGenerator pg = new MethodCallableGenerator(outerClass, (ExecutableElement) possibleMethod);
+			if (namesTaken.contains(pg.getPropertyName())) {
+				throw new WrongGeneratorException(); // do not generate bindings with compilation errors 
+			}
+
+			return pg;
+		}
 	}
 
 }

@@ -14,6 +14,7 @@ import javax.tools.FileObject;
 import javax.tools.StandardLocation;
 import javax.tools.JavaFileManager.Location;
 
+import org.bindgen.binding.AbstractBinding;
 import org.bindgen.processor.CurrentEnv;
 import org.bindgen.processor.util.ClassName;
 
@@ -68,7 +69,16 @@ public class BindgenConfig {
 		if (pn.startsWith("java.") || pn.startsWith("javax.")) {
 			pn = "org.bindgen." + pn;
 		}
-		return pn + "." + cn.getSimpleName();
+		if (pn.isEmpty()) {
+			return cn.getSimpleName();
+		} else {
+			return pn + "." + cn.getSimpleName();
+		}
+	}
+
+	/** @return the fully qualified name of the super class of all Bindings - useful for integration */
+	public String bindingPathSuperClassName() {
+		return this.options.get("bindingPathSuperClass");
 	}
 
 	/** @return a list of class names to match void methods against for callable bindings */
@@ -102,14 +112,12 @@ public class BindgenConfig {
 	}
 
 	private Scope<ClassName> getBindingScope() {
-		final Scope<ClassName> bindingScope;
 		final String scopeExpression = this.options.get(SCOPE_PARAM);
 		if (scopeExpression != null && scopeExpression.trim().length() > 0) {
-			bindingScope = new PackageExpressionScope(scopeExpression);
+			return new PackageExpressionScope(scopeExpression);
 		} else {
-			bindingScope = new GlobalScope<ClassName>();
+			return new GlobalScope<ClassName>();
 		}
-		return bindingScope;
 	}
 
 	// Default properties--this is ugly, but I could not get a bindgen.properties to be found on the classpath
@@ -130,6 +138,7 @@ public class BindgenConfig {
 		this.options.put("skipAttribute.java.lang.Object.getClass", "true");
 		this.options.put("skipAttribute.java.lang.Object.notify", "true");
 		this.options.put("skipAttribute.java.lang.Object.notifyAll", "true");
+		this.options.put("bindingPathSuperClass", AbstractBinding.class.getName());
 	}
 
 	private void loadBindgenDotProperties(ProcessingEnvironment env) {

@@ -69,4 +69,21 @@ public class BasicPropertiesTest extends AbstractBindgenTestCase {
 		assertThat(CITY, is(city));
 	}
 
+	@Test
+	public void shouldCreateBindingsForSingleLetterGetters() throws Exception {
+		ClassLoader loader = this.compile(path("Point"));
+
+		Class<?> actualClass = loader.loadClass(name("Point"));
+		assertNotNull(actualClass);
+
+		Class<?> bindingClass = loader.loadClass(name("PointBindingPath"));
+		assertNotNull(bindingClass);
+
+		assertMethodDeclared(bindingClass, "x");
+		assertMethodDeclared(bindingClass, "y");
+		assertMethodDeclared(bindingClass, "z");
+		assertMethodDeclared(bindingClass, "zero");
+		assertMethodDeclared(bindingClass, "origin");
+	}
+
 }

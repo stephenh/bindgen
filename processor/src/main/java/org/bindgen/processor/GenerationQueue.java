@@ -1,8 +1,6 @@
 package org.bindgen.processor;
 
-import static org.bindgen.processor.CurrentEnv.getConfig;
-import static org.bindgen.processor.CurrentEnv.getFiler;
-import static org.bindgen.processor.CurrentEnv.getMessager;
+import static org.bindgen.processor.CurrentEnv.*;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -113,7 +111,7 @@ public class GenerationQueue {
 			return false;
 		}
 		try {
-			ClassName bindingClassName = new BoundClass(element.asType()).getBindingClassName();
+			ClassName bindingClassName = new BoundClass(element).getBindingClassName();
 			FileObject fo = getFiler().getResource(
 				StandardLocation.SOURCE_OUTPUT,
 				bindingClassName.getPackageName(),

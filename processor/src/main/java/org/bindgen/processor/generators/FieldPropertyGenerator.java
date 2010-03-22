@@ -1,40 +1,44 @@
 package org.bindgen.processor.generators;
 
+import java.util.Collection;
+
 import javax.lang.model.element.Element;
+import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.TypeElement;
 
 import joist.sourcegen.GClass;
-import joist.sourcegen.GField;
 import joist.sourcegen.GMethod;
 
 import org.bindgen.ContainerBinding;
 import org.bindgen.processor.util.BoundProperty;
 import org.bindgen.processor.util.Util;
 
+/**
+ * Generates bindings for fields 
+ */
 public class FieldPropertyGenerator implements PropertyGenerator {
 
 	private final GClass outerClass;
 	private final Element field;
+	private final String fieldName;
 	private final BoundProperty property;
 	private final boolean isFinal;
 	private GClass innerClass;
 
-	public FieldPropertyGenerator(GClass outerClass, Element field) {
+	public FieldPropertyGenerator(GClass outerClass, Element field, String propertyName) throws WrongGeneratorException {
 		this.outerClass = outerClass;
 		this.field = field;
-		this.property = new BoundProperty(this.field, this.field.asType(), this.field.getSimpleName().toString());
+		this.fieldName = this.field.getSimpleName().toString();
+
+		this.property = new BoundProperty(this.field, this.field.asType(), propertyName);
+		if (this.property.shouldSkip()) {
+			throw new WrongGeneratorException();
+		}
 		this.isFinal = this.field.getModifiers().contains(javax.lang.model.element.Modifier.FINAL);
 	}
 
 	@Override
-	public boolean isCallable() {
-		return false;
-	}
-
-	public boolean shouldGenerate() {
-		if (this.property.shouldSkip()) {
-			return false;
-		}
+	public boolean hasSubBindings() {
 		return true;
 	}
 
@@ -53,10 +57,7 @@ public class FieldPropertyGenerator implements PropertyGenerator {
 	}
 
 	private void addOuterClassBindingField() {
-		GField f = this.outerClass.getField(this.property.getName()).type(this.property.getBindingClassFieldDeclaration());
-		if (this.property.isRawType()) {
-			f.addAnnotation("@SuppressWarnings(\"unchecked\")");
-		}
+		this.outerClass.getField(this.property.getName()).type(this.property.getBindingClassFieldDeclaration());
 	}
 
 	private void addOuterClassGet() {
@@ -102,7 +103,7 @@ public class FieldPropertyGenerator implements PropertyGenerator {
 		get.body.line("return {}{}.this.get().{};",//
 			this.property.getCastForReturnIfNeeded(),
 			this.outerClass.getSimpleClassNameWithoutGeneric(),
-			this.property.getName());
+			this.fieldName);
 		if (this.property.doesInnerGetNeedSuppressWarnings()) {
 			get.addAnnotation("@SuppressWarnings(\"unchecked\")");
 		}
@@ -114,7 +115,7 @@ public class FieldPropertyGenerator implements PropertyGenerator {
 		getWithRoot.body.line("return {}{}.this.getWithRoot(root).{};",//
 			this.property.getCastForReturnIfNeeded(),
 			this.outerClass.getSimpleClassNameWithoutGeneric(),
-			this.property.getName());
+			this.fieldName);
 		if (this.property.doesInnerGetNeedSuppressWarnings()) {
 			getWithRoot.addAnnotation("@SuppressWarnings(\"unchecked\")");
 		}
@@ -129,7 +130,7 @@ public class FieldPropertyGenerator implements PropertyGenerator {
 		}
 		set.body.line("{}.this.get().{} = {};",//
 			this.outerClass.getSimpleClassNameWithoutGeneric(),
-			this.property.getName(),
+			this.fieldName,
 			this.property.getName());
 	}
 
@@ -140,10 +141,9 @@ public class FieldPropertyGenerator implements PropertyGenerator {
 			setWithRoot.body.line("throw new RuntimeException(this.getName() + \" is read only\");");
 			return;
 		}
-		setWithRoot.body.line(
-			"{}.this.getWithRoot(root).{} = {};",
+		setWithRoot.body.line("{}.this.getWithRoot(root).{} = {};",//
 			this.outerClass.getSimpleClassNameWithoutGeneric(),
-			this.property.getName(),
+			this.fieldName,
 			this.property.getName());
 	}
 
@@ -170,5 +170,24 @@ public class FieldPropertyGenerator implements PropertyGenerator {
 	@Override
 	public String toString() {
 		return this.field.toString();
+	}
+
+	public static class Factory implements GeneratorFactory {
+		@Override
+		public FieldPropertyGenerator newGenerator(GClass outerClass, Element possibleField, Collection<String> namesTaken) throws WrongGeneratorException {
+			if (possibleField.getKind() != ElementKind.FIELD) {
+				throw new WrongGeneratorException();
+			}
+
+			String propertyName = possibleField.getSimpleName().toString();
+			if (namesTaken.contains(propertyName)) {
+				propertyName += "Field";
+			}
+			while (Util.isObjectMethodName(propertyName) || Util.isBindingMethodName(propertyName)) {
+				propertyName += "Field"; // Still invalid
+			}
+
+			return new FieldPropertyGenerator(outerClass, possibleField, propertyName);
+		}
 	}
 }

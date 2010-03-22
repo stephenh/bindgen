@@ -1,27 +1,30 @@
 package org.bindgen.processor.util;
 
+import static org.bindgen.processor.CurrentEnv.*;
+
 import java.util.List;
 
-import javax.lang.model.type.TypeMirror;
+import javax.lang.model.element.TypeElement;
 
 import joist.util.Join;
 
-import org.bindgen.binding.AbstractBinding;
 import org.bindgen.processor.CurrentEnv;
 
 /** Given a TypeMirror type of a field/method property, provides information about its binding outer/inner class. */
 public class BoundClass {
 
+	private final TypeElement element;
 	private final ClassName name;
 
-	public BoundClass(TypeMirror type) {
-		this.name = new ClassName(Util.boxIfNeeded(type).toString());
+	public BoundClass(TypeElement element) {
+		this.element = element;
+		this.name = new ClassName(Util.boxIfNeeded(element.asType()).toString());
 	}
 
 	/** @return binding type, e.g. bindgen.java.lang.StringBinding, bindgen.app.EmployeeBinding */
 	public ClassName getBindingClassName() {
-		String bindingName = CurrentEnv.getConfig().baseNameForBinding(this.name) + "Binding" + this.name.getGenericPart();
-		return new ClassName(Util.lowerCaseOuterClassNames(bindingName));
+		String bindingName = getConfig().baseNameForBinding(this.name) + "Binding" + this.name.getGenericPart();
+		return new ClassName(Util.lowerCaseOuterClassNames(this.element, bindingName));
 	}
 
 	public String getBindingPathClassDeclaration() {
@@ -31,7 +34,7 @@ public class BoundClass {
 	}
 
 	public String getBindingPathClassSuperClass() {
-		return AbstractBinding.class.getName() + "<R, " + this.name.get() + ">";
+		return CurrentEnv.getConfig().bindingPathSuperClassName() + "<R, " + this.name.get() + ">";
 	}
 
 	public String getBindingRootClassDeclaration() {

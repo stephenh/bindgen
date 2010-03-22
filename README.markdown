@@ -112,7 +112,8 @@ Gotchas
 Todo
 ====
 
-* Support extension methods, e.g. StringBinding could have extra methods like `length()`, `substring()`, etc., ideally configurable
+* Support extension methods, e.g. StringBinding could have extra methods like `length()`, `substring()`, etc., ideally configurable - done.
 * Optional null-safe get/set, e.g. `eb.employer().name()` with a null `employer` could have `get()` return `null` and not NPE and `set()` could create a `new Employer()` to then call `setName()` on to again avoid the NPE
 * Document options, `fixRawTypes`, `bindgen.log`, etc.
+* Package a `bindgen-profiled` that has post-processed/something basic wall clock timing for performance analysis
 
