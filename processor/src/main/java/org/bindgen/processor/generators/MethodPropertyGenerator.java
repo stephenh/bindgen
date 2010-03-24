@@ -1,5 +1,7 @@
 package org.bindgen.processor.generators;
 
+import static org.bindgen.processor.CurrentEnv.*;
+
 import java.util.Collection;
 
 import javax.lang.model.element.Element;
@@ -10,19 +12,18 @@ import javax.lang.model.type.ExecutableType;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.ElementFilter;
-import javax.lang.model.util.Types;
 
 import joist.sourcegen.GClass;
 import joist.sourcegen.GMethod;
 
 import org.bindgen.ContainerBinding;
-import org.bindgen.processor.CurrentEnv;
 import org.bindgen.processor.util.BoundProperty;
 import org.bindgen.processor.util.Util;
 
 /** Generates bindings for method properties like getFoo/setFoo, foo/foo(), with setters being optional. */
 public class MethodPropertyGenerator implements PropertyGenerator {
 
+	private final TypeElement outerElement;
 	private final AccessorPrefix prefix;
 	private final GClass outerClass;
 	private final ExecutableElement method;
@@ -30,13 +31,14 @@ public class MethodPropertyGenerator implements PropertyGenerator {
 	private final BoundProperty property;
 	private GClass innerClass;
 
-	public MethodPropertyGenerator(GClass outerClass, ExecutableElement method, AccessorPrefix prefix, String propertyName)
+	public MethodPropertyGenerator(GClass outerClass, TypeElement outerElement, ExecutableElement method, AccessorPrefix prefix, String propertyName)
 		throws WrongGeneratorException {
+		this.outerElement = outerElement;
 		this.outerClass = outerClass;
 		this.method = method;
 		this.methodName = method.getSimpleName().toString();
 		this.prefix = prefix;
-		this.property = new BoundProperty(this.method, this.method.getReturnType(), propertyName);
+		this.property = new BoundProperty(outerElement, this.method, this.method.getReturnType(), propertyName);
 		if (!this.methodNotVoidNoParamsNoThrows() || this.property.shouldSkip()) {
 			throw new WrongGeneratorException();
 		}
@@ -64,21 +66,22 @@ public class MethodPropertyGenerator implements PropertyGenerator {
 	private boolean hasSetterMethod() {
 		String setterName = this.prefix.setterName(this.methodName);
 
-		Types typeUtils = CurrentEnv.getTypeUtils();
-		TypeMirror methodReturnType = this.method.getReturnType();
-		TypeElement parent = (TypeElement) this.method.getEnclosingElement();
-
 		// Hm...we don't currently go looking into super classes for the setter
+		TypeElement parent = (TypeElement) this.method.getEnclosingElement();
 		for (ExecutableElement enclosed : ElementFilter.methodsIn(parent.getEnclosedElements())) {
-			String memberName = enclosed.getSimpleName().toString();
-			if (memberName.equals(setterName) && Util.isAccessibleIfGenerated(parent, enclosed)) {
-				if (enclosed.getParameters().size() == 1 // single parameter
-					&& enclosed.getThrownTypes().isEmpty() // no throws
-					&& typeUtils.isSameType(enclosed.getParameters().get(0).asType(), methodReturnType)) {
-					return true;
+			String methodName = enclosed.getSimpleName().toString();
+			if (methodName.equals(setterName) && Util.isAccessibleIfGenerated(parent, enclosed)) {
+				// single parameter and no throws
+				if (enclosed.getParameters().size() == 1 && enclosed.getThrownTypes().isEmpty()) {
+					TypeMirror parameterType = enclosed.getParameters().get(0).asType();
+					TypeMirror resolvedParameterType = Util.resolveTypeVarIfPossible(this.outerElement, parameterType);
+					if (getTypeUtils().isSameType(this.property.getType(), resolvedParameterType)) {
+						return true; // setter parameter type matches getter return type
+					}
 				}
 			}
 		}
+
 		return false;
 	}
 
@@ -230,7 +233,7 @@ public class MethodPropertyGenerator implements PropertyGenerator {
 		}
 
 		@Override
-		public MethodPropertyGenerator newGenerator(GClass outerClass, Element possibleMethod, Collection<String> namesTaken) throws WrongGeneratorException {
+		public MethodPropertyGenerator newGenerator(GClass outerClass, TypeElement outerElement, Element possibleMethod, Collection<String> namesTaken) throws WrongGeneratorException {
 			if (possibleMethod.getKind() != ElementKind.METHOD) {
 				throw new WrongGeneratorException();
 			}
@@ -253,7 +256,7 @@ public class MethodPropertyGenerator implements PropertyGenerator {
 				propertyName += "Binding";
 			}
 
-			return new MethodPropertyGenerator(outerClass, method, this.prefix, propertyName);
+			return new MethodPropertyGenerator(outerClass, outerElement, method, this.prefix, propertyName);
 		}
 	}
 }

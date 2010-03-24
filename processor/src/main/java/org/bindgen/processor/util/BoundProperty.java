@@ -38,14 +38,16 @@ public class BoundProperty {
 	 * @param type our type
 	 * @param propertyName our name on the parent <code>enclosed</code> type
 	 */
-	public BoundProperty(Element enclosed, TypeMirror type, String propertyName) {
+	public BoundProperty(TypeElement outerElement, Element enclosed, TypeMirror type, String propertyName) {
 		this.enclosed = enclosed;
 		this.enclosing = (TypeElement) enclosed.getEnclosingElement();
+		this.propertyName = propertyName;
+
+		type = Util.resolveTypeVarIfPossible(outerElement, type);
 		this.isArray = type.getKind() == TypeKind.ARRAY;
 		// if we're an array, keep the primitive type, e.g. char[]
 		this.type = this.isArray ? type : Util.boxIfNeeded(type);
 		this.element = getTypeUtils().asElement(Util.boxIfNeeded(type));
-		this.propertyName = propertyName;
 		this.name = new ClassName(this.type.toString());
 		this.isFixingRawType = this.fixRawTypeIfNeeded();
 	}
@@ -308,6 +310,10 @@ public class BoundProperty {
 			return ((DeclaredType) this.type).getTypeArguments().size() != this.getElement().getTypeParameters().size();
 		}
 		return false;
+	}
+
+	public TypeMirror getType() {
+		return this.type;
 	}
 
 	public boolean isArray() {

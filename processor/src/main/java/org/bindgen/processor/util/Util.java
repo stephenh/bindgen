@@ -2,6 +2,8 @@ package org.bindgen.processor.util;
 
 import static org.bindgen.processor.CurrentEnv.*;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 import java.util.regex.Pattern;
 
@@ -10,6 +12,7 @@ import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.ArrayType;
+import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.PrimitiveType;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
@@ -84,11 +87,7 @@ public class Util {
 		return contains(bindingMethodNames, propertyName);
 	}
 
-	/**
-	 * Gets the {@link Access} level of the element
-	 * @param element
-	 * @return
-	 */
+	/** @return the {@link Access} level of the element */
 	public static Access getAccess(Element element) {
 		final Set<Modifier> modifiers = element.getModifiers();
 		if (modifiers.contains(Modifier.PUBLIC)) {
@@ -100,6 +99,57 @@ public class Util {
 		} else {
 			return Access.PACKAGE;
 		}
+	}
+
+	public static List<TypeMirror> allSuperClasses(TypeElement element) {
+		List<TypeMirror> classes = new ArrayList<TypeMirror>();
+		TypeMirror current = element.getSuperclass();
+		while (current.getKind() != TypeKind.NONE) {
+			classes.add(current);
+			Element superElement = getTypeUtils().asElement(current);
+			if (superElement.getKind() == ElementKind.CLASS) {
+				current = ((TypeElement) superElement).getSuperclass();
+			} else {
+				break;
+			}
+		}
+		return classes;
+	}
+
+	public static TypeMirror resolveTypeVarIfPossible(TypeElement outerElement, TypeMirror type) {
+		if (type.getKind() != TypeKind.TYPEVAR) {
+			return type;
+		}
+
+		// Go searching for the type var
+		for (TypeMirror superClass : Util.allSuperClasses(outerElement)) {
+			boolean found = false;
+			int foundAt = 0;
+
+			// Go TypeMirror (bound type vars) -> Element -> TypeMirror (unbound type vars)
+			// so that we can compare the possibly-unbound <code>type</code> parameter
+			// with the unbound TypeMirror, get the right index, and then jump back to
+			// our bound TypeMirror
+			TypeMirror superGeneric = getTypeUtils().asElement(superClass).asType();
+			if (superGeneric.getKind() == TypeKind.DECLARED) {
+				for (TypeMirror tm : ((DeclaredType) superGeneric).getTypeArguments()) {
+					if (getTypeUtils().isSameType(tm, type)) {
+						found = true;
+						break;
+					}
+					foundAt++;
+				}
+			}
+
+			if (found) {
+				if (superClass.getKind() == TypeKind.DECLARED) {
+					return ((DeclaredType) superClass).getTypeArguments().get(foundAt);
+				}
+			}
+		}
+
+		// Didn't find a match
+		return type;
 	}
 
 	private static <T> boolean contains(T[] array, T element) {

@@ -181,7 +181,7 @@ public class BindingClassGenerator {
 			for (Iterator<Element> i = elements.iterator(); i.hasNext();) {
 				Element enclosed = i.next();
 				try {
-					PropertyGenerator pg = f.newGenerator(this.pathBindingClass, enclosed, namesTaken);
+					PropertyGenerator pg = f.newGenerator(this.pathBindingClass, this.element, enclosed, namesTaken);
 					if (namesTaken.contains(pg.getPropertyName())) {
 						continue;
 					} else {

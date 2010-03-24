@@ -201,7 +201,7 @@ public class MethodCallableGenerator implements PropertyGenerator {
 
 	public static class Factory implements GeneratorFactory {
 		@Override
-		public MethodCallableGenerator newGenerator(GClass outerClass, Element possibleMethod, Collection<String> namesTaken) throws WrongGeneratorException {
+		public MethodCallableGenerator newGenerator(GClass outerClass, TypeElement outerElement, Element possibleMethod, Collection<String> namesTaken) throws WrongGeneratorException {
 			if (possibleMethod.getKind() != ElementKind.METHOD) {
 				throw new WrongGeneratorException();
 			}

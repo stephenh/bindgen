@@ -25,12 +25,12 @@ public class FieldPropertyGenerator implements PropertyGenerator {
 	private final boolean isFinal;
 	private GClass innerClass;
 
-	public FieldPropertyGenerator(GClass outerClass, Element field, String propertyName) throws WrongGeneratorException {
+	public FieldPropertyGenerator(GClass outerClass, TypeElement outerElement, Element field, String propertyName) throws WrongGeneratorException {
 		this.outerClass = outerClass;
 		this.field = field;
 		this.fieldName = this.field.getSimpleName().toString();
 
-		this.property = new BoundProperty(this.field, this.field.asType(), propertyName);
+		this.property = new BoundProperty(outerElement, this.field, this.field.asType(), propertyName);
 		if (this.property.shouldSkip()) {
 			throw new WrongGeneratorException();
 		}
@@ -174,7 +174,7 @@ public class FieldPropertyGenerator implements PropertyGenerator {
 
 	public static class Factory implements GeneratorFactory {
 		@Override
-		public FieldPropertyGenerator newGenerator(GClass outerClass, Element possibleField, Collection<String> namesTaken) throws WrongGeneratorException {
+		public FieldPropertyGenerator newGenerator(GClass outerClass, TypeElement outerElement, Element possibleField, Collection<String> namesTaken) throws WrongGeneratorException {
 			if (possibleField.getKind() != ElementKind.FIELD) {
 				throw new WrongGeneratorException();
 			}
@@ -187,7 +187,7 @@ public class FieldPropertyGenerator implements PropertyGenerator {
 				propertyName += "Field"; // Still invalid
 			}
 
-			return new FieldPropertyGenerator(outerClass, possibleField, propertyName);
+			return new FieldPropertyGenerator(outerClass, outerElement, possibleField, propertyName);
 		}
 	}
 }
