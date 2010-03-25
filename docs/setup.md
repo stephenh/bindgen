@@ -6,7 +6,7 @@ title: Setup
 Setup
 =====
 
-Bindgen is an annotation processor that you configure the Java compiler to run during its compilation run.
+Bindgen is an annotation processor that you configure the Java compiler to run during its compilation phase.
 
 Ivy/Maven Repository
 --------------------

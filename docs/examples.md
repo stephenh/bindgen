@@ -6,14 +6,14 @@ title: Examples
 Examples
 ========
 
-Given a class `Foo`, annotated with `@Bindable`, Bindgen automatically generates `FooBinding` during the compile phase of `javac` or Eclipse.
+Given a class `Foo`, annotated with `@Bindable`, Bindgen automatically generates a `FooBinding` class during the compile phase of `javac` or Eclipse.
 
-`FooBinding` instances can then be constructed around an instance of `foo` and provide type-safe `Binding`s for `foo`'s properties.
+`FooBinding` instances can be then wrapped around an instance of `foo` and provide type-safe `Binding`s for `foo`'s properties.
 
 Foo Example
 -----------
 
-For example, with class `Foo`:
+For example, with class `Foo` and class `Bar`:
 
 <pre name="code" class="java">
     @Bindable
@@ -27,77 +27,27 @@ For example, with class `Foo`:
     }
 </pre>
 
-During compilation, the compiler will have Bindgen generate a class `FooBinding` that looks basically like:
-
-<pre name="code" class="java">
-    public class FooBinding {
-      private Foo foo;
-
-      // for turning Foo.name into a Binding
-      public StringBinding name() {
-        return new StringBinding {
-          public String get() {
-            return FooBinding.this.foo.name;
-          }
-          public void set(String name) {
-            FooBinding.this.foo.name = name;
-          }
-        };
-      }
-
-      // for turning Foo.bar into a Binding
-      public BarBinding bar() {
-        return new BarBinding {
-          public Bar get() {
-            return FooBinding.this.foo.bar;
-          }
-          public void set(Bar bar) {
-            FooBinding.this.foo.bar = bar;
-          }
-        };
-      }
-    }
-
-    public class BarBinding {
-      private Bar bar;
-
-      // for turning Bar.zaz into a Binding
-      public StringBinding zaz() {
-        return new StringBinding() {
-          public String get() {
-            return BarBinding.this.bar.zaz;
-          }
-          public void set(String zaz) {
-            BarBinding.this.bar.zaz = zaz;
-          }
-        };
-      }
-    }
-</pre>
-
-Note that Bindgen recursively generated a `BarBinding` class--this is assuming `Bar` is within the configured `scope` (see [config](config.html)).
-
-You can now use the bindings like:
+During compilation, the compiler will have Bindgen generate a class `FooBinding` that allows you do to:
 
 <pre name="code" class="java">
     Foo foo = new Foo();
-    FooBinding fooBinding = new FooBinding(foo);
+    FooBinding b = new FooBinding(foo);
 
-    // equivalent to foo.name "bob";
-    StringBinding nameBinding = fooBinding.name();
-    nameBinding.set("bob");
+    // equivalent to foo.name = "bob";
+    b.name().set("bob");
 
     // equivalent to foo.getBar().zaz = "zaz";
-    StringBinding zazBinding = fooBinding.bar().zaz();
-    zazBinding.set("zaz");
+    b.bar().zaz().set("zaz");
 </pre>
 
-Of course, it does not make sense to call `fooBinding.bar().zaz().set("zaz")` directly--bindings are typically most useful when frameworks understand them.
+Of course, it does not make sense to call `b.bar().zaz().set("zaz")` directly--bindings are typically most useful when frameworks understand them.
+
+If you are curious about the guts of `FooBinding`, you can see pseudo code [here](examplesFooBinding.html).
 
 Framework Example
 -----------------
 
-The benefit of `fooBinding.bar().zaz()` over `foo.getBar().setZaz()` is that we can pass `zazBinding` around like an UL/OGNL expression for frameworks to get/put data in/out of.
+The benefit of `b.bar().zaz()` over `foo.getBar().setZaz()` is that we can pass `zazBinding` around like an UL/OGNL expression for frameworks to get/put data in/out of.
 
 The [joist](http://joist.ws/web.html) web framework is what drove Bindgen's development, but the same idea should apply to other frameworks as well. Some pseudo-code:
 
@@ -106,7 +56,7 @@ The [joist](http://joist.ws/web.html) web framework is what drove Bindgen's deve
     public class HomePage extends AbstractPage {
 
       public Form form = new Form("Login");
-      // assigned by the framework
+      // assigned by the framework from the querystring
       public Employee employee = null;
 
       @Override
