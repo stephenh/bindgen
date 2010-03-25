@@ -23,6 +23,6 @@ public interface PropertyGenerator {
 	void generate();
 
 	public static interface GeneratorFactory {
-		PropertyGenerator newGenerator(GClass outerClass, Element field, Collection<String> namesTaken) throws WrongGeneratorException;
+		PropertyGenerator newGenerator(GClass outerClass, TypeElement outerElement, Element element, Collection<String> namesTaken) throws WrongGeneratorException;
 	}
 }
