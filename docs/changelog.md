@@ -6,6 +6,10 @@ title: Changelog
 Changelog
 =========
 
+## 2.10 - 2010-03-24
+
+* Fix: Inherited bindings that used type variables in their signature were broken in javac
+
 ## 2.9 - 2010-03-21
 
 * New Feature: generate bindings for prefix-less getters (e.g. `int foo()`) (Mihai)
