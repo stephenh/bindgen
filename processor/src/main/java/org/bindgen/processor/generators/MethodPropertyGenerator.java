@@ -74,7 +74,7 @@ public class MethodPropertyGenerator implements PropertyGenerator {
 				// single parameter and no throws
 				if (enclosed.getParameters().size() == 1 && enclosed.getThrownTypes().isEmpty()) {
 					TypeMirror parameterType = enclosed.getParameters().get(0).asType();
-					TypeMirror resolvedParameterType = Util.resolveTypeVarIfPossible(this.outerElement, parameterType);
+					TypeMirror resolvedParameterType = Util.resolveTypeVarIfPossible(getTypeUtils(), this.outerElement, parameterType);
 					if (getTypeUtils().isSameType(this.property.getType(), resolvedParameterType)) {
 						return true; // setter parameter type matches getter return type
 					}

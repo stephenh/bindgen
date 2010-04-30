@@ -16,6 +16,7 @@ import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.PrimitiveType;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
+import javax.lang.model.util.Types;
 
 import joist.sourcegen.Access;
 import joist.util.Inflector;
@@ -116,7 +117,19 @@ public class Util {
 		return classes;
 	}
 
-	public static TypeMirror resolveTypeVarIfPossible(TypeElement outerElement, TypeMirror type) {
+	public static TypeMirror resolveTypeVarIfPossible(Types types, TypeElement outerElement, TypeMirror type) {
+		if (type.getKind() == TypeKind.DECLARED) {
+			DeclaredType dt = (DeclaredType) type;
+			if (dt.getTypeArguments().size() == 0) {
+				return dt;
+			}
+			TypeMirror[] args = new TypeMirror[dt.getTypeArguments().size()];
+			int i = 0;
+			for (TypeMirror arg : dt.getTypeArguments()) {
+				args[i++] = resolveTypeVarIfPossible(types, outerElement, arg);
+			}
+			return types.getDeclaredType((TypeElement) dt.asElement(), args);
+		}
 		if (type.getKind() != TypeKind.TYPEVAR) {
 			return type;
 		}

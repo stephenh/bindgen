@@ -1,22 +1,16 @@
 package org.bindgen.processor.config;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Properties;
 
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
-import javax.tools.FileObject;
-import javax.tools.StandardLocation;
-import javax.tools.JavaFileManager.Location;
 
 import org.bindgen.binding.AbstractBinding;
 import org.bindgen.processor.CurrentEnv;
 import org.bindgen.processor.util.ClassName;
+import org.bindgen.processor.util.ConfUtil;
 
 /**
  * Bindgen configuration.
@@ -142,78 +136,13 @@ public class BindgenConfig {
 	}
 
 	private void loadBindgenDotProperties(ProcessingEnvironment env) {
-		// Eclipse, ant, and maven all act a little differently here, so try both source and class output
-		File bindgenProperites = null;
-		for (Location location : new Location[] { StandardLocation.SOURCE_OUTPUT, StandardLocation.CLASS_OUTPUT }) {
-			bindgenProperites = this.resolveBindgenPropertiesIfExists(location, env);
-			if (bindgenProperites != null) {
-				break;
-			}
-		}
-		if (bindgenProperites != null) {
-			Properties p = new Properties();
-			try {
-				p.load(new FileInputStream(bindgenProperites));
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-			for (Map.Entry<Object, Object> entry : p.entrySet()) {
-				this.options.put((String) entry.getKey(), (String) entry.getValue());
-			}
-		}
+		this.options.putAll(ConfUtil.loadProperties(env, "bindgen.properties"));
 	}
 
 	private void loadAptKeyValueOptions(ProcessingEnvironment env) {
 		for (Map.Entry<String, String> entry : env.getOptions().entrySet()) {
 			this.options.put(entry.getKey(), entry.getValue());
 		}
-	}
-
-	/** Finds a {@code bindgen.properties} file.
-	 *
-	 * This uses a heuristic because in Eclipse we will not know what our
-	 * working directory is (it is wherever Eclipse was started from), so
-	 * project/workspace-relative paths will not work.
-	 *
-	 * As far as passing in a bindgen.properties path as a {@code -Afile=path}
-	 * setting, Eclipse also lacks any {@code ${basepath}}-type interpolation
-	 * in its APT key/value pairs (like Ant would be able to do). So only fixed
-	 * values are accepted, meaning an absolute path, which would be too tied
-	 * to any one developer's particular machine.
-	 *
-	 * The one thing the APT API gives us is the CLASS_OUTPUT (e.g. bin/apt).
-	 * So we start there and walk up parent directories looking for
-	 * {@code bindgen.properties} files.
-	 */
-	private File resolveBindgenPropertiesIfExists(Location location, ProcessingEnvironment env) {
-		// Find a dummy /bin/apt/dummy.txt path to start at
-		final String dummyPath;
-		try {
-			// We don't actually create this, we just want its URI
-			FileObject dummyFileObject = env.getFiler().getResource(location, "", "dummy.txt");
-			dummyPath = dummyFileObject.toUri().toString().replaceAll("file:", "");
-		} catch (IOException e1) {
-			return null;
-		}
-
-		// Walk up looking for a bindgen.properties
-		File current = new File(dummyPath).getParentFile();
-		while (current != null) {
-			File possible = new File(current, "bindgen.properties");
-			if (possible.exists()) {
-				return possible;
-			}
-			current = current.getParentFile();
-		}
-
-		// Before giving up, try just grabbing it from the current directory
-		File possible = new File("bindgen.properties");
-		if (possible.exists()) {
-			return possible;
-		}
-
-		// No bindgen.properties found
-		return null;
 	}
 
 }

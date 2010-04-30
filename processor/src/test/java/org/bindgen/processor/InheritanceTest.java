@@ -12,7 +12,7 @@ public class InheritanceTest extends AbstractBindgenTestCase {
 
 		Class<?> cClass = cl.loadClass("org.bindgen.processor.inheritance.Child");
 		Class<?> cbClass = cl.loadClass("org.bindgen.processor.inheritance.ChildBinding");
-		assertChildBindings(cbClass, "hashCodeBinding", "toStringBinding", "value", "valueField");
+		assertChildBindings(cbClass, "hashCodeBinding", "list", "toStringBinding", "value", "valueField");
 
 		Object child = cClass.newInstance();
 		Object childBinding = cbClass.getConstructor(cClass).newInstance(child);
