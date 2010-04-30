@@ -43,7 +43,7 @@ public class BoundProperty {
 		this.enclosing = (TypeElement) enclosed.getEnclosingElement();
 		this.propertyName = propertyName;
 
-		type = Util.resolveTypeVarIfPossible(outerElement, type);
+		type = Util.resolveTypeVarIfPossible(getTypeUtils(), outerElement, type);
 		this.isArray = type.getKind() == TypeKind.ARRAY;
 		// if we're an array, keep the primitive type, e.g. char[]
 		this.type = this.isArray ? type : Util.boxIfNeeded(type);

@@ -1,5 +1,7 @@
 package org.bindgen.processor.inheritance;
 
+import java.util.List;
+
 public class Base<T> {
 	public T value;
 
@@ -10,4 +12,9 @@ public class Base<T> {
 	public void value(T value) {
 		this.value = value;
 	}
+
+	public List<T> list() {
+		return null;
+	}
+
 }
