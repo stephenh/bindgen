@@ -6,6 +6,15 @@ title: Changelog
 Changelog
 =========
 
+## 2.13 - 2010-06-20
+
+* Fix: Avoid NPE in Eclipse on `java.util.Map` and after type variable resolution introduced in versions 2.10/2.11
+* Fix: Avoid NPE if user-configured `blockTypes` is invalid
+
+## 2.12 - 2010-06-14
+
+* Fix: Setter lookup failed for primitive types, resulted in their bindings being read only
+
 ## 2.11 - 2010-04-29
 
 * Fix: Inherited bindings that used complex type variables in their signature where broken in javac

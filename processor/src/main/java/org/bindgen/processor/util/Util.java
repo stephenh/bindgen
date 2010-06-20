@@ -117,21 +117,51 @@ public class Util {
 		return classes;
 	}
 
-	public static TypeMirror resolveTypeVarIfPossible(Types types, TypeElement outerElement, TypeMirror type) {
+	/**
+	 * DTO for multiple return values from {@code resolveTypeVarIfPossible}.
+	 *
+	 * Eclipse will produce NPE-prone TypeMirrors if we use
+	 * {@link Types#getDeclaredType(TypeElement, TypeMirror...)} willy
+	 * nilly. So we pass around a {@code wasReplaced} variable about
+	 * whether we have actually done a type var resolution and, if not,
+	 * skip the {@code getDeclaredType} call and return the original,
+	 * NPE-avoiding, TypeMirror.
+	 */
+	public static class ResolveResult {
+		public final TypeMirror type;
+		public final boolean wasReplaced;
+
+		public ResolveResult(TypeMirror type, boolean wasReplaced) {
+			this.type = type;
+			this.wasReplaced = wasReplaced;
+		}
+	}
+
+	public static ResolveResult resolveTypeVarIfPossible(Types types, TypeElement outerElement, TypeMirror type) {
 		if (type.getKind() == TypeKind.DECLARED) {
 			DeclaredType dt = (DeclaredType) type;
 			if (dt.getTypeArguments().size() == 0) {
-				return dt;
+				return new ResolveResult(dt, false);
 			}
 			TypeMirror[] args = new TypeMirror[dt.getTypeArguments().size()];
+			boolean someReplaced = false;
 			int i = 0;
 			for (TypeMirror arg : dt.getTypeArguments()) {
-				args[i++] = resolveTypeVarIfPossible(types, outerElement, arg);
+				ResolveResult result = resolveTypeVarIfPossible(types, outerElement, arg);
+				args[i++] = result.type;
+				if (result.wasReplaced) {
+					someReplaced = true;
+				}
 			}
-			return types.getDeclaredType((TypeElement) dt.asElement(), args);
+			if (someReplaced) {
+				TypeMirror resolved = types.getDeclaredType((TypeElement) dt.asElement(), args);
+				return new ResolveResult(resolved, true);
+			} else {
+				return new ResolveResult(type, false);
+			}
 		}
 		if (type.getKind() != TypeKind.TYPEVAR) {
-			return type;
+			return new ResolveResult(type, false);
 		}
 
 		// Go searching for the type var
@@ -156,13 +186,13 @@ public class Util {
 
 			if (found) {
 				if (superClass.getKind() == TypeKind.DECLARED) {
-					return ((DeclaredType) superClass).getTypeArguments().get(foundAt);
+					return new ResolveResult(((DeclaredType) superClass).getTypeArguments().get(foundAt), true);
 				}
 			}
 		}
 
 		// Didn't find a match
-		return type;
+		return new ResolveResult(type, false);
 	}
 
 	private static <T> boolean contains(T[] array, T element) {
