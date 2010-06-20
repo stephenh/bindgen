@@ -70,6 +70,9 @@ public class MethodCallableGenerator implements PropertyGenerator {
 
 	private boolean blockTypeMatchesMethod(String attemptClassName) {
 		TypeElement attemptType = getElementUtils().getTypeElement(attemptClassName);
+		if (attemptType == null) {
+			return false;
+		}
 		List<ExecutableElement> methods = ElementFilter.methodsIn(attemptType.getEnclosedElements());
 		if (methods.size() != 1) {
 			return false; // We only like classes with 1 method
