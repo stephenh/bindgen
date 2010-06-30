@@ -26,7 +26,7 @@ public class Util {
 	private static final Pattern lowerCase = Pattern.compile("^[a-z]");
 	private static final String[] javaKeywords = "abstract,continue,for,new,switch,assert,default,goto,package,synchronized,boolean,do,if,private,this,break,double,implements,protected,throw,byte,else,import,public,throws,case,enum,instanceof,return,transient,catch,extends,int,short,try,char,final,interface,static,void,class,finally,long,strictfp,volatile,const,float,native,super,while,null"
 		.split(",");
-	private static final String[] objectMethodNames = { "hashCode", "toString", "clone" };
+	private static final String[] objectMethodNames = { "hashCode", "toString", "clone", "notify", "notifyAll", "wait", "finalize" };
 	private static final String[] bindingMethodNames = { "get", "getPath", "getType", "getParentBinding", "getChildBindings", "getIsSafe", "getSafely" };
 
 	// Watch for package.Foo.Inner -> package.foo.Inner
