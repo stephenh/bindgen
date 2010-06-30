@@ -253,7 +253,7 @@ public class MethodPropertyGenerator implements PropertyGenerator {
 				propertyName = methodName;
 			}
 			// 2: If we'd collide with getType or toString, append Binding
-			if (Util.isBindingMethodName(propertyName) || Util.isObjectMethodName(propertyName)) {
+			while (namesTaken.contains(propertyName) || Util.isBindingMethodName(propertyName) || Util.isObjectMethodName(propertyName)) {
 				propertyName += "Binding";
 			}
 
