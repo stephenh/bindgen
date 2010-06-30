@@ -3,10 +3,7 @@
 	<include url="${ivy.default.settings.dir}/ivysettings-public.xml"/>
 	<resolvers>
 		<!-- for joist-util and jarjar 1.0 -->
-		<url name="joist" m2compatible="true">
-			<ivy pattern="http://repo.joist.ws/[organization]/[module]/[revision]/ivy-[revision].xml" />
-			<artifact pattern="http://repo.joist.ws/[organization]/[module]/[revision]/[artifact]-[revision](-[classifier]).[ext]" />
-		</url>
+		<ibiblio name="joist" m2compatible="true" root="http://repo.joist.ws"/>
 		<!-- for publishing via an sshfs share -->
 		<filesystem name="maven-share" m2compatible="true">
 			<artifact pattern="${user.home}/repo/[organization]/[module]/[revision]/[artifact]-[revision](-[classifier]).[ext]"/>

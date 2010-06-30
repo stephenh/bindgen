@@ -14,7 +14,7 @@
 	</target>
 
 	<target name="ivy.retrieve" depends="ivy.init" description="downloads jars for the project">
-		<ivy:retrieve pattern="bin/lib/[conf]/[type]s/[artifact].[ext]" conf="*" type="*"/>
+		<ivy:retrieve pattern="bin/lib/[conf]/[type]s/[artifact].[ext]" conf="*" type="*" sync="true"/>
 	</target>
 
 	<target name="ivy.publish-local" depends="jar,gwt-jar,ivy.init" description="publish bindgen jar/source to ~/ivy2/local/">
