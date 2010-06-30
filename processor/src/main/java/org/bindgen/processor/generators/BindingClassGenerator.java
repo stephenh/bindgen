@@ -15,8 +15,8 @@ import java.util.Set;
 import javax.annotation.Generated;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
-import javax.tools.JavaFileObject;
 import javax.tools.Diagnostic.Kind;
+import javax.tools.JavaFileObject;
 
 import joist.sourcegen.GClass;
 import joist.sourcegen.GMethod;
@@ -174,6 +174,12 @@ public class BindingClassGenerator {
 		factories.add(new FieldPropertyGenerator.Factory());
 
 		Set<String> namesTaken = new HashSet<String>();
+		namesTaken.add("getName");
+		namesTaken.add("getPath");
+		namesTaken.add("getType");
+		namesTaken.add("getParentBinding");
+		namesTaken.add("getChildBindings");
+
 		List<Element> elements = this.getAccessibleElements();
 		List<PropertyGenerator> generators = new ArrayList<PropertyGenerator>();
 

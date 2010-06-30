@@ -6,6 +6,10 @@ title: Changelog
 Changelog
 =========
 
+## 2.14 - 2010-06-30
+
+* Fix: Avoid clash on `Binding.getName` if `name` and `getName` methods both appeared in a class
+
 ## 2.13 - 2010-06-20
 
 * Fix: Avoid NPE in Eclipse on `java.util.Map` and after type variable resolution introduced in versions 2.10/2.11
