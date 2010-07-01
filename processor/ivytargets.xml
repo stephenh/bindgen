@@ -23,15 +23,21 @@
 		</ivy:publish>
 	</target>
 
-	<target name="ivy.publish-maven-share" depends="jar,gwt-jar,ivy.init" description="publish bindgen jar/source to maven repo mounted at ~/repo">
-		<ivy:makepom ivyfile="ivy.xml" pomfile="bin/poms/${ivy.module}.pom"/>
+	<target name="ivy.pom" depends="ivy.init">
+		<ivy:makepom ivyfile="ivy.xml" pomfile="bin/poms/${ant.project.name}.pom">
+			<mapping conf="default" scope="compile"/>
+			<mapping conf="tests" scope="test"/>
+			<mapping conf="build" scope="system"/>
+		</ivy:makepom>
+	</target>
+
+	<target name="ivy.publish-maven-share" depends="jar,gwt-jar,ivy.init,ivy.pom" description="publish bindgen jar/source to maven repo mounted at ~/repo">
 		<ivy:publish status="release" resolver="maven-share" update="true" overwrite="true" forcedeliver="true">
 			<artifacts pattern="bin/[type]s/[artifact].[ext]" />
 		</ivy:publish>
 	</target>
 
-	<target name="ivy.publish-maven-user" depends="jar,gwt-jar,ivy.init" description="publish bindgen jar/source to maven repo mounted at ~/.m2/repository">
-		<ivy:makepom ivyfile="ivy.xml" pomfile="bin/poms/${ivy.module}.pom"/>
+	<target name="ivy.publish-maven-user" depends="jar,gwt-jar,ivy.init,ivy.pom" description="publish bindgen jar/source to maven repo mounted at ~/.m2/repository">
 		<ivy:publish status="release" resolver="maven-user" update="true" overwrite="true" forcedeliver="true">
 			<artifacts pattern="bin/[type]s/[artifact].[ext]" />
 		</ivy:publish>
