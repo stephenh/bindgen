@@ -32,12 +32,15 @@ public class Util {
 	// Watch for package.Foo.Inner -> package.foo.Inner
 	public static String lowerCaseOuterClassNames(Element bindableClass, String className) {
 		boolean isTypeElement = bindableClass.getKind().isClass() || bindableClass.getKind().isInterface();
-		if (isTypeElement && ((TypeElement) bindableClass).getEnclosingElement().getKind() == ElementKind.CLASS) {
-			String outerClassName = bindableClass.getEnclosingElement().getSimpleName().toString();
-			if (lowerCase.matcher(outerClassName).find()) {
-				className = className.replace(outerClassName, "bindgen_" + outerClassName);
-			} else {
-				className = className.replace(outerClassName, Inflector.uncapitalize(outerClassName));
+		if (isTypeElement) {
+			ElementKind enclosingKind = ((TypeElement) bindableClass).getEnclosingElement().getKind();
+			if (enclosingKind == ElementKind.CLASS || enclosingKind == ElementKind.INTERFACE || enclosingKind == ElementKind.ENUM) {
+				String outerClassName = bindableClass.getEnclosingElement().getSimpleName().toString();
+				if (lowerCase.matcher(outerClassName).find()) {
+					className = className.replace(outerClassName, "bindgen_" + outerClassName);
+				} else {
+					className = className.replace(outerClassName, Inflector.uncapitalize(outerClassName));
+				}
 			}
 		}
 		return className;

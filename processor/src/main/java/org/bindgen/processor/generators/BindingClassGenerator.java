@@ -112,7 +112,7 @@ public class BindingClassGenerator {
 
 	private void addGetType() {
 		GMethod getType = this.pathBindingClass.getMethod("getType").returnType("Class<?>").addAnnotation("@Override");
-		getType.body.line("return {}.class;", this.element.getSimpleName());
+		getType.body.line("return {}.class;", this.element.toString());
 	}
 
 	private void addProperties() {
@@ -156,7 +156,7 @@ public class BindingClassGenerator {
 			w.close();
 			this.queue.log("Saved " + gc.getFullClassNameWithoutGeneric());
 		} catch (IOException io) {
-			getMessager().printMessage(Kind.ERROR, io.getMessage());
+			getMessager().printMessage(Kind.ERROR, io.getMessage(), this.element);
 		}
 	}
 

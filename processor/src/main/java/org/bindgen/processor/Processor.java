@@ -33,7 +33,7 @@ import org.bindgen.Bindable;
  * See the processor <a href="http://java.sun.com/javase/6/docs/api/javax/annotation/processing/Processor.html">javadocs</a>
  * for more details.
  */
-@SupportedAnnotationTypes( { "org.bindgen.Bindable" })
+@SupportedAnnotationTypes({ "org.bindgen.Bindable" })
 @SupportedSourceVersion(SourceVersion.RELEASE_6)
 public class Processor extends AbstractProcessor {
 
@@ -52,7 +52,7 @@ public class Processor extends AbstractProcessor {
 	public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
 		try {
 			for (Element element : roundEnv.getElementsAnnotatedWith(Bindable.class)) {
-				if (element.getKind() == ElementKind.CLASS || element.getKind() == ElementKind.INTERFACE) {
+				if (element.getKind() == ElementKind.CLASS || element.getKind() == ElementKind.INTERFACE || element.getKind() == ElementKind.ENUM) {
 					TypeElement type = (TypeElement) element;
 
 					if (CurrentEnv.getConfig().shouldGenerateBindingFor(type)) {

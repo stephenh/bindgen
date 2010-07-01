@@ -12,6 +12,7 @@ import javax.lang.model.type.ExecutableType;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.ElementFilter;
+import javax.lang.model.type.DeclaredType;
 
 import joist.sourcegen.GClass;
 import joist.sourcegen.GMethod;
@@ -19,6 +20,7 @@ import joist.sourcegen.GMethod;
 import org.bindgen.ContainerBinding;
 import org.bindgen.processor.util.BoundProperty;
 import org.bindgen.processor.util.Util;
+import org.bindgen.processor.CurrentEnv;
 
 /** Generates bindings for method properties like getFoo/setFoo, foo/foo(), with setters being optional. */
 public class MethodPropertyGenerator implements PropertyGenerator {
@@ -31,14 +33,19 @@ public class MethodPropertyGenerator implements PropertyGenerator {
 	private final BoundProperty property;
 	private GClass innerClass;
 
-	public MethodPropertyGenerator(GClass outerClass, TypeElement outerElement, ExecutableElement method, AccessorPrefix prefix, String propertyName)
-		throws WrongGeneratorException {
+	public MethodPropertyGenerator(
+		GClass outerClass,
+		TypeElement outerElement,
+		ExecutableElement method,
+		ExecutableType inContext,
+		AccessorPrefix prefix,
+		String propertyName) throws WrongGeneratorException {
 		this.outerElement = outerElement;
 		this.outerClass = outerClass;
 		this.method = method;
 		this.methodName = method.getSimpleName().toString();
 		this.prefix = prefix;
-		this.property = new BoundProperty(outerElement, this.method, this.method.getReturnType(), propertyName);
+		this.property = new BoundProperty(outerElement, this.method, inContext.getReturnType(), propertyName);
 		if (!this.methodNotVoidNoParamsNoThrows() || this.property.shouldSkip()) {
 			throw new WrongGeneratorException();
 		}
@@ -252,12 +259,25 @@ public class MethodPropertyGenerator implements PropertyGenerator {
 			if (namesTaken.contains(propertyName) || Util.isJavaKeyword(propertyName)) {
 				propertyName = methodName;
 			}
-			// 2: If we'd collide with getType or toString, append Binding
+			// 2: If we'd collide with getType or toString, or the method name is already taken, append Binding
 			while (namesTaken.contains(propertyName) || Util.isBindingMethodName(propertyName) || Util.isObjectMethodName(propertyName)) {
 				propertyName += "Binding";
 			}
 
-			return new MethodPropertyGenerator(outerClass, outerElement, method, this.prefix, propertyName);
+			ExecutableType methodInContext = null;
+			if (outerElement.asType() instanceof DeclaredType) {
+				try {
+					methodInContext = (ExecutableType) CurrentEnv.getTypeUtils().asMemberOf((DeclaredType) outerElement.asType(), method);
+				} catch (IllegalArgumentException iae) {
+					// Means that this element does not make sense as an element of the declared type.
+					// Therefore, leave methodInContext null.
+				}
+			}
+			if (methodInContext == null) {
+				methodInContext = (ExecutableType) method.asType();
+			}
+
+			return new MethodPropertyGenerator(outerClass, outerElement, method, methodInContext, this.prefix, propertyName);
 		}
 	}
 }

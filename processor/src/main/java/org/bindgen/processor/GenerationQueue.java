@@ -9,9 +9,9 @@ import java.util.List;
 import java.util.Set;
 
 import javax.lang.model.element.TypeElement;
+import javax.tools.Diagnostic.Kind;
 import javax.tools.FileObject;
 import javax.tools.StandardLocation;
-import javax.tools.Diagnostic.Kind;
 
 import org.bindgen.processor.generators.BindKeywordGenerator;
 import org.bindgen.processor.generators.BindingClassGenerator;
@@ -118,7 +118,7 @@ public class GenerationQueue {
 				bindingClassName.getSimpleName() + ".java");
 			return fo.getLastModified() > 0; // exists already
 		} catch (IOException io) {
-			getMessager().printMessage(Kind.ERROR, io.getMessage());
+			getMessager().printMessage(Kind.ERROR, io.getMessage(), element);
 			return false;
 		}
 	}
