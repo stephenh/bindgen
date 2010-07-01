@@ -33,8 +33,13 @@ public class MethodPropertyGenerator implements PropertyGenerator {
 	private final BoundProperty property;
 	private GClass innerClass;
 
-	public MethodPropertyGenerator(GClass outerClass, TypeElement outerElement, ExecutableElement method, ExecutableType inContext, AccessorPrefix prefix, String propertyName)
-		throws WrongGeneratorException {
+	public MethodPropertyGenerator(
+		GClass outerClass,
+		TypeElement outerElement,
+		ExecutableElement method,
+		ExecutableType inContext,
+		AccessorPrefix prefix,
+		String propertyName) throws WrongGeneratorException {
 		this.outerElement = outerElement;
 		this.outerClass = outerClass;
 		this.method = method;
@@ -259,7 +264,6 @@ public class MethodPropertyGenerator implements PropertyGenerator {
 				propertyName += "Binding";
 			}
 
-
 			ExecutableType methodInContext = null;
 			if (outerElement.asType() instanceof DeclaredType) {
 				try {
@@ -272,8 +276,7 @@ public class MethodPropertyGenerator implements PropertyGenerator {
 			if (methodInContext == null) {
 				methodInContext = (ExecutableType) method.asType();
 			}
-			
-			
+
 			return new MethodPropertyGenerator(outerClass, outerElement, method, methodInContext, this.prefix, propertyName);
 		}
 	}

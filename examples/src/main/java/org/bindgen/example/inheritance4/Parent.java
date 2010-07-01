@@ -1,9 +1,7 @@
-package org.bindgen.examples.inheritance4;
-
-import org.bindgen.Bindable;
+package org.bindgen.example.inheritance4;
 
 public interface Parent<T> {
-    T getParentField();
-    
-    void setParentField(T field);
+	T getParentField();
+
+	void setParentField(T field);
 }

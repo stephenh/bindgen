@@ -33,7 +33,7 @@ import org.bindgen.Bindable;
  * See the processor <a href="http://java.sun.com/javase/6/docs/api/javax/annotation/processing/Processor.html">javadocs</a>
  * for more details.
  */
-@SupportedAnnotationTypes( { "org.bindgen.Bindable" })
+@SupportedAnnotationTypes({ "org.bindgen.Bindable" })
 @SupportedSourceVersion(SourceVersion.RELEASE_6)
 public class Processor extends AbstractProcessor {
 

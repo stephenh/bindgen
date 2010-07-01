@@ -1,10 +1,10 @@
-package org.bindgen.examples.inheritance4;
+package org.bindgen.example.inheritance4;
 
 import org.bindgen.Bindable;
 
 @Bindable
 public interface Child extends Parent<String> {
-    String getChildField();
-    
-    void setChildField(String field);
+	String getChildField();
+
+	void setChildField(String field);
 }
