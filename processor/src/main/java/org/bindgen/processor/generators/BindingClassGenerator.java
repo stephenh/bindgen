@@ -156,7 +156,7 @@ public class BindingClassGenerator {
 			w.close();
 			this.queue.log("Saved " + gc.getFullClassNameWithoutGeneric());
 		} catch (IOException io) {
-			getMessager().printMessage(Kind.ERROR, io.getMessage());
+			getMessager().printMessage(Kind.ERROR, io.getMessage(), this.element);
 		}
 	}
 
