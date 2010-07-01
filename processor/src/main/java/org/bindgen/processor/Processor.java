@@ -52,7 +52,7 @@ public class Processor extends AbstractProcessor {
 	public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
 		try {
 			for (Element element : roundEnv.getElementsAnnotatedWith(Bindable.class)) {
-				if (element.getKind() == ElementKind.CLASS || element.getKind() == ElementKind.INTERFACE) {
+				if (element.getKind() == ElementKind.CLASS || element.getKind() == ElementKind.INTERFACE || element.getKind() == ElementKind.ENUM) {
 					TypeElement type = (TypeElement) element;
 
 					if (CurrentEnv.getConfig().shouldGenerateBindingFor(type)) {
