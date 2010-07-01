@@ -6,6 +6,14 @@ title: Changelog
 Changelog
 =========
 
+## 2.15 - 2010-07-01
+
+* Fix: Enums can now be annotated with `@Bindable` (David Shepherdson)
+* Fix: Bindings of subclasses that fill in a parent's type parameters now compile (David Shepherdson)
+* Fix: `@Bindable` classes inside of interfaces now compile (David Shepherdson)
+* Fix: `Binding.getType` could cause unresolved type compile errors for inner classes
+* Change: the dependencies in the pom are now either in the `test` or `system` scopes
+
 ## 2.14 - 2010-06-30
 
 * Fix: Avoid clash on `Binding.getName` if `name` and `getName` methods both appeared in a class
