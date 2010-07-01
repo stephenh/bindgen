@@ -112,7 +112,7 @@ public class BindingClassGenerator {
 
 	private void addGetType() {
 		GMethod getType = this.pathBindingClass.getMethod("getType").returnType("Class<?>").addAnnotation("@Override");
-		getType.body.line("return {}.class;", this.element.getSimpleName());
+		getType.body.line("return {}.class;", this.element.toString());
 	}
 
 	private void addProperties() {
