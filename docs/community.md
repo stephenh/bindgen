@@ -23,5 +23,5 @@ Related Projects
 
 * [Joist](http://joist.ws) is the web framework that Bindgen grew out of
 * [bindgen-wicket](http://code.google.com/p/bindgen-wicket/) integrates Bindgen with the [Wicket](http://wicket.apache.org) web framework
-
+* [bindgen-gwt](http://github.com/stephenh/bindgen-gwt/) adds a `Bindgen.gwt.xml` for using bindgen-generated bindings in GWT code
 
