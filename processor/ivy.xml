@@ -7,13 +7,11 @@
 		<conf name="tests" visibility="private"/>
 		<conf name="default"/>
 		<conf name="sources"/>
-		<conf name="gwt" description="gwt-compatible bindgen jar"/>
 	</configurations>
 	<publications>
 		<artifact name="bindgen" type="jar" ext="jar" conf="default"/>
 		<artifact name="bindgen" type="source" ext="jar" conf="sources" m:classifier="sources"/>
 		<artifact name="bindgen" type="pom" ext="pom" conf="build"/>
-		<artifact name="bindgen-gwt" type="jar" ext="jar" conf="gwt"/>
 	</publications>
 	<dependencies>
 		<!-- joist.util is jarjar'd into bindgen.jar so we count it as a build dependency. -->
