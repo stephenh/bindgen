@@ -1,5 +1,5 @@
 <ivy-module version="2.0" xmlns:m="http://ant.apache.org/ivy/maven">
-	<info organisation="org.bindgen" module="bindgen" revision="SNAPSHOT">
+	<info organisation="org.bindgen" module="bindgen" revision="${revision}">
 		<license name="The Apache Software License, Version 2.0" url="http://www.apache.org/licenses/LICENSE-2.0.txt"/>
 	</info>
 	<configurations>
