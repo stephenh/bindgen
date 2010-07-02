@@ -17,7 +17,7 @@
 		<ivy:retrieve pattern="bin/lib/[conf]/[type]s/[artifact].[ext]" conf="*" type="*" sync="true"/>
 	</target>
 
-	<target name="ivy.publish-local" depends="jar,init" description="publish bindgen jar/source to ~/ivy2/local/">
+	<target name="ivy.publish-local" depends="jar,ivy.init" description="publish bindgen jar/source to ~/ivy2/local/">
 		<ivy:publish resolver="local" conf="default,sources" forcedeliver="true" overwrite="true">
 			<artifacts pattern="bin/[type]s/[artifact].[ext]"/>
 		</ivy:publish>
