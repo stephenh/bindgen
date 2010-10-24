@@ -8,19 +8,19 @@ import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
+import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.ExecutableType;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.ElementFilter;
-import javax.lang.model.type.DeclaredType;
 
 import joist.sourcegen.GClass;
 import joist.sourcegen.GMethod;
 
 import org.bindgen.ContainerBinding;
+import org.bindgen.processor.CurrentEnv;
 import org.bindgen.processor.util.BoundProperty;
 import org.bindgen.processor.util.Util;
-import org.bindgen.processor.CurrentEnv;
 
 /** Generates bindings for method properties like getFoo/setFoo, foo/foo(), with setters being optional. */
 public class MethodPropertyGenerator implements PropertyGenerator {
