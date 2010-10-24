@@ -1,6 +1,7 @@
 <ivysettings>
 	<settings defaultResolver="default"/>
 	<include url="${ivy.default.settings.dir}/ivysettings-public.xml"/>
+	<property name="revision" value="SNAPSHOT" override="false"/>
 	<resolvers>
 		<!-- for joist-util and jarjar 1.0 -->
 		<ibiblio name="joist" m2compatible="true" root="http://repo.joist.ws"/>

@@ -120,6 +120,34 @@ public class Util {
 		return classes;
 	}
 
+	/** @return super classes + interfaces */
+	public static List<TypeMirror> allSuperTypes(TypeElement element) {
+		List<TypeMirror> found = new ArrayList<TypeMirror>();
+
+		List<TypeMirror> todo = new ArrayList<TypeMirror>();
+		todo.add(element.asType());
+
+		while (todo.size() != 0) {
+			TypeMirror currentType = todo.remove(0);
+			if (currentType.getKind() != TypeKind.NONE) {
+				found.add(currentType);
+				Element currentElement = getTypeUtils().asElement(currentType);
+				if (currentElement.getKind() == ElementKind.CLASS || currentElement.getKind() == ElementKind.INTERFACE) {
+					TypeElement currentTypeElement = (TypeElement) currentElement;
+					todo.add(currentTypeElement.getSuperclass());
+					todo.addAll(currentTypeElement.getInterfaces());
+				}
+			}
+		}
+
+		// we cheated and added elemenet.asType to found while we
+		// were doing the loop--take it back out as it is not a super
+		// type of itself
+		found.remove(element.asType());
+
+		return found;
+	}
+
 	/**
 	 * DTO for multiple return values from {@code resolveTypeVarIfPossible}.
 	 *
@@ -168,7 +196,7 @@ public class Util {
 		}
 
 		// Go searching for the type var
-		for (TypeMirror superClass : Util.allSuperClasses(outerElement)) {
+		for (TypeMirror superType : Util.allSuperTypes(outerElement)) {
 			boolean found = false;
 			int foundAt = 0;
 
@@ -176,7 +204,7 @@ public class Util {
 			// so that we can compare the possibly-unbound <code>type</code> parameter
 			// with the unbound TypeMirror, get the right index, and then jump back to
 			// our bound TypeMirror
-			TypeMirror superGeneric = getTypeUtils().asElement(superClass).asType();
+			TypeMirror superGeneric = getTypeUtils().asElement(superType).asType();
 			if (superGeneric.getKind() == TypeKind.DECLARED) {
 				for (TypeMirror tm : ((DeclaredType) superGeneric).getTypeArguments()) {
 					if (getTypeUtils().isSameType(tm, type)) {
@@ -188,8 +216,8 @@ public class Util {
 			}
 
 			if (found) {
-				if (superClass.getKind() == TypeKind.DECLARED) {
-					return new ResolveResult(((DeclaredType) superClass).getTypeArguments().get(foundAt), true);
+				if (superType.getKind() == TypeKind.DECLARED) {
+					return new ResolveResult(((DeclaredType) superType).getTypeArguments().get(foundAt), true);
 				}
 			}
 		}

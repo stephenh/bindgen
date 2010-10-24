@@ -17,8 +17,8 @@
 		<ivy:retrieve pattern="bin/lib/[conf]/[type]s/[artifact].[ext]" conf="*" type="*" sync="true"/>
 	</target>
 
-	<target name="ivy.publish-local" depends="jar,gwt-jar,ivy.init" description="publish bindgen jar/source to ~/ivy2/local/">
-		<ivy:publish resolver="local" conf="default,sources,gwt" forcedeliver="true" overwrite="true">
+	<target name="ivy.publish-local" depends="jar,ivy.init" description="publish bindgen jar/source to ~/ivy2/local/">
+		<ivy:publish resolver="local" conf="default,sources" forcedeliver="true" overwrite="true">
 			<artifacts pattern="bin/[type]s/[artifact].[ext]"/>
 		</ivy:publish>
 	</target>
@@ -31,14 +31,14 @@
 		</ivy:makepom>
 	</target>
 
-	<target name="ivy.publish-maven-share" depends="jar,gwt-jar,ivy.init,ivy.pom" description="publish bindgen jar/source to maven repo mounted at ~/repo">
-		<ivy:publish status="release" resolver="maven-share" update="true" overwrite="true" forcedeliver="true">
+	<target name="ivy.publish-maven-share" depends="jar,ivy.init,ivy.pom" description="publish bindgen jar/source to maven repo mounted at ~/repo">
+		<ivy:publish status="release" resolver="maven-share" update="true" overwrite="true" forcedeliver="true" publishivy="false">
 			<artifacts pattern="bin/[type]s/[artifact].[ext]" />
 		</ivy:publish>
 	</target>
 
-	<target name="ivy.publish-maven-user" depends="jar,gwt-jar,ivy.init,ivy.pom" description="publish bindgen jar/source to maven repo mounted at ~/.m2/repository">
-		<ivy:publish status="release" resolver="maven-user" update="true" overwrite="true" forcedeliver="true">
+	<target name="ivy.publish-maven-user" depends="jar,ivy.init,ivy.pom" description="publish bindgen jar/source to maven repo mounted at ~/.m2/repository">
+		<ivy:publish status="release" resolver="maven-user" update="true" overwrite="true" forcedeliver="true" publishivy="false">
 			<artifacts pattern="bin/[type]s/[artifact].[ext]" />
 		</ivy:publish>
 	</target>
