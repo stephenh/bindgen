@@ -6,6 +6,10 @@ title: Changelog
 Changelog
 =========
 
+## 2.16 - 2010-10-24
+
+* Fix: Bindings of methods that had type variables bound in super interfaces were read only
+
 ## 2.15 - 2010-07-01
 
 * Fix: Enums can now be annotated with `@Bindable` (David Shepherdson)
