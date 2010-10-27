@@ -119,12 +119,12 @@ public class MethodExampleTest extends TestCase {
 		MethodExample e = new MethodExample("1", "name");
 		MethodExampleBinding b = new MethodExampleBinding(e);
 
-        String[] arrayProp = {"foo", "bar"};
-        String[] arrayProp2 = {"foobar"};
+		String[] arrayProp = { "foo", "bar" };
+		String[] arrayProp2 = { "foobar" };
 
-        e.setArrayProp(arrayProp);
-		Assert.assertEquals(arrayProp , b.arrayProp().get());
-        b.arrayProp().set(arrayProp2);
-        Assert.assertEquals(arrayProp2, b.arrayProp().get());
+		e.setArrayProp(arrayProp);
+		Assert.assertEquals(arrayProp, b.arrayProp().get());
+		b.arrayProp().set(arrayProp2);
+		Assert.assertEquals(arrayProp2, b.arrayProp().get());
 	}
 }
