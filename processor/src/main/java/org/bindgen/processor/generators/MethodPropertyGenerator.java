@@ -8,7 +8,6 @@ import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
-import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.ExecutableType;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
@@ -18,7 +17,6 @@ import joist.sourcegen.GClass;
 import joist.sourcegen.GMethod;
 
 import org.bindgen.ContainerBinding;
-import org.bindgen.processor.CurrentEnv;
 import org.bindgen.processor.util.BoundProperty;
 import org.bindgen.processor.util.Util;
 
@@ -33,19 +31,14 @@ public class MethodPropertyGenerator implements PropertyGenerator {
 	private final BoundProperty property;
 	private GClass innerClass;
 
-	public MethodPropertyGenerator(
-		GClass outerClass,
-		TypeElement outerElement,
-		ExecutableElement method,
-		ExecutableType inContext,
-		AccessorPrefix prefix,
-		String propertyName) throws WrongGeneratorException {
+	public MethodPropertyGenerator(GClass outerClass, TypeElement outerElement, ExecutableElement method, AccessorPrefix prefix, String propertyName)
+		throws WrongGeneratorException {
 		this.outerElement = outerElement;
 		this.outerClass = outerClass;
 		this.method = method;
 		this.methodName = method.getSimpleName().toString();
 		this.prefix = prefix;
-		this.property = new BoundProperty(outerElement, this.method, inContext.getReturnType(), propertyName);
+		this.property = new BoundProperty(outerElement, this.method, this.method.getReturnType(), propertyName);
 		if (!this.methodNotVoidNoParamsNoThrows() || this.property.shouldSkip()) {
 			throw new WrongGeneratorException();
 		}
@@ -83,7 +76,7 @@ public class MethodPropertyGenerator implements PropertyGenerator {
 					TypeMirror parameterType = enclosed.getParameters().get(0).asType();
 					TypeMirror resolvedParameterType = Util.resolveTypeVarIfPossible(getTypeUtils(), this.outerElement, parameterType).type;
 					TypeMirror boxedResolved = Util.boxIfNeeded(resolvedParameterType);
-					if (getTypeUtils().isSameType(this.property.getType(), boxedResolved)) {
+					if (getTypeUtils().isSameType(Util.boxIfNeeded(this.property.getType()), boxedResolved)) {
 						return true; // setter parameter type matches getter return type
 					}
 				}
@@ -264,20 +257,7 @@ public class MethodPropertyGenerator implements PropertyGenerator {
 				propertyName += "Binding";
 			}
 
-			ExecutableType methodInContext = null;
-			if (outerElement.asType() instanceof DeclaredType) {
-				try {
-					methodInContext = (ExecutableType) CurrentEnv.getTypeUtils().asMemberOf((DeclaredType) outerElement.asType(), method);
-				} catch (IllegalArgumentException iae) {
-					// Means that this element does not make sense as an element of the declared type.
-					// Therefore, leave methodInContext null.
-				}
-			}
-			if (methodInContext == null) {
-				methodInContext = (ExecutableType) method.asType();
-			}
-
-			return new MethodPropertyGenerator(outerClass, outerElement, method, methodInContext, this.prefix, propertyName);
+			return new MethodPropertyGenerator(outerClass, outerElement, method, this.prefix, propertyName);
 		}
 	}
 }

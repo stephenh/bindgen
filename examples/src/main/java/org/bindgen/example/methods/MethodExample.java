@@ -26,6 +26,8 @@ public class MethodExample {
 	protected int protectedProperty;
 	// a 1-char method
 	private String m;
+	// a read/write array
+	private String[] arrayProp;
 
 	public MethodExample(String id, String name) {
 		this.id = id;
@@ -151,4 +153,11 @@ public class MethodExample {
 		this.protectedProperty = protectedProperty + 1;
 	}
 
+	public String[] getArrayProp() {
+		return this.arrayProp;
+	}
+
+	public void setArrayProp(String[] arrayProp) {
+		this.arrayProp = arrayProp;
+	}
 }
