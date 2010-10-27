@@ -6,6 +6,10 @@ title: Changelog
 Changelog
 =========
 
+## 2.17 - 2010-10-27
+
+* Fix: Array properties were read only (Thomas Matthijs)
+
 ## 2.16 - 2010-10-24
 
 * Fix: Bindings of methods that had type variables bound in super interfaces were read only
