@@ -105,21 +105,6 @@ public class Util {
 		}
 	}
 
-	public static List<TypeMirror> allSuperClasses(TypeElement element) {
-		List<TypeMirror> classes = new ArrayList<TypeMirror>();
-		TypeMirror current = element.getSuperclass();
-		while (current.getKind() != TypeKind.NONE) {
-			classes.add(current);
-			Element superElement = getTypeUtils().asElement(current);
-			if (superElement.getKind() == ElementKind.CLASS) {
-				current = ((TypeElement) superElement).getSuperclass();
-			} else {
-				break;
-			}
-		}
-		return classes;
-	}
-
 	/** @return super classes + interfaces */
 	public static List<TypeMirror> allSuperTypes(TypeElement element) {
 		List<TypeMirror> found = new ArrayList<TypeMirror>();
