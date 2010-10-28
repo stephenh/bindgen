@@ -76,11 +76,13 @@ public class BindingClassGenerator {
 		this.pathBindingClass = new GClass(this.name.getBindingPathClassDeclaration());
 		this.pathBindingClass.baseClassName(this.name.getBindingPathClassSuperClass());
 		this.pathBindingClass.setAbstract();
+		this.pathBindingClass.addAnnotation("@SuppressWarnings(\"all\")");
 	}
 
 	private void initializeRootBindingClass() {
 		this.rootBindingClass = new GClass(this.name.getBindingRootClassDeclaration());
 		this.rootBindingClass.baseClassName(this.name.getBindingRootClassSuperClass());
+		this.rootBindingClass.addAnnotation("@SuppressWarnings(\"all\")");
 	}
 
 	private void addGetWithRoot() {

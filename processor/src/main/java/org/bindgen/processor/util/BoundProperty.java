@@ -57,7 +57,7 @@ public class BoundProperty {
 	}
 
 	public boolean shouldSkip() {
-		return this.isDeclaringClass() || this.isSkipAttributeSet() || this.isForBinding() || this.isDeprecated();
+		return this.isDeclaringClass() || this.isSkipAttributeSet() || this.isForBinding();
 	}
 
 	public String getCastForReturnIfNeeded() {
@@ -260,10 +260,6 @@ public class BoundProperty {
 
 	private boolean hasGenerics() {
 		return this.type.getKind() == TypeKind.DECLARED && ((DeclaredType) this.type).getTypeArguments().size() > 0;
-	}
-
-	private boolean isDeprecated() {
-		return this.enclosed.getAnnotation(Deprecated.class) != null;
 	}
 
 	/** Add generic suffixes to avoid warnings in bindings for pre-1.5 APIs.
