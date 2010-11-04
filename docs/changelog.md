@@ -6,6 +6,12 @@ title: Changelog
 Changelog
 =========
 
+## 2.18 - 2010-11-03
+
+* New: `BindingRoot.getSafelyWithRoot` method
+* Change: Deprecated fields/methods now have bindings generated for them (previously they were skipped to avoid warnings)
+* Minor: Generated classes have `@SuppressWarnings("all")` to ensure no warnings
+
 ## 2.17 - 2010-10-27
 
 * Fix: Array properties were read only (Thomas Matthijs)

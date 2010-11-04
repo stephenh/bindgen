@@ -55,6 +55,26 @@ public class EmployeeTest extends TestCase {
 		Assert.assertEquals("newAt&t", er.name);
 	}
 
+	public void testEmployerThroughEmployeeStateless() {
+		Employer er = new Employer();
+		er.name = "at&t";
+		Employee ee = new Employee();
+		ee.employer = er;
+
+		EmployeeBinding eb = new EmployeeBinding(); // no instance set
+		Assert.assertEquals("at&t", eb.employer().name().getWithRoot(ee));
+	}
+
+	public void testEmployerThroughEmployeeStatelessSafely() {
+		Employee ee = new Employee();
+		ee.employer = null; // leave null
+
+		EmployeeBinding eb = new EmployeeBinding(); // no instance set
+		Assert.assertEquals(null, eb.employer().name().getSafelyWithRoot(ee));
+
+		Assert.assertEquals(null, eb.employer().name().getSafelyWithRoot(null));
+	}
+
 	public void testSetEmployer() {
 		Employer er1 = new Employer();
 		er1.name = "at&t";

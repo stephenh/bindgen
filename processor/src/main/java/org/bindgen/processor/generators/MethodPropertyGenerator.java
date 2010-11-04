@@ -52,6 +52,7 @@ public class MethodPropertyGenerator implements PropertyGenerator {
 		this.addInnerClassParent();
 		this.addInnerClassGet();
 		this.addInnerClassGetWithRoot();
+		this.addInnerClassGetSafelyWithRoot();
 		if (this.hasSetterMethod()) {
 			this.addInnerClassSet();
 			this.addInnerClassSetWithRoot();
@@ -110,9 +111,6 @@ public class MethodPropertyGenerator implements PropertyGenerator {
 		fieldGet.body.line("    this.{} = new {}();", this.property.getName(), this.property.getBindingRootClassInstantiation());
 		fieldGet.body.line("}");
 		fieldGet.body.line("return this.{};", this.property.getName());
-		if (this.property.doesOuterGetNeedSuppressWarnings()) {
-			fieldGet.addAnnotation("@SuppressWarnings(\"unchecked\")");
-		}
 	}
 
 	private void addOuterClassBindingField() {
@@ -123,9 +121,6 @@ public class MethodPropertyGenerator implements PropertyGenerator {
 		this.innerClass = this.outerClass.getInnerClass(this.property.getInnerClassDeclaration()).notStatic();
 		this.innerClass.setAccess(Util.getAccess(this.method));
 		this.innerClass.baseClassName(this.property.getInnerClassSuperClass());
-		if (this.property.doesInnerClassNeedSuppressWarnings()) {
-			this.innerClass.addAnnotation("@SuppressWarnings(\"unchecked\")");
-		}
 		if (this.property.isForGenericTypeParameter() || this.property.isArray()) {
 			this.innerClass.getMethod("getType").returnType("Class<?>").body.line("return null;");
 		} else if (!this.property.shouldGenerateBindingClassForType()) {
@@ -151,9 +146,6 @@ public class MethodPropertyGenerator implements PropertyGenerator {
 			this.property.getCastForReturnIfNeeded(),
 			this.outerClass.getSimpleClassNameWithoutGeneric(),
 			this.methodName);
-		if (this.property.doesInnerGetNeedSuppressWarnings()) {
-			get.addAnnotation("@SuppressWarnings(\"unchecked\")");
-		}
 	}
 
 	private void addInnerClassGetWithRoot() {
@@ -163,9 +155,19 @@ public class MethodPropertyGenerator implements PropertyGenerator {
 			this.property.getCastForReturnIfNeeded(),
 			this.outerClass.getSimpleClassNameWithoutGeneric(),
 			this.methodName);
-		if (this.property.doesInnerGetNeedSuppressWarnings()) {
-			getWithRoot.addAnnotation("@SuppressWarnings(\"unchecked\")");
-		}
+	}
+
+	private void addInnerClassGetSafelyWithRoot() {
+		GMethod m = this.innerClass.getMethod("getSafelyWithRoot");
+		m.argument("R", "root").returnType(this.property.getSetType()).addAnnotation("@Override");
+		m.body.line("if ({}.this.getSafelyWithRoot(root) == null) {", this.outerClass.getSimpleClassNameWithoutGeneric());
+		m.body.line("    return null;");
+		m.body.line("} else {");
+		m.body.line("    return {}{}.this.getWithRoot(root).{}();",//
+			this.property.getCastForReturnIfNeeded(),
+			this.outerClass.getSimpleClassNameWithoutGeneric(),
+			this.methodName);
+		m.body.line("}");
 	}
 
 	private void addReadOnlyInnerClassSet() {
