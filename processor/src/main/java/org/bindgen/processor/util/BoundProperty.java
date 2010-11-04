@@ -24,7 +24,6 @@ import org.bindgen.processor.CurrentEnv;
 /** Given a TypeMirror type of a field/method property, provides information about its binding outer/inner class. */
 public class BoundProperty {
 
-	private final Element enclosed;
 	private final TypeElement enclosing;
 	private final TypeMirror type;
 	private final Element element;
@@ -39,7 +38,6 @@ public class BoundProperty {
 	 * @param propertyName our name on the parent <code>enclosed</code> type
 	 */
 	public BoundProperty(TypeElement outerElement, Element enclosed, TypeMirror type, String propertyName) {
-		this.enclosed = enclosed;
 		this.enclosing = (TypeElement) enclosed.getEnclosingElement();
 		this.propertyName = propertyName;
 
