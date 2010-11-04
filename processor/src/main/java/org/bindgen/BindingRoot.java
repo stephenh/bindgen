@@ -10,9 +10,15 @@ public interface BindingRoot<R, T> extends Binding<T> {
 
 	/**
 	 * @param root the explicit root to use for traversing the path
-	 * @return the value for this binding when evaluated again <code>root</code> 
+	 * @return the value for this binding when evaluated against <code>root</code> 
 	 */
 	T getWithRoot(R root);
+
+	/**
+	 * @param root the explicit root to use for traversing the path
+	 * @return the value for this binding when evaluated against <code>root</code>, or <code>null</code> if any binding is null
+	 */
+	T getSafelyWithRoot(R root);
 
 	/**
 	 * @param root the explicit root to use for traversing the path

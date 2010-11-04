@@ -65,6 +65,7 @@ public class BindingClassGenerator {
 		this.initializeRootBindingClass();
 		this.addConstructors();
 		this.addGetWithRoot();
+		this.addGetSafelyWithRoot();
 
 		this.addGeneratedTimestamp();
 		this.addSerialVersionUID();
@@ -88,6 +89,11 @@ public class BindingClassGenerator {
 	private void addGetWithRoot() {
 		GMethod getWithRoot = this.rootBindingClass.getMethod("getWithRoot").argument(this.name.get(), "root").returnType(this.name.get());
 		getWithRoot.body.line("return root;");
+	}
+
+	private void addGetSafelyWithRoot() {
+		GMethod getSafelyWithRoot = this.rootBindingClass.getMethod("getSafelyWithRoot").argument(this.name.get(), "root").returnType(this.name.get());
+		getSafelyWithRoot.body.line("return root;");
 	}
 
 	private void addGeneratedTimestamp() {

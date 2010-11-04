@@ -50,6 +50,7 @@ public class FieldPropertyGenerator implements PropertyGenerator {
 		this.addInnerClassGetParent();
 		this.addInnerClassGet();
 		this.addInnerClassGetWithRoot();
+		this.addInnerClassGetSafelyWithRoot();
 		this.addInnerClassSet();
 		this.addInnerClassSetWithRoot();
 		this.addInnerClassGetContainedTypeIfNeeded();
@@ -119,6 +120,19 @@ public class FieldPropertyGenerator implements PropertyGenerator {
 		if (this.property.doesInnerGetNeedSuppressWarnings()) {
 			getWithRoot.addAnnotation("@SuppressWarnings(\"unchecked\")");
 		}
+	}
+
+	private void addInnerClassGetSafelyWithRoot() {
+		GMethod m = this.innerClass.getMethod("getSafelyWithRoot");
+		m.argument("R", "root").returnType(this.property.getSetType()).addAnnotation("@Override");
+		m.body.line("if ({}.this.getSafelyWithRoot(root) == null) {", this.outerClass.getSimpleClassNameWithoutGeneric());
+		m.body.line("    return null;");
+		m.body.line("} else {");
+		m.body.line("    return {}{}.this.getSafelyWithRoot(root).{};",//
+			this.property.getCastForReturnIfNeeded(),
+			this.outerClass.getSimpleClassNameWithoutGeneric(),
+			this.fieldName);
+		m.body.line("}");
 	}
 
 	private void addInnerClassSet() {
