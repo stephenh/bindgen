@@ -30,6 +30,8 @@ public class MethodExampleTest extends TestCase {
 		} catch (RuntimeException re) {
 			Assert.assertEquals("id is read only", re.getMessage());
 		}
+
+		Assert.assertEquals(true, b.id().getBindingIsReadOnly());
 	}
 
 	public void testBoolean() {

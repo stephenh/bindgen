@@ -31,6 +31,9 @@ public interface Binding<T> extends NamedBinding, Serializable {
 	/** @return whether a {@code #get} or {@code #set} will NPE because of a null parent */
 	boolean getIsSafe();
 
+	/** @return whether the binding is for a read-only field/getter or not. */
+	boolean getBindingIsReadOnly();
+
 	/** @return the value for this binding or {@code null} if a parent path's value is {@code null} */
 	T getSafely();
 

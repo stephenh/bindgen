@@ -19,6 +19,11 @@ public class FieldExampleTest extends TestCase {
 		Assert.assertEquals("name1", e.name);
 	}
 
+	public void testFinal() {
+		FieldExampleBinding b = new FieldExampleBinding();
+		Assert.assertEquals(true, b.finalField().getBindingIsReadOnly());
+	}
+
 	public void testListReadWrite() {
 		FieldExample e = new FieldExample("name");
 		FieldExampleBinding b = new FieldExampleBinding(e);

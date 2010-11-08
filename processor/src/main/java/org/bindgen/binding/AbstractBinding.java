@@ -84,4 +84,9 @@ public abstract class AbstractBinding<R, T> implements BindingRoot<R, T> {
 		}
 	}
 
+	@Override
+	public boolean getBindingIsReadOnly() {
+		return false;
+	}
+
 }

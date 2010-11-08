@@ -55,6 +55,7 @@ public class FieldPropertyGenerator implements PropertyGenerator {
 		this.addInnerClassSetWithRoot();
 		this.addInnerClassGetContainedTypeIfNeeded();
 		this.addInnerClassSerialVersionUID();
+		this.addInnerClassIsReadOnlyOverrideIfNeeded();
 	}
 
 	private void addOuterClassBindingField() {
@@ -159,6 +160,12 @@ public class FieldPropertyGenerator implements PropertyGenerator {
 
 	private void addInnerClassSerialVersionUID() {
 		this.innerClass.getField("serialVersionUID").type("long").setStatic().setFinal().initialValue("1L");
+	}
+
+	private void addInnerClassIsReadOnlyOverrideIfNeeded() {
+		if (this.isFinal) {
+			this.innerClass.getMethod("getBindingIsReadOnly").returnType(boolean.class).body.line("return true;");
+		}
 	}
 
 	public TypeElement getPropertyTypeElement() {
