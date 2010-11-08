@@ -59,6 +59,7 @@ public class MethodPropertyGenerator implements PropertyGenerator {
 		} else {
 			this.addReadOnlyInnerClassSet();
 			this.addReadOnlyInnerClassSetWithRoot();
+			this.addInnerClassIsReadOnlyOverride();
 		}
 		this.addInnerClassGetContainedTypeIfNeeded();
 		this.addInnerClassSerialVersionUID();
@@ -181,6 +182,10 @@ public class MethodPropertyGenerator implements PropertyGenerator {
 		GMethod setWithRoot = this.innerClass.getMethod("setWithRoot(R root, {} {})", this.property.getSetType(), this.property.getName());
 		setWithRoot.addAnnotation("@Override");
 		setWithRoot.body.line("throw new RuntimeException(this.getName() + \" is read only\");");
+	}
+
+	private void addInnerClassIsReadOnlyOverride() {
+		this.innerClass.getMethod("getBindingIsReadOnly").returnType(boolean.class).body.line("return true;");
 	}
 
 	private void addInnerClassSet() {

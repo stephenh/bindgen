@@ -6,6 +6,10 @@ title: Changelog
 Changelog
 =========
 
+## 2.19 - 2010-11-08
+
+* New: `Binding.getBindingIsReadOnly` method, returns `true` for getter-only methods or final fields
+
 ## 2.18 - 2010-11-03
 
 * New: `BindingRoot.getSafelyWithRoot` method
