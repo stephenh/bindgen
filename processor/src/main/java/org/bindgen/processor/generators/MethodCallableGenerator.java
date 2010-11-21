@@ -2,6 +2,7 @@ package org.bindgen.processor.generators;
 
 import static org.bindgen.processor.CurrentEnv.*;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
@@ -129,12 +130,14 @@ public class MethodCallableGenerator implements PropertyGenerator {
 		this.innerClass.getField("serialVersionUID").type("long").setStatic().setFinal().initialValue("1L");
 	}
 
+	@Override
 	public String getPropertyName() {
 		return this.methodName;
 	}
 
-	public TypeElement getPropertyTypeElement() {
-		return null;
+	@Override
+	public List<TypeElement> getPropertyTypeElements() {
+		return new ArrayList<TypeElement>();
 	}
 
 	private boolean doBlockReturnTypesMatch(ExecutableElement methodToMatch) {

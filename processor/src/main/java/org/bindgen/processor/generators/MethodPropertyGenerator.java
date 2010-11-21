@@ -3,6 +3,7 @@ package org.bindgen.processor.generators;
 import static org.bindgen.processor.CurrentEnv.*;
 
 import java.util.Collection;
+import java.util.List;
 
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
@@ -224,8 +225,8 @@ public class MethodPropertyGenerator implements PropertyGenerator {
 	}
 
 	@Override
-	public TypeElement getPropertyTypeElement() {
-		return this.property.getElement();
+	public List<TypeElement> getPropertyTypeElements() {
+		return Util.collectTypeElements(this.property.getType());
 	}
 
 	@Override

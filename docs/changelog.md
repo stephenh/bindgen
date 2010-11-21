@@ -6,6 +6,10 @@ title: Changelog
 Changelog
 =========
 
+## 2.20 - 2010-11-21
+
+* New: Binding generation takes into account generics, e.g. a `List<Employee>` signature will potentially create both `ListBinding` and `EmployeeBinding`
+
 ## 2.19 - 2010-11-08
 
 * New: `Binding.getBindingIsReadOnly` method, returns `true` for getter-only methods or final fields
