@@ -132,9 +132,9 @@ public class BindingClassGenerator {
 	}
 
 	private void enqueuePropertyTypeIfNeeded(PropertyGenerator pg) {
-		if (pg.getPropertyTypeElement() != null) {
-			if (getConfig().shouldGenerateBindingFor(pg.getPropertyTypeElement())) {
-				this.queue.enqueueIfNew(pg.getPropertyTypeElement());
+		for (TypeElement te : pg.getPropertyTypeElements()) {
+			if (te != null && getConfig().shouldGenerateBindingFor(te)) {
+				this.queue.enqueueIfNew(te);
 			}
 		}
 	}

@@ -1,5 +1,7 @@
 package org.bindgen.inscope;
 
+import java.util.List;
+
 import org.bindgen.Bindable;
 import org.bindgen.binding.GenericObjectBindingPath;
 import org.bindgen.outofscope.AddressOut;
@@ -24,4 +26,6 @@ public class Person {
 	public AddressOut addressOut;
 	public GenericOut<String> genericOut;
 	public AddressIn addressIn;
+	public List<HouseIn> houseInViaGeneric;
+	public List<List<CarIn>> carInViaNestedGeneric;
 }

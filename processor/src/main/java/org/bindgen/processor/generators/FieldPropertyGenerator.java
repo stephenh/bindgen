@@ -1,6 +1,7 @@
 package org.bindgen.processor.generators;
 
 import java.util.Collection;
+import java.util.List;
 
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
@@ -168,8 +169,9 @@ public class FieldPropertyGenerator implements PropertyGenerator {
 		}
 	}
 
-	public TypeElement getPropertyTypeElement() {
-		return this.property.getElement();
+	@Override
+	public List<TypeElement> getPropertyTypeElements() {
+		return Util.collectTypeElements(this.property.getType());
 	}
 
 	public String getPropertyName() {

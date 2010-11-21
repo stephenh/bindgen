@@ -105,6 +105,28 @@ public class Util {
 		}
 	}
 
+	/**
+	 * Recursively returns the TypeElements of {@code tm}.
+	 *
+	 * E.g. {@code ArrayList<Foo>} returns ArrayList and Foo.
+	 */
+	public static List<TypeElement> collectTypeElements(TypeMirror tm) {
+		final List<TypeElement> tes = new ArrayList<TypeElement>();
+		collectTypeElements(tes, tm);
+		return tes;
+	}
+
+	private static void collectTypeElements(List<TypeElement> tes, TypeMirror tm) {
+		tm = Util.boxIfNeeded(tm);
+		if (tm.getKind() == TypeKind.DECLARED) {
+			tes.add((TypeElement) getTypeUtils().asElement(tm));
+			DeclaredType dt = (DeclaredType) tm;
+			for (TypeMirror tm2 : dt.getTypeArguments()) {
+				collectTypeElements(tes, tm2);
+			}
+		}
+	}
+
 	/** @return super classes + interfaces */
 	public static List<TypeMirror> allSuperTypes(TypeElement element) {
 		List<TypeMirror> found = new ArrayList<TypeMirror>();
