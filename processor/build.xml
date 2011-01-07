@@ -36,8 +36,8 @@
 			<fileset dir="bin/main" includes="**/*.class"/>
 			<zipfileset src="bin/lib/build/jars/joist-util.jar" includes="joist/sourcegen/**/*.class,joist/util/**/*.class"/>
 			<zipfileset dir="META-INF" includes="**/*" prefix="META-INF"/>
-			<rule pattern="joist.sourcegen.*" result="org.bindgen.dependencies.sourcegen.Bindgen@1"/>
-			<rule pattern="joist.util.*" result="org.bindgen.dependencies.util.Bindgen@1"/>
+			<rule pattern="joist.sourcegen.*" result="org.bindgen.dependencies.sourcegen.$Bindgen@1"/>
+			<rule pattern="joist.util.*" result="org.bindgen.dependencies.util.$Bindgen@1"/>
 		</jarjar>
 		<mkdir dir="bin/sources"/>
 		<zip destfile="bin/sources/bindgen.jar">
