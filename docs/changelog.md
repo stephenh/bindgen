@@ -6,6 +6,11 @@ title: Changelog
 Changelog
 =========
 
+## 2.21 - 2011-01-07
+
+* Fix: `BindKeywords` has `@SuppressWarnings("all")` to ensure no warnings (Andrzej Czajewski)
+* Fix: Guard against odd boundary case where Eclipse was returning `java.util.Map<K, V>.Entry<K, V>`, resulting in compile errors
+
 ## 2.20 - 2010-11-21
 
 * New: Binding generation takes into account generics, e.g. a `List<Employee>` signature will potentially create both `ListBinding` and `EmployeeBinding`
