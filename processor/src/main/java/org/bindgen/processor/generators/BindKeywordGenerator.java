@@ -12,10 +12,10 @@ import java.util.TreeSet;
 
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.DeclaredType;
+import javax.tools.Diagnostic.Kind;
 import javax.tools.FileObject;
 import javax.tools.JavaFileObject;
 import javax.tools.StandardLocation;
-import javax.tools.Diagnostic.Kind;
 
 import joist.sourcegen.GClass;
 import joist.sourcegen.GMethod;
@@ -58,8 +58,13 @@ public class BindKeywordGenerator {
 		this.readClassNamesFromBindKeywordFileIfExists();
 		this.classNames.addAll(newlyWritten);
 		this.addBindMethods();
+		this.addSuppressWarnings();
 		this.writeBindKeywordFile();
 		this.writeBindKeywordClass();
+	}
+
+	private void addSuppressWarnings() {
+		this.bindClass.addAnnotation("@SuppressWarnings(\"all\")");
 	}
 
 	private void addBindMethods() {
