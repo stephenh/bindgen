@@ -100,15 +100,34 @@ public class BoundProperty {
 					dummyParams.add(tpe.toString());
 				}
 			} else {
+				// the user declared wildcards, e.g. "public Foo<?> foo", but
+				// our MyFoo inner class can't use wildcards in the declaration,
+				// so we make up dummy Ux type parameters and s/?/Ux
 				int wildcardIndex = 0;
 				for (TypeMirror tm : ((DeclaredType) this.type).getTypeArguments()) {
+					final String dummyParam = "U" + (wildcardIndex);
 					if (tm.getKind() == TypeKind.WILDCARD) {
 						WildcardType wt = (WildcardType) tm;
 						String suffix = "";
 						if (wt.getExtendsBound() != null) {
+							// the user declared their own bounds, e.g. "public Foo<? extends Foo<?>> foo"
 							suffix += " extends " + wt.getExtendsBound().toString();
+						} else {
+							// get Foo<?>'s declared type, and copy over its type parameters
+							// and their bounds, replacing ? with our U0
+							Element e = ((DeclaredType) this.type).asElement();
+							if (e instanceof TypeElement) {
+								List<? extends TypeParameterElement> tpes = ((TypeElement) e).getTypeParameters();
+								if (tpes.size() > wildcardIndex) {
+									TypeParameterElement tp = tpes.get(wildcardIndex);
+									if (tp.getBounds().size() > 0) {
+										suffix += " extends " + toStringWithDummyParam(tp.getBounds().get(0), tp.asType(), dummyParam);
+									}
+								}
+							}
 						}
-						dummyParams.add("U" + (wildcardIndex++) + suffix);
+						dummyParams.add(dummyParam + suffix);
+						wildcardIndex++;
 					}
 				}
 			}
@@ -151,8 +170,7 @@ public class BoundProperty {
 			int wildcardIndex = 0;
 			for (TypeMirror tm : ((DeclaredType) this.type).getTypeArguments()) {
 				if (tm.getKind() == TypeKind.WILDCARD) {
-					typeArgs.add(replaceWildcards ? "?" : ("U" + wildcardIndex));
-					wildcardIndex++;
+					typeArgs.add(replaceWildcards ? "?" : ("U" + wildcardIndex++));
 				} else {
 					typeArgs.add(tm.toString());
 				}
@@ -319,6 +337,26 @@ public class BoundProperty {
 	 */
 	public String getReturnableType() {
 		return this.name.getWithoutGenericPart();
+	}
+
+	/** @return the toString of {@code tm} with {@code tp} replaced by {@code dummyParameter} */
+	private static String toStringWithDummyParam(TypeMirror tm, TypeMirror tp, String dummyParameter) {
+		if (tm.getKind() == TypeKind.DECLARED) {
+			DeclaredType dt = (DeclaredType) tm;
+			List<String> params = new ArrayList<String>();
+			for (TypeMirror ta : dt.getTypeArguments()) {
+				params.add(toStringWithDummyParam(ta, tp, dummyParameter));
+			}
+			if (params.size() == 0) {
+				return tm.toString();
+			} else {
+				return dt.asElement().toString() + "<" + Join.commaSpace(params) + ">";
+			}
+		}
+		if (getTypeUtils().isSameType(tm, tp)) {
+			return dummyParameter;
+		}
+		return tm.toString();
 	}
 
 }
