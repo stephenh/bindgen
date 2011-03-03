@@ -6,6 +6,10 @@ title: Changelog
 Changelog
 =========
 
+## 2.22 - 2011-03-03
+
+* Fix: Handle wildcards for types that have self-referencing bounds
+
 ## 2.21 - 2011-01-07
 
 * Fix: `BindKeywords` has `@SuppressWarnings("all")` to ensure no warnings (Andrzej Czajewski)
