@@ -17,6 +17,7 @@ public class InnerClassTest extends AbstractBindgenTestCase {
 		assertNotNull(bindingClass);
 		assertMethodDeclared(bindingClass, "x");
 		assertMethodDeclared(bindingClass, "squared");
+		assertMethodNotDeclared(bindingClass, "foobar"); // does not have access to protected from different package (someClass)
 	}
 
 	@Test

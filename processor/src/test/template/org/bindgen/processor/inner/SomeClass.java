@@ -18,6 +18,10 @@ public class SomeClass {
 		public int squared() {
 			return x*x;
 		}
+
+		protected int getFoobar() {
+			return 42;
+		}
 	}
 
 	private int y;
