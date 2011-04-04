@@ -58,7 +58,7 @@
 		</javac>
 		<!-- run -->
 		<mkdir dir="bin/results"/>
-		<junit printsummary="on" showoutput="yes" fork="yes" forkmode="once">
+		<junit printsummary="on" showoutput="yes" fork="yes" forkmode="once" failureproperty="junit.failure">
 			<classpath>
 				<pathelement location="bin/jars/bindgen.jar"/>
 				<fileset dir="bin/lib/tests/jars" includes="**/*.jar"/>
@@ -70,6 +70,7 @@
 				<fileset dir="src/test/java" includes="**/*Test.java" excludes="**/Abstract*.java"/>
 			</batchtest>
 		</junit>
+		<fail if="junit.failure" message="Unit test(s) failed."/>
 	</target>
 
 </project>
