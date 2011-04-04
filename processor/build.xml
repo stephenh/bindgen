@@ -52,6 +52,7 @@
 			<src path="src/test/java"/>
 			<classpath>
 				<pathelement location="bin/jars/bindgen.jar"/>
+				<fileset dir="bin/lib/build/jars" includes="**/*.jar"/> <!-- needs joist-util without being rewritten into bindgen.jar ... -->
 				<fileset dir="bin/lib/tests/jars" includes="**/*.jar"/>
 			</classpath>
 		</javac>
