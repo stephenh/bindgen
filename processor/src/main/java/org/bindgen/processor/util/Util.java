@@ -72,7 +72,8 @@ public class Util {
 		boolean isPublic = enclosed.getModifiers().contains(Modifier.PUBLIC);
 		boolean inJava = currentOrSuper.getQualifiedName().toString().startsWith("java.");
 		boolean superSamePackage = getElementUtils().getPackageOf(currentOrSuper).equals(getElementUtils().getPackageOf(current));
-		return !isStatic && !isPrivate && (isPublic || (superSamePackage && !inJava));
+		boolean innerClass = currentOrSuper.getEnclosingElement().getKind() != ElementKind.PACKAGE;
+		return !isStatic && !isPrivate && (isPublic || (superSamePackage && !inJava && !innerClass));
 	}
 
 	public static boolean isBadPropertyName(String name) {
