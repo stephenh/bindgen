@@ -6,6 +6,10 @@ title: Changelog
 Changelog
 =========
 
+## 2.23 - 2011-04-04
+
+* Fix: Protected methods in inner classes caused compile errors (reported by Thomas Matthijs)
+
 ## 2.22 - 2011-03-03
 
 * Fix: Handle wildcards for types that have self-referencing bounds

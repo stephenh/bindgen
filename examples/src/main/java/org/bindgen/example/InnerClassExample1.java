@@ -19,6 +19,10 @@ public class InnerClassExample1 {
 		public InnerClassBinding getBind() {
 			return new InnerClassBinding(this);
 		}
+
+		protected String getBar() {
+			return "bar2";
+		}
 	}
 
 }
