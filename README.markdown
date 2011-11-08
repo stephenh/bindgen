@@ -120,4 +120,7 @@ Todo
   * Looks like not--`Types.getMemberOf` doesn't resolve the generic in `setFoo(T foo)` when inherited by a `Child extends Parent<String>`
   * Probably needs the type `Parent<String>` passed to it, which would mean remembering which super-type we're on instead of using `getAllMembers`
   * Perhaps this would be solved by having child bindings inherit from the parent, e.g. `ChildBindingPath extends ParentBindingPath<String>`
+* Move most `Binding` methods behind a `asBound` method so that generated bindings don't have a polluted name space
+* Add `Binding.getTag/setTag` for attaching metadata to binding instances (like gwt-mpv properties)
+
 
