@@ -114,7 +114,7 @@ public class MethodCallableGenerator implements PropertyGenerator {
 		run.returnType(this.blockMethod.getReturnType().toString());
 		run.body.line("{}{}.this.get().{}({});",//
 			this.getReturnPrefixIfNeeded(),
-			this.outerClass.getSimpleClassNameWithoutGeneric(),
+			this.outerClass.getSimpleName(),
 			this.methodName,
 			this.getArguments());
 		this.addMethodParameters(run);

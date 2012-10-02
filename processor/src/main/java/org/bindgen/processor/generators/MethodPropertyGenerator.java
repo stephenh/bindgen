@@ -138,7 +138,7 @@ public class MethodPropertyGenerator implements PropertyGenerator {
 
 	private void addInnerClassParent() {
 		GMethod getParent = this.innerClass.getMethod("getParentBinding").returnType("Binding<?>").addAnnotation("@Override");
-		getParent.body.line("return {}.this;", this.outerClass.getSimpleClassNameWithoutGeneric());
+		getParent.body.line("return {}.this;", this.outerClass.getSimpleName());
 	}
 
 	private void addInnerClassGet() {
@@ -146,7 +146,7 @@ public class MethodPropertyGenerator implements PropertyGenerator {
 		get.returnType(this.property.getSetType()).addAnnotation("@Override");
 		get.body.line("return {}{}.this.get().{}();",//
 			this.property.getCastForReturnIfNeeded(),
-			this.outerClass.getSimpleClassNameWithoutGeneric(),
+			this.outerClass.getSimpleName(),
 			this.methodName);
 	}
 
@@ -155,19 +155,19 @@ public class MethodPropertyGenerator implements PropertyGenerator {
 		getWithRoot.argument("R", "root").returnType(this.property.getSetType()).addAnnotation("@Override");
 		getWithRoot.body.line("return {}{}.this.getWithRoot(root).{}();",//
 			this.property.getCastForReturnIfNeeded(),
-			this.outerClass.getSimpleClassNameWithoutGeneric(),
+			this.outerClass.getSimpleName(),
 			this.methodName);
 	}
 
 	private void addInnerClassGetSafelyWithRoot() {
 		GMethod m = this.innerClass.getMethod("getSafelyWithRoot");
 		m.argument("R", "root").returnType(this.property.getSetType()).addAnnotation("@Override");
-		m.body.line("if ({}.this.getSafelyWithRoot(root) == null) {", this.outerClass.getSimpleClassNameWithoutGeneric());
+		m.body.line("if ({}.this.getSafelyWithRoot(root) == null) {", this.outerClass.getSimpleName());
 		m.body.line("    return null;");
 		m.body.line("} else {");
 		m.body.line("    return {}{}.this.getWithRoot(root).{}();",//
 			this.property.getCastForReturnIfNeeded(),
-			this.outerClass.getSimpleClassNameWithoutGeneric(),
+			this.outerClass.getSimpleName(),
 			this.methodName);
 		m.body.line("}");
 	}
@@ -193,7 +193,7 @@ public class MethodPropertyGenerator implements PropertyGenerator {
 		GMethod set = this.innerClass.getMethod("set({} {})", this.property.getSetType(), this.property.getName());
 		set.addAnnotation("@Override");
 		set.body.line("{}.this.get().{}({});",//
-			this.outerClass.getSimpleClassNameWithoutGeneric(),
+			this.outerClass.getSimpleName(),
 			this.prefix.setterName(this.methodName),
 			this.property.getName());
 	}
@@ -202,7 +202,7 @@ public class MethodPropertyGenerator implements PropertyGenerator {
 		GMethod setWithRoot = this.innerClass.getMethod("setWithRoot(R root, {} {})", this.property.getSetType(), this.property.getName());
 		setWithRoot.addAnnotation("@Override");
 		setWithRoot.body.line("{}.this.getWithRoot(root).{}({});",//
-			this.outerClass.getSimpleClassNameWithoutGeneric(),
+			this.outerClass.getSimpleName(),
 			this.prefix.setterName(this.methodName),
 			this.property.getName());
 	}
