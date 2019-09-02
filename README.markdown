@@ -1,4 +1,9 @@
 
+Status
+======
+
+I'm no longer actively maintaining this project; see [this fork](https://github.com/igloo-project/bindgen/) for a more active project.
+
 Intro
 =====
 
