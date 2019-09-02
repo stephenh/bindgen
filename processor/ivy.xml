@@ -15,8 +15,8 @@
 	</publications>
 	<dependencies>
 		<!-- joist.util is jarjar'd into bindgen.jar so we count it as a build dependency. -->
-		<dependency org="joist" name="joist-util" rev="1.4.17" conf="build->default,sources"/>
-		<dependency org="com.tonicsystems" name="jarjar" rev="1.0" conf="build->default"/>
+		<dependency org="com.github.stephenh.joist" name="joist-util" rev="1.14.0" conf="build->default,sources"/>
+		<dependency org="com.github.shevek" name="jarjar" rev="59b9f04970" conf="build->default"/>
 		<dependency org="junit" name="junit" rev="4.7" conf="tests->default,sources"/>
 	</dependencies>
 </ivy-module>

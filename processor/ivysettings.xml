@@ -4,7 +4,7 @@
 	<property name="revision" value="SNAPSHOT" override="false"/>
 	<resolvers>
 		<!-- for joist-util and jarjar 1.0 -->
-		<ibiblio name="joist" m2compatible="true" root="http://repo.joist.ws"/>
+    <ibiblio name="jitpack" m2compatible="true" root="https://jitpack.io"/>
 		<!-- for publishing via an sshfs share -->
 		<filesystem name="maven-share" m2compatible="true">
 			<artifact pattern="${user.home}/repo/[organization]/[module]/[revision]/[artifact]-[revision](-[classifier]).[ext]"/>
@@ -14,7 +14,7 @@
 			<artifact pattern="${user.home}/.m2/repository/[organization]/[module]/[revision]/[artifact]-[revision](-[classifier]).[ext]"/>
 		</filesystem>
 		<chain name="default">
-			<resolver ref="joist"/>
+			<resolver ref="jitpack"/>
 			<resolver ref="public"/>
 		</chain>
 	</resolvers>
